@@ -13,6 +13,7 @@ class AITherapistService:
         genai.configure(api_key=api_key)
 
         self.model = genai.GenerativeModel("gemini-1.5-flash-latest")
+        # self.model = genai.GenerativeModel("gemini-2.5-pro")
 
     def __system_prompt_settings(self, username: str):
         prompt = f"""
