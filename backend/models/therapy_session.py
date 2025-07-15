@@ -8,7 +8,7 @@ class StatusType(Enum):
     INACTIVE = 'INACTIVE'
 
 
-class TherapySession:
+class TherapySession(db.Model):
     __tablename__ = 'therapy_session'
 
     id = db.Column(db.Integer, primary_key=True)
