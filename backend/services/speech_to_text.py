@@ -4,7 +4,7 @@ import speech_recognition as sr
 r = sr.Recognizer()
 
 
-def transribe_audio(path):
+def speech_to_text(path):
     # use te audio file as the audio source
     try:
         with sr.AudioFile(path) as source:
