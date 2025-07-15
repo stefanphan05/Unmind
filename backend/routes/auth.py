@@ -1,6 +1,6 @@
 from . import app
 from flask import request, jsonify
-from services.auth_service import login_user, register_user
+from services.auth import login_user, register_user
 
 
 @app.route("/login", methods=["POST"])

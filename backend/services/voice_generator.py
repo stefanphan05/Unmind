@@ -27,8 +27,8 @@ class VoiceGenerator:
         self.engine.runAndWait()
 
 
-voice_gen = VoiceGenerator()
-voice_gen.speak_default("Hello, I'm speaking in a normal adult male voice")
+# voice_gen = VoiceGenerator()
+# voice_gen.speak_default("Hello, I'm speaking in a normal adult male voice")
 
 # Get all the system voices
 # for i, voice in enumerate(voices):

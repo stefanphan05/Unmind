@@ -1,5 +1,5 @@
 from config import app, db
-from routes import auth_routes
+from routes import auth
 
 if __name__ == "__main__":
     with app.app_context():
