@@ -1,12 +1,12 @@
 from . import db
 from models import User
 from utils.password import hash_password, verify_password
+from utils.is_existing_user import is_existing_user
 
 
 def register_user(username, password):
     # Check if user already exists
-    existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
+    if is_existing_user(username):
         return False, "Username already exists"
 
     try:
@@ -32,4 +32,13 @@ def login_user(username, password):
     Check if the password matches the stored hash passowrd
     return user or raise an error
     """
-    pass
+    # Check if user doesn't exists
+    user = is_existing_user(username)
+
+    if not user:
+        return False, "Username doesn't exist"
+
+    if not verify_password(user.password, password):
+        return False, "Incorrect password"
+
+    return True, "Successfully login"
