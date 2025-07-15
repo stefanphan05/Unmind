@@ -1,19 +1,20 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+import openai  # Changed from google.generativeai
 
 
 class AITherapistService:
     def __init__(self):
         load_dotenv()
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")  # Changed variable name
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in .env")
+            raise ValueError("OPENAI_API_KEY not found in .env")
 
-        genai.configure(api_key=api_key)
+        # Create an OpenAI client instance
+        self.client = openai.OpenAI()
 
-        self.model = genai.GenerativeModel("gemini-1.5-flash-latest")
-        # self.model = genai.GenerativeModel("gemini-2.5-pro")
+        # Choose the model. gpt-4o-mini is a great option.
+        self.model = "gpt-4o-mini"
 
     def __system_prompt_settings(self, username: str):
         prompt = f"""
@@ -44,13 +45,29 @@ class AITherapistService:
         return prompt
 
     def send_message(self, username, user_input):
-        prompt = self.__system_prompt_settings(username)
-        full_prompt = f"{prompt}\n\nUser: {user_input}\nTherapist:"
+        system_prompt = self.__system_prompt_settings(username)
 
-        response = self.model.generate_content(full_prompt)
-        return response.text.strip()
+        # Prepare the messages list, which is how OpenAI handles context
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ]
+
+        try:
+            # Use the new method to send messages to the OpenAI model
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages
+            )
+
+            # Access the response text differently
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
 
 
 service = AITherapistService()
-reply = service.send_message("Stefan", "I've been feeling overwhelmed lately.")
+reply = service.send_message(
+    "Stefan", "I've been feeling so stress lately. One of the reason is that i just broke up with my girlfriend a couple of weeks ago")
 print("AI Therapist:", reply)
