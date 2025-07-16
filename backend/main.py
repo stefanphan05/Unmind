@@ -1,13 +1,13 @@
 from config import app, db
 from utils.token_utils import Token
 
-from services.auth import AuthService
-from services.text_generator import TextGenerator
-from services.ai_therapist import AITherapistService
+from services.authentication.auth import AuthService
+from services.text.text_generator import TextGenerator
+from services.ai.ai_therapist import AITherapistService
 
-from core.voice.voice_generator import VoiceGenerator
+from services.voice.voice_generator import VoiceGenerator
 
-from core.voice.strategies.samantha_voice import SamanthaVoiceStrategy
+from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 
 from routes import auth, message
 
