@@ -8,22 +8,18 @@ def process_audio_with_adapter(audio_file) -> str:
     try:
         result = app.audio_service.process_audio_file(audio_file)
 
-        print(result)
-
         if not result["success"]:
             return {"error": result["error"]}
 
         # Use the converted WAV file for speech recognition
         wav_file_path = result["file_path"]
 
-        print(wav_file_path)
-
         try:
             # Convert speech to text
             user_input = app.text_generator.speech_to_text(wav_file_path)
 
             # Check if speech recognition was successul
-            if not user_input["sucess"]:
+            if not user_input["success"]:
                 return {"error": user_input["error"]}
 
             return {"input": user_input["input"]}
