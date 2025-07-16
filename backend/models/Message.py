@@ -1,5 +1,7 @@
 from . import db
 from enum import Enum
+from sqlalchemy import ForeignKey
+from datetime import datetime, timezone
 
 
 class InputType(Enum):
@@ -18,3 +20,9 @@ class Message(db.Model):
 
     # Using enum for a limited set of choices
     input_type = db.Column(db.Enum(InputType), nullable=False)
+
+    therapy_session_id = db.Column(
+        db.Integer, ForeignKey("therapy_session.id"), nullable=False)
+
+    timestamp = db.Column(db.DateTime, nullable=False,
+                          default=datetime.now(timezone.utc))

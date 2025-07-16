@@ -17,7 +17,7 @@ if __name__ == "__main__":
         app.text_generator = TextGenerator()
         app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
         app.audio_service = AudioProcessingService()
-        app.ai_therapist = AITherapistService()
+        app.ai_therapist = AITherapistService(db.session)
         app.auth_service = AuthService(db.session)
         app.token_handler = Token(app.config["SECRET_KEY"])
 

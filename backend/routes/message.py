@@ -26,6 +26,7 @@ def send_text_message(username):
     content_type = request.headers.get('Content-Type', '').lower()
 
     user_input = None
+    input_type = None
 
     if 'application/json' in content_type:
         # This is the path for 'text' input
@@ -68,7 +69,7 @@ def send_text_message(username):
         return jsonify({'error': "Unsupported Content-Type. Use 'application/json' or 'multipart/form-data'."}),
 
     # Get ai answer for the input
-    ai_answer = app.ai_therapist.send_message(username, user_input)
+    ai_answer = app.ai_therapist.send_message(username, user_input, input_type)
 
     # Generate voice based on ai answer
     app.voice_generator.speak_default(ai_answer)
