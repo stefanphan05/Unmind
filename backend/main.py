@@ -5,9 +5,9 @@ from services.auth import AuthService
 from services.text_generator import TextGenerator
 from services.ai_therapist import AITherapistService
 
-from core.voice_generator import VoiceGenerator
+from core.voice.voice_generator import VoiceGenerator
 
-from core.strategies.samantha_voice import SamanthaVoiceStrategy
+from core.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 
 from routes import auth, message
 
