@@ -1,6 +1,9 @@
 from . import app
+from flask import current_app
 from flask import request, jsonify
 from services.auth import login_user, register_user
+from utils.token_required import token_required
+from utils.token_utils import Token
 
 
 @app.route("/login", methods=["POST"])
@@ -17,7 +20,12 @@ def login():
 
     success, message = login_user(username, password)
     if success:
-        return jsonify({"message": message}), 201
+        token_handler = Token()
+
+        # Generate token using the Token class instance
+        token = token_handler.generate_token(username)
+
+        return jsonify({"token": token}), 201
     else:
         return jsonify({"message": message}), 400
 
@@ -40,3 +48,9 @@ def register():
         return jsonify({"message": message}), 200
     else:
         return jsonify({"message": message}), 400
+
+
+@app.route("/testing", methods=["GET"])
+@token_required
+def test(username):
+    return jsonify({"message": username}), 200

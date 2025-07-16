@@ -1,19 +1,18 @@
 import os
 from dotenv import load_dotenv
-import openai  # Changed from google.generativeai
+import openai
 
 
 class AITherapistService:
     def __init__(self):
         load_dotenv()
-        api_key = os.getenv("OPENAI_API_KEY")  # Changed variable name
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found in .env")
 
         # Create an OpenAI client instance
         self.client = openai.OpenAI()
 
-        # Choose the model. gpt-4o-mini is a great option.
         self.model = "gpt-4o-mini"
 
     def __system_prompt_settings(self, username: str):
