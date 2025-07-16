@@ -67,4 +67,6 @@ def send_text_message(username):
         # Handle unsupported content types
         return jsonify({'error': "Unsupported Content-Type. Use 'application/json' or 'multipart/form-data'."}),
 
-    return jsonify({"message": user_input}), 200
+    ai_answer = app.ai_therapist.send_message(username, user_input)
+
+    return jsonify({"question": user_input, "answer": ai_answer}), 200
