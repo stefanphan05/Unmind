@@ -1,44 +1,75 @@
-from . import db
 from models import User
-from utils.password import hash_password, verify_password
-from utils.is_existing_user import is_existing_user
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# Types
+from sqlalchemy.orm import Session
+from typing import Tuple, Union
 
 
-def register_user(username, password):
-    # Check if user already exists
-    if is_existing_user(username):
-        return False, "Username already exists"
-
-    try:
-        # Use the utility function to hash the password
-        hashed_password = hash_password(password)
-
-        # Create a new user instance (only store the hashpassword instead of plain password)
-        new_user = User(username=username, password=hashed_password)
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return True, "User registered successfully"
-
-    except Exception as e:
-        db.session.rollback()
-        return False, f"Registration failed: {str(e)}"
-
-
-def login_user(username, password):
+class AuthService:
     """
-    Find user by username
-    Check if the password matches the stored hash passowrd
-    return user or raise an error
+    A service class to handle user authentication operations like registration and login
     """
-    # Check if user doesn't exists
-    user = is_existing_user(username)
 
-    if not user:
-        return False, "Username doesn't exist"
+    def __init__(self, db_session: Session) -> None:
+        self.__db_session = db_session
 
-    if not verify_password(user.password, password):
-        return False, "Incorrect password"
+    def register_user(self, username: str, password: str) -> Tuple[bool, str]:
+        """
+        Registers a new user in the database.
 
-    return True, "Successfully login"
+        Args:
+            username (str): The username for the new user.
+            password (str): The plain-text password for the new user.
+
+        Returns:
+            Tuple[bool, str]: A tuple containing a boolean (True for success, False for failure)
+                               and a message string.
+        """
+
+        if self.__get_user(username):
+            return False, "Username already exists"
+
+        try:
+            hashed_password = generate_password_hash(password)
+
+            # Create a new user instance (only store the hashpassword instead of plain password)
+            new_user = User(username, hashed_password)
+
+            self.__db_session.add(new_user)
+            self.__db_session.commit()
+
+            return True, "User registered successfully"
+
+        except Exception as e:
+            self.__db_session.rollback()
+            return False, f"Registration failed: {str(e)}"
+
+    def login_user(self, username: str, password: str) -> Tuple[bool, str]:
+        """
+        Find user by username
+        Check if the password matches the stored hash passowrd
+        return user or raise an error
+        """
+
+        user = self.__get_user(username)
+
+        if not user:
+            return False, "Username doesn't exist"
+
+        if not check_password_hash(user.password, password):
+            return False, "Incorrect password"
+
+        return True, "Successfully login"
+
+    def __get_user(self, username: str) -> Union[User, None]:
+        """
+        Checks if a user with the given username already exists in the database.
+
+        Args:
+            username (str): The username to check.
+
+        Returns:
+            Union[User, None]: The User object if the user exists, otherwise None.
+        """
+        return User.query.filter_by(username=username).first()

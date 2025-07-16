@@ -6,7 +6,7 @@ from utils.token_utils import Token
 
 def token_required(func):
     """
-    Decorator to pretect routes by requiring a valid JWT access token
+    Decorator to protect routes by requiring a valid JWT access token
     """
     @wraps(func)
     def decorated(*args, **kwargs):
