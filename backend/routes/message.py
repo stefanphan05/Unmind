@@ -43,7 +43,7 @@ def send_text_message(username):
             return jsonify({"message": "Message content is required"}), 400
 
     elif 'multipart/form-data' in content_type:
-        # Speech type inptu
+        # Speech type input
         input_type = request.form.get('type')
         if input_type != 'speech':
             return jsonify({"error": "Mismatched content type and input type"}), 400
@@ -67,6 +67,10 @@ def send_text_message(username):
         # Handle unsupported content types
         return jsonify({'error': "Unsupported Content-Type. Use 'application/json' or 'multipart/form-data'."}),
 
+    # Get ai answer for the input
     ai_answer = app.ai_therapist.send_message(username, user_input)
+
+    # Generate voice based on ai answer
+    app.voice_generator.speak_default(ai_answer)
 
     return jsonify({"question": user_input, "answer": ai_answer}), 200
