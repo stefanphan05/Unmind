@@ -66,7 +66,7 @@ class AITherapistService:
             return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
 
 
-service = AITherapistService()
-reply = service.send_message(
-    "Stefan", "I've been feeling so stress lately. One of the reason is that i just broke up with my girlfriend a couple of weeks ago")
-print("AI Therapist:", reply)
+# service = AITherapistService()
+# reply = service.send_message(
+#     "Stefan", "I've been feeling so stress lately. One of the reason is that i just broke up with my girlfriend a couple of weeks ago")
+# print("AI Therapist:", reply)

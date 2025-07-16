@@ -1,6 +1,5 @@
 from . import db
 from enum import Enum
-from sqlalchemy import ForeignKey
 
 
 class InputType(Enum):
@@ -8,14 +7,10 @@ class InputType(Enum):
     TEXT = 'TEXT'
 
 
-class Conversation(db.Model):
-    __tablename__ = 'conversation'
+class Message(db.Model):
+    __tablename__ = 'message'
 
     id = db.Column(db.Integer, primary_key=True)
-
-    # Foreign key from therapy_session model
-    session_id = db.Column(db.Integer, ForeignKey(
-        "therapy_session.id"), nullable=False)
 
     # Large text inputs/outputs
     user_input = db.Column(db.Text, nullable=False)

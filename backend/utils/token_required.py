@@ -1,7 +1,7 @@
+from . import app
 import jwt
 from functools import wraps
 from flask import request, jsonify
-from utils.token_utils import Token
 
 
 def token_required(func):
@@ -20,8 +20,7 @@ def token_required(func):
 
         try:
             # Instantiate token handler and decode the token
-            token_handler = Token()
-            data = token_handler.decode_token(token)
+            data = app.token_handler.decode_token(token)
 
             # Extract current user from the token payload
             current_user = data['username']
