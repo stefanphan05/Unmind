@@ -34,7 +34,7 @@ class AudioProcessingService:
         except Exception as e:
             return {
                 "success": False,
-                "error": f"Audio processing failed: {str(e)}"
+                "error": f"Audio processing failed stefan: {str(e)}"
             }
 
     def get_supported_formats(self) -> list:

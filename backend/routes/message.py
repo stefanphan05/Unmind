@@ -1,6 +1,7 @@
 from . import app
 from flask import request, jsonify
 from utils.token_required import token_required
+from utils.process_audio import process_audio_with_adapter
 
 
 @app.route('/message', methods=['POST'])
@@ -21,28 +22,49 @@ def send_text_message(username):
 
     return answer_by_text and audio
     """
-    data = request.json
-    # Get input type from json request
-    input_type = data.get('type')
+    # Check the Content-Type header to determine how to parse the request
+    content_type = request.headers.get('Content-Type', '').lower()
+
     user_input = None
 
-    if input_type == "text":
-        # Handle text input
+    if 'application/json' in content_type:
+        # This is the path for 'text' input
+        data = request.json
+        if not data or not isinstance(data, dict):
+            return jsonify({"error": "Invalid JSON data"}), 400
+
+        input_type = data.get('type')
+        if input_type != "text":
+            return jsonify({"error": "Mismatched content type and input type"}), 400
+
         user_input = data.get('message', '').strip()
 
         if not user_input:
             return jsonify({"message": "Message content is required"}), 400
-    elif input_type == 'speech':
-        # Handle speech input from user
+
+    elif 'multipart/form-data' in content_type:
+        # Speech type inptu
+        input_type = request.form.get('type')
+        if input_type != 'speech':
+            return jsonify({"error": "Mismatched content type and input type"}), 400
+
         if 'audio_file' not in request.files:
             return jsonify({"message": "Audio file is required for speech input"}), 400
 
         audio_file = request.files['audio_file']
 
-        # No audio file is provided
         if not audio_file or audio_file.filename == '':
             return jsonify({"message": "No audio file selected"}), 400
 
-        pass
+        result = process_audio_with_adapter(audio_file)
 
-    return jsonify({"message": "message"}), 200
+        if isinstance(result, dict) and 'error' in result:
+            return jsonify(result), 400
+
+        user_input = result["input"]
+
+    else:
+        # Handle unsupported content types
+        return jsonify({'error': "Unsupported Content-Type. Use 'application/json' or 'multipart/form-data'."}),
+
+    return jsonify({"message": user_input}), 200

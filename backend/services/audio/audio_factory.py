@@ -1,6 +1,7 @@
 from typing import Optional
 from .audio_processors.speech_recognition_processor import SpeechRecognitionProcessor, AudioProcessor
 from .audio_adapters.webm_adapter import WebMAdapter
+from .audio_adapters.m4a_adapter import M4AAdapter
 from werkzeug.datastructures import FileStorage
 
 
@@ -12,7 +13,8 @@ class AudioProcessorFactory:
     def __init__(self):
         self.adapters = {
             'webm': WebMAdapter(),
-            'wav': SpeechRecognitionProcessor()
+            'wav': SpeechRecognitionProcessor(),
+            'm4a': M4AAdapter()
         }
 
     def get_processor(self, audio_file: FileStorage) -> Optional[AudioProcessor]:
@@ -41,6 +43,8 @@ class AudioProcessorFactory:
                 return 'wav'
             elif b'webm' in header.lower():
                 return 'webm'
+            elif b'ftyp' in header:
+                return 'm4a'
         except:
             pass
 
@@ -55,7 +59,7 @@ class AudioProcessorFactory:
             get the [-1] which is wav
             """
             extension = audio_file.filename.lower().split('.')[-1]
-            if extension in ['webm', 'ogg', 'mp3', 'm4a', 'wav']:
+            if extension in ['webm', 'm4a', 'wav']:
                 return extension
 
         return 'unknown'
