@@ -29,6 +29,13 @@ class AITherapistService:
             - Offer coping strategies and techniques
             - Encourage self-reflection and personal growth
 
+            You now have access to full conversation history of this session. Use it to:
+            - Reference what the user has shared earlier (e.g., emotions, events, struggles)
+            - Maintain continuity in the conversation and avoid repeating advice
+            - Deepen the conversation based on previously shared thoughts
+            - Recognize patterns or changes in emotinoal tone
+            - Help the user reflect on their progress
+
             Guidelines:
             1. Always response with empathy and understanding
             2. Ask open-ended questions to encourage sharing
@@ -72,14 +79,25 @@ class AITherapistService:
             self.__db_session.commit()
 
     def send_message(self, username: str, user_input: str, input_type: InputType) -> str:
-        if not self.__is_valid_message_input(username, user_input, input_type):
+        if not self.__is_valid_message_input(
+            username=username,
+            user_input=user_input,
+            input_type=input_type
+        ):
             return "Invalid input. Please make sure all fields are correctly provided"
 
         # Get the session or create a new session
-        session = self.get_or_create_session(username)
+        session = self.get_or_create_session(username=username)
 
         # Build messages with just system prompt + current question
-        messages = self.__build_openai_messages(username, user_input)
+        messages = self.__build_openai_messages(
+            username=username,
+            user_input=user_input,
+            session_id=session.id,
+
+            # Load message history to make the ai smarter
+            load_history=True
+        )
 
         try:
             ai_response = self.__get_ai_response(messages=messages)
@@ -100,17 +118,33 @@ class AITherapistService:
     def __is_valid_message_input(self, username: str, user_input: str, input_type: InputType) -> bool:
         return bool(username or user_input or isinstance(input_type, InputType))
 
-    def __build_openai_messages(self, username: str, user_input: str) -> List[Dict[str, str]]:
-        return [
-            {
-                "role": "system",
-                "content": self.__system_prompt(username)
-            },
-            {
-                "role": "user",
-                "content": user_input
-            }
+    def __build_openai_messages(self, username: str, user_input: str, session_id: str, load_history: bool) -> List[Dict[str, str]]:
+        messages = [
+            {"role": "system", "content": self.__system_prompt(username)}
         ]
+
+        if load_history:
+            """
+            Get the newest first and then [::-1] reverse back to the chronological order after get desc()
+            """
+            # Only load the last 5 turns
+            history = self.__db_session.query(Message).filter_by(
+                therapy_session_id=session_id
+            ).order_by(Message.timestamp.desc()).limit(5).all()[::-1]
+
+            for msg in history:
+                messages.append(
+                    {"role": "user", "content": msg.user_input}
+                )
+
+                messages.append(
+                    {"role": "assistant", "content": msg.ai_response}
+                )
+
+        # Append the latest user message
+        messages.append({"role": "user", "content": user_input})
+
+        return messages
 
     def __get_ai_response(self, messages: List[Dict[str, str]]) -> str:
         response = self.__client.chat.completions.create(
@@ -118,13 +152,12 @@ class AITherapistService:
             messages=messages,
 
             # Limit how long the AI's reply can be (200-300 words)
-            max_tokens=300,
+            max_tokens=200,
 
             # Controls the creativity or randomness of the response
-            temperature=0.7
+            temperature=0.6
         )
 
-        # Access the response text differently
         return response.choices[0].message.content.strip()
 
     def __save_message_to_db(self, user_input: str, ai_response: str, input_type: str, session: str, username: str) -> None:
