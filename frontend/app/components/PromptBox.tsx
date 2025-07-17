@@ -13,10 +13,10 @@ const PromptBox = () => {
 
         <div className="flex text-sm">
           <div className="flex gap-2">
-            <p className="flex items-center gap-2 text-sx border border-gray-300/40 px-2 py-1 rounded-full cursor-pointer hover:bg-[#4F46E5] hover:text-white transition">
+            <p className="flex items-center gap-2 text-sx border border-gray-300/40 px-2 py-1 rounded-lg cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition">
               <Mic className="h-5 " />
             </p>
-            <p className="flex items-center gap-2 text-sx border border-gray-300/40 px-2 py-2 rounded-full cursor-pointer hover:bg-[#4F46E5] hover:text-white transition">
+            <p className="flex items-center gap-2 text-sx border border-gray-300/40 px-2 py-2 rounded-lg cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition">
               <Send className="h-5" />
             </p>
           </div>
