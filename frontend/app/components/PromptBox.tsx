@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Send, Mic } from "lucide-react";
+import { Send, Mic, Trash2 } from "lucide-react";
 import Message from "@/types/message";
 
 interface PromptBoxProps {
@@ -65,7 +65,6 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
       formData.append("audio_file", audioBlob, audioFileName);
 
       // Add the Authorization token
-      // TODO: Change the token into real token or remove entire things
       const token =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4iLCJleHAiOjE3NTI3NzM2ODB9.sR5fF27YrRGm3doRB9QZgmX7GOMOX5EoLY2rlgj9_jo";
 
@@ -110,46 +109,63 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
     }
   };
 
+  // Function to remove the audio
+  const removeAudio = () => {
+    setAudioURL(null);
+    setAudioBlob(null);
+  };
+
   return (
     <div className="glass text-[#5e5e5e] px-4 py-3 ">
-      <form className="flex flex-row gap-8">
-        <input
-          className="outline-none w-full resize-none overflow-hidden break-words bg-transparent text-[#262626]"
-          placeholder="Share what's on your mind..."
-          required
-        />
+      <form className="flex flex-row gap-4 items-center">
+        {!audioURL ? (
+          <input
+            className="outline-none w-full resize-none overflow-hidden break-words bg-transparent text-[#262626] h-10"
+            placeholder="Share what's on your mind..."
+            required
+          />
+        ) : (
+          <div className="flex gap-4 items-center w-full h-10">
+            <audio controls className="flex-1 h-10">
+              <source src={audioURL} type={audioBlob?.type || "audio/webm"} />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        )}
 
-        <div className="flex text-sm">
-          <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {!audioURL ? (
             <p
               className={`glass icon flex items-center justify-center gap-2 text-sx px-2 cursor-pointer transition ${
                 isRecording
                   ? "bg-red-500 text-white shadow-lg ring-4 ring-red-300 animate-expand"
-                  : " hover:bg-[#2b2b2b] hover:text-white"
+                  : "hover:bg-[#2b2b2b] hover:text-white"
               }`}
               onClick={isRecording ? stopRecording : startRecording}
             >
               <Mic className="h-5" />
             </p>
-
+          ) : (
             <p
-              className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
-              onClick={sendAudioToBackend}
+              className={`glass icon flex items-center justify-center gap-2 text-sx px-2 cursor-pointer transition ${
+                isRecording
+                  ? "bg-red-500 text-white shadow-lg ring-4 ring-red-300 animate-expand"
+                  : "hover:bg-[#2b2b2b] hover:text-white"
+              }`}
+              onClick={removeAudio}
             >
-              <Send className="h-5" />
+              <Trash2 className="h-5" />
             </p>
-          </div>
+          )}
+
+          <p
+            className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
+            onClick={sendAudioToBackend}
+          >
+            <Send className="h-5" />
+          </p>
         </div>
       </form>
-
-      {audioURL && (
-        <div className="mt-4 flex flex-col gap-2">
-          <audio controls>
-            <source src={audioURL} type={audioBlob?.type || "audio/webm"} />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
     </div>
   );
 };

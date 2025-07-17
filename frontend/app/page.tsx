@@ -5,6 +5,7 @@ import Message from "@/types/message";
 
 import PromptBox from "./components/PromptBox";
 import ChatMessage from "./components/ChatMessage";
+import TalkingCharacter from "./components/TalkingCharacter";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -78,7 +79,9 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100">
       <div className="container mx-auto px-4 py-6 h-screen flex flex-col lg:flex-row gap-6">
         <div className="lg:w-3/5 flex flex-col">
-          <div className="glass flex flex-1 flex-col p-5"></div>
+          <div className="flex flex-1 flex-col p-5 items-center justify-center">
+            <TalkingCharacter isTalking={true} />
+          </div>
         </div>
         <div className="lg:w-2/5 flex flex-col gap-3">
           <div className="flex flex-1 flex-col glass overflow-y-auto">

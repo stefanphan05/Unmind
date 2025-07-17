@@ -15,9 +15,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", Arial, Helvetica, sans-serif;
+  font-family: "Lato", Arial, Helvetica, sans-serif;
 }
 
+/* ----------------------Heart animation---------------------- */
 @keyframes expandRing {
   0% {
     transform: scale(1);
@@ -37,6 +38,7 @@ body {
   animation: expandRing 1.5s infinite;
 }
 
+/* ----------------------Glass animation---------------------- */
 .glass {
   position: relative;
   background: rgba(255, 255, 255, 0.104);
@@ -79,7 +81,7 @@ body {
   border-radius: 0.625rem;
 }
 
-/* Hide scrollbar */
+/* ----------------------Hide scrollbar---------------------- */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

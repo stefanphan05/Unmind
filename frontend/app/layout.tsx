@@ -1,6 +1,11 @@
-import { Outfit, Ovo } from "next/font/google";
 import "./globals.css";
+import { Lato } from "next/font/google";
 import type { ReactNode } from "react";
+
+const lato = Lato({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+});
 
 export const metadata = {
   title: "Unmind",
@@ -18,7 +23,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className="antialiased leading-8 overflow-x-hidden">
+      <body
+        className={`${lato.className} antialiased leading-8 overflow-x-hidden`}
+      >
         {children}
       </body>
     </html>
