@@ -1,10 +1,10 @@
 import os
 import openai
+from . import app
 from dotenv import load_dotenv
 
 from typing import Dict, List
 
-from models.therapy_session import TherapySession, StatusType
 from models.message import Message
 
 
@@ -54,30 +54,6 @@ class AITherapistService:
 
         return prompt
 
-    def get_or_create_session(self, username: str) -> TherapySession:
-        session = self.__db_session.query(TherapySession).filter_by(
-            username=username, status=StatusType.ACTIVE).first()
-
-        if session:
-            return session
-
-        # No active session, create one
-        new_session = TherapySession(username=username)
-        self.__db_session.add(new_session)
-        self.__db_session.commit()
-        return new_session
-
-    def end_active_session(self, username: str) -> None:
-        session = self.__db_session.query(TherapySession).filter_by(
-            username=username, status=StatusType.ACTIVE).first()
-
-        if session:
-            # Delete related messages
-            self.__db_session.query(Message).filter_by(
-                therapy_session_id=session.id).delete()
-            self.__db_session.delete(session)
-            self.__db_session.commit()
-
     def send_message(self, username: str, user_input: str, input_type: str) -> str:
         if not self.__is_valid_message_input(
             username=username,
@@ -87,7 +63,8 @@ class AITherapistService:
             return "Invalid input. Please make sure all fields are correctly provided"
 
         # Get the session or create a new session
-        session = self.get_or_create_session(username=username)
+        session = app.therapy_session_service.get_or_create_session(
+            username=username)
 
         # Build messages with just system prompt + current question
         messages = self.__build_openai_messages(

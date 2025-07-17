@@ -7,8 +7,9 @@ from services.ai.ai_therapist import AITherapistService
 from services.voice.voice_generator import VoiceGenerator
 from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 from services.audio.audio_service import AudioProcessingService
+from services.therapy_session.therapy_session import TherapySessionService
 
-from routes import auth, message
+from routes import auth, message, therapy_session
 
 if __name__ == "__main__":
     with app.app_context():
@@ -19,6 +20,7 @@ if __name__ == "__main__":
         app.audio_service = AudioProcessingService()
         app.ai_therapist = AITherapistService(db.session)
         app.auth_service = AuthService(db.session)
+        app.therapy_session_service = TherapySessionService(db.session)
         app.token_handler = Token(app.config["SECRET_KEY"])
 
     # TODO: Remove the debug=True when finish the project
