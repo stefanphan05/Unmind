@@ -1,11 +1,14 @@
 from . import app
-from flask import jsonify
+from flask import Blueprint, jsonify
 
 from utils.token_required import token_required
 from utils.message_input_parse import get_request_content_type, extract_text_input, extract_speech_input
 
 
-@app.route('/message', methods=['POST'])
+message_bp = Blueprint("message", __name__)
+
+
+@message_bp.route('/message', methods=['POST'])
 @token_required
 def send_text_message(username):
     # Check the Content-Type header to determine how to parse the request

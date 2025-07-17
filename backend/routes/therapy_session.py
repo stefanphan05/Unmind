@@ -1,17 +1,20 @@
 from . import app
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 
 from utils.token_required import token_required
 
 
-@app.route('/start_therapy_session', methods=['POST'])
+therapy_session_bp = Blueprint("therapy_session", __name__)
+
+
+@therapy_session_bp.route('/start_therapy_session', methods=['POST'])
 @token_required
 def start_therapy_session(username):
     session = app.therapy_session_service.start_session(username)
     return jsonify({"message": f"Successfully created a new therapy session ({session.session_name}) for {username}"})
 
 
-@app.route('/rename_therapy_session', methods=['POST'])
+@therapy_session_bp.route('/rename_therapy_session', methods=['POST'])
 @token_required
 def rename_therapy_session(username):
     data = request.json
@@ -30,7 +33,7 @@ def rename_therapy_session(username):
     return jsonify({"message": f"Therapy session renamed to: {new_name.strip()}"}), 200
 
 
-@app.route('/session', methods=['GET'])
+@therapy_session_bp.route('/session', methods=['GET'])
 @token_required
 def get_session(username):
     session = app.therapy_session_service.get_session(username)
