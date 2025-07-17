@@ -8,7 +8,7 @@ from utils.message_input_parse import get_request_content_type, extract_text_inp
 message_bp = Blueprint("message", __name__)
 
 
-@message_bp.route('/message', methods=['POST'])
+@message_bp.route('/ask', methods=['POST'])
 @token_required
 def send_text_message(username):
     # Check the Content-Type header to determine how to parse the request

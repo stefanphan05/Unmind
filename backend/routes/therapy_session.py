@@ -33,7 +33,7 @@ def rename_therapy_session(username):
     return jsonify({"message": f"Therapy session renamed to: {new_name.strip()}"}), 200
 
 
-@therapy_session_bp.route('/session', methods=['GET'])
+@therapy_session_bp.route('/messages', methods=['GET'])
 @token_required
 def get_session(username):
     session = app.therapy_session_service.get_session(username)

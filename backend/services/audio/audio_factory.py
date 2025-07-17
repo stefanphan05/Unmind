@@ -30,6 +30,8 @@ class AudioProcessorFactory:
 
     def __detect_file_type(self, audio_file: FileStorage) -> str:
         """Detect file type based on content and file name"""
+        if audio_file.mimetype == 'audio/wav':
+            return 'wav'
 
         # Reset the file pointer to 0
         audio_file.seek(0)

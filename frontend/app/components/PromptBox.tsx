@@ -111,7 +111,7 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
   };
 
   return (
-    <div className="bg-white backdrop-blur-lg shadow-lg rounded-lg text-[#5e5e5e] px-4 py-3 ">
+    <div className="glass text-[#5e5e5e] px-4 py-3 ">
       <form className="flex flex-row gap-8">
         <input
           className="outline-none w-full resize-none overflow-hidden break-words bg-transparent text-[#262626]"
@@ -122,10 +122,10 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
         <div className="flex text-sm">
           <div className="flex gap-2">
             <p
-              className={`flex items-center justify-center gap-2 text-sx border border-gray-300/40 px-2 rounded-full cursor-pointer transition ${
+              className={`glass icon flex items-center justify-center gap-2 text-sx px-2 cursor-pointer transition ${
                 isRecording
                   ? "bg-red-500 text-white shadow-lg ring-4 ring-red-300 animate-expand"
-                  : "bg-transparent hover:bg-[#2b2b2b] hover:text-white"
+                  : " hover:bg-[#2b2b2b] hover:text-white"
               }`}
               onClick={isRecording ? stopRecording : startRecording}
             >
@@ -133,7 +133,7 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
             </p>
 
             <p
-              className="flex items-center gap-2 text-sx border border-gray-300/40 px-2 py-2 rounded-lg cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
+              className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
               onClick={sendAudioToBackend}
             >
               <Send className="h-5" />
