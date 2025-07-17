@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from typing import Dict, List
 
 from models.therapy_session import TherapySession, StatusType
-from models.message import Message, InputType
+from models.message import Message
 
 
 class AITherapistService:
@@ -78,7 +78,7 @@ class AITherapistService:
             self.__db_session.delete(session)
             self.__db_session.commit()
 
-    def send_message(self, username: str, user_input: str, input_type: InputType) -> str:
+    def send_message(self, username: str, user_input: str, input_type: str) -> str:
         if not self.__is_valid_message_input(
             username=username,
             user_input=user_input,
@@ -115,8 +115,8 @@ class AITherapistService:
             print(f"An error occurred: {e}")
             return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
 
-    def __is_valid_message_input(self, username: str, user_input: str, input_type: InputType) -> bool:
-        return bool(username or user_input or isinstance(input_type, InputType))
+    def __is_valid_message_input(self, username: str, user_input: str, input_type: str) -> bool:
+        return bool(username and user_input and input_type)
 
     def __build_openai_messages(self, username: str, user_input: str, session_id: str, load_history: bool) -> List[Dict[str, str]]:
         messages = [

@@ -1,12 +1,6 @@
 from . import db
-from enum import Enum
 from sqlalchemy import ForeignKey
 from datetime import datetime, timezone
-
-
-class InputType(Enum):
-    SPEECH = 'SPEECH'
-    TEXT = 'TEXT'
 
 
 class Message(db.Model):
@@ -19,7 +13,7 @@ class Message(db.Model):
     ai_response = db.Column(db.Text, nullable=False)
 
     # Using enum for a limited set of choices
-    input_type = db.Column(db.Enum(InputType), nullable=False)
+    input_type = db.Column(db.String(80), nullable=False)
 
     therapy_session_id = db.Column(
         db.Integer, ForeignKey("therapy_session.id"), nullable=False)

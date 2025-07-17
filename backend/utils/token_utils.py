@@ -7,7 +7,7 @@ class Token:
     A class for generating and decoding JSON Web Tokens (JWT)
     """
 
-    def __init__(self, secret: str, algorithm: str = "HS256", expires_in: int = 3600) -> None:
+    def __init__(self, secret: str, algorithm: str = "HS256", expires_in: int = 10000) -> None:
         self.__secret = secret
         self.__algorithm = algorithm
         self.__expires_in = expires_in
