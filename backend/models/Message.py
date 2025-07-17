@@ -23,6 +23,8 @@ class Message(db.Model):
 
     therapy_session_id = db.Column(
         db.Integer, ForeignKey("therapy_session.id"), nullable=False)
+    username = db.Column(db.String(80), ForeignKey(
+        "user.username"), nullable=False)
 
     timestamp = db.Column(db.DateTime, nullable=False,
                           default=datetime.now(timezone.utc))

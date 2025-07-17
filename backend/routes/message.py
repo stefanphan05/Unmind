@@ -1,5 +1,8 @@
 from . import app
 from flask import request, jsonify
+
+from models.message import InputType
+
 from utils.token_required import token_required
 from utils.process_audio import process_audio_with_adapter
 
@@ -67,6 +70,12 @@ def send_text_message(username):
     else:
         # Handle unsupported content types
         return jsonify({'error': "Unsupported Content-Type. Use 'application/json' or 'multipart/form-data'."}),
+
+    # Convert input_type string to InputType Enum
+    try:
+        input_type = InputType[input_type.upper()]
+    except KeyError:
+        return jsonify({"error": "Invalid input type. Use 'text' or 'speech'."}), 400
 
     # Get ai answer for the input
     ai_answer = app.ai_therapist.send_message(username, user_input, input_type)

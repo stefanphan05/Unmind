@@ -1,8 +1,12 @@
 import os
 import openai
 from dotenv import load_dotenv
+
 from models.therapy_session import TherapySession, StatusType
 from models.message import Message, InputType
+
+
+from . import db
 
 
 class AITherapistService:
@@ -70,32 +74,24 @@ class AITherapistService:
             self.__db_session.commit()
 
     def send_message(self, username: str, user_input: str, input_type: InputType) -> str:
-
-        # TODO: Check input type, make sure username and user input arent empty
-
         # Get the session or create a new session
         session = self.get_or_create_session(username)
 
         # Get all the messages in the current session
-        previous_messages = self.db.query(Message).filter_by(
+        previous_messages = self.__db_session.query(Message).filter_by(
             therapy_session_id=session.id
         ).order_by(Message.timestamp).all()
 
         messages = [{
             "role": "system",
-            "content": self.__self.__system_prompt_settings(username)
+            "content": self.__system_prompt_settings(username)
         }]
 
         for message in previous_messages:
-            messages.append([
-                {"role": "system", "content": message.user_input},
-                {"role": "user", "content": message.ai_response}
-            ])
+            messages.append({"role": "system", "content": message.user_input})
+            messages.append({"role": "user", "content": message.ai_response})
 
-        messages.append([
-            {"role": "user", "content": user_input},
-            {"role": "system", "content": user_input}
-        ])
+        messages.append({"role": "user", "content": user_input})
 
         try:
             # Use the new method to send messages to the OpenAI model
@@ -112,10 +108,13 @@ class AITherapistService:
                 user_input=user_input,
                 ai_response=ai_response,
                 input_type=input_type,
-                therapy_session_id=session.id
+                therapy_session_id=session.id,
+                username=username
             )
+
+            # Save to database
             self.__db_session.add(new_message)
-            self.db.commit()
+            self.__db_session.commit()
 
             return ai_response
         except Exception as e:
