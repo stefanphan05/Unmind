@@ -15,20 +15,11 @@ export default function Home() {
       role: "assistant",
       timestamp: new Date(),
     },
-    {
-      id: "2",
-      content: "Hi there! I'm feeling a bit overwhelmed with work lately.",
-      role: "user",
-      timestamp: new Date(),
-    },
-    {
-      id: "3",
-      content:
-        "I understand that feeling overwhelmed at work can be really challenging. It's completely normal to experience these feelings, and I'm here to help you work through them. Can you tell me more about what's been making you feel this way?",
-      role: "assistant",
-      timestamp: new Date(),
-    },
   ]);
+
+  const handleNewMessage = (newMessage: Message): void => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -53,7 +44,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-auto">
-            <PromptBox />
+            <PromptBox onNewMessage={handleNewMessage} />
           </div>
         </div>
       </div>
