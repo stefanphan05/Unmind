@@ -2,15 +2,14 @@ import os
 import openai
 from dotenv import load_dotenv
 
+from typing import Dict, List
+
 from models.therapy_session import TherapySession, StatusType
 from models.message import Message, InputType
 
 
-from . import db
-
-
 class AITherapistService:
-    def __init__(self, db_session):
+    def __init__(self, db_session) -> None:
         load_dotenv()
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -20,7 +19,7 @@ class AITherapistService:
         self.__model = "gpt-4o-mini"
         self.__db_session = db_session
 
-    def __system_prompt_settings(self, username: str) -> str:
+    def __system_prompt(self, username: str) -> str:
         prompt = f"""
             You are an AI therapist helping {username} in a speech therapy session.
 
@@ -49,11 +48,11 @@ class AITherapistService:
         return prompt
 
     def get_or_create_session(self, username: str) -> TherapySession:
-        active_session = self.__db_session.query(TherapySession).filter_by(
+        session = self.__db_session.query(TherapySession).filter_by(
             username=username, status=StatusType.ACTIVE).first()
 
-        if active_session:
-            return active_session
+        if session:
+            return session
 
         # No active session, create one
         new_session = TherapySession(username=username)
@@ -61,68 +60,80 @@ class AITherapistService:
         self.__db_session.commit()
         return new_session
 
-    def end_active_session(self, username: str):
-        old_session = self.__db_session.query(TherapySession).filter_by(
+    def end_active_session(self, username: str) -> None:
+        session = self.__db_session.query(TherapySession).filter_by(
             username=username, status=StatusType.ACTIVE).first()
 
-        if old_session:
-
+        if session:
             # Delete related messages
             self.__db_session.query(Message).filter_by(
-                therapy_session_id=old_session.id).delete()
-            self.__db_session.delete(old_session)
+                therapy_session_id=session.id).delete()
+            self.__db_session.delete(session)
             self.__db_session.commit()
 
     def send_message(self, username: str, user_input: str, input_type: InputType) -> str:
+        if not self.__is_valid_message_input(username, user_input, input_type):
+            return "Invalid input. Please make sure all fields are correctly provided"
+
         # Get the session or create a new session
         session = self.get_or_create_session(username)
 
-        # Get all the messages in the current session
-        previous_messages = self.__db_session.query(Message).filter_by(
-            therapy_session_id=session.id
-        ).order_by(Message.timestamp).all()
-
-        messages = [{
-            "role": "system",
-            "content": self.__system_prompt_settings(username)
-        }]
-
-        for message in previous_messages:
-            messages.append({"role": "system", "content": message.user_input})
-            messages.append({"role": "user", "content": message.ai_response})
-
-        messages.append({"role": "user", "content": user_input})
+        # Build messages with just system prompt + current question
+        messages = self.__build_openai_messages(username, user_input)
 
         try:
-            # Use the new method to send messages to the OpenAI model
-            response = self.__client.chat.completions.create(
-                model=self.__model,
-                messages=messages
-            )
+            ai_response = self.__get_ai_response(messages=messages)
 
-            # Access the response text differently
-            ai_response = response.choices[0].message.content.strip()
-
-            # Save new message into database
-            new_message = Message(
+            self.__save_message_to_db(
                 user_input=user_input,
                 ai_response=ai_response,
                 input_type=input_type,
-                therapy_session_id=session.id,
+                session=session,
                 username=username
             )
-
-            # Save to database
-            self.__db_session.add(new_message)
-            self.__db_session.commit()
 
             return ai_response
         except Exception as e:
             print(f"An error occurred: {e}")
             return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
 
+    def __is_valid_message_input(self, username: str, user_input: str, input_type: InputType) -> bool:
+        return bool(username or user_input or isinstance(input_type, InputType))
 
-# service = AITherapistService(db.session)
-# reply = service.send_message(
-#     "Stefan", "I've been feeling so stress lately. One of the reason is that i just broke up with my girlfriend a couple of weeks ago")
-# print("AI Therapist:", reply)
+    def __build_openai_messages(self, username: str, user_input: str) -> List[Dict[str, str]]:
+        return [
+            {
+                "role": "system",
+                "content": self.__system_prompt(username)
+            },
+            {
+                "role": "user",
+                "content": user_input
+            }
+        ]
+
+    def __get_ai_response(self, messages: List[Dict[str, str]]) -> str:
+        response = self.__client.chat.completions.create(
+            model=self.__model,
+            messages=messages,
+
+            # Limit how long the AI's reply can be (200-300 words)
+            max_tokens=300,
+
+            # Controls the creativity or randomness of the response
+            temperature=0.7
+        )
+
+        # Access the response text differently
+        return response.choices[0].message.content.strip()
+
+    def __save_message_to_db(self, user_input: str, ai_response: str, input_type: str, session: str, username: str) -> None:
+        new_message = Message(
+            user_input=user_input,
+            ai_response=ai_response,
+            input_type=input_type,
+            therapy_session_id=session.id,
+            username=username
+        )
+        self.__db_session.add(new_message)
+        self.__db_session.commit()

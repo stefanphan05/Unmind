@@ -34,7 +34,7 @@ class AuthService:
             hashed_password = generate_password_hash(password)
 
             # Create a new user instance (only store the hashpassword instead of plain password)
-            new_user = User(username, hashed_password)
+            new_user = User(username=username, password=hashed_password)
 
             self.__db_session.add(new_user)
             self.__db_session.commit()

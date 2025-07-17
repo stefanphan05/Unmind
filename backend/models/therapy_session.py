@@ -14,6 +14,5 @@ class TherapySession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), ForeignKey(
         "user.username"), nullable=False)
-
     status = db.Column(db.Enum(StatusType), nullable=False,
                        default=StatusType.ACTIVE)
