@@ -1,14 +1,26 @@
 import Message from "@/types/message";
 
+import { ApiError } from "next/dist/server/api-utils";
+
 const API_URL = "http://127.0.0.1:5000/v1/unmind/ask";
 const AUTH_TOKEN =
   "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4ifQ.eJOmRym9VXGNxixrIlXCvsAKUQVIPAt6bsI57QYAk9Q";
 
 export const sendTextToBackend = async (
   textMessage: string,
-  onNewMessage: (message: Message) => void
+  onNewMessage: (message: Message) => void,
+  onError: (error: ApiError) => void
 ): Promise<void> => {
   if (textMessage) {
+    if (!textMessage.trim()) {
+      onError({
+        name: "Error",
+        statusCode: 400,
+        message: "Please provide a message",
+      });
+      return;
+    }
+
     onNewMessage({
       id: Date.now().toString() + "-user",
       content: textMessage,
@@ -31,11 +43,14 @@ export const sendTextToBackend = async (
     });
 
     if (!response.ok) {
-      const errorMessage = await response.text();
-      console.log(errorMessage);
-      throw new Error(
-        `Request failed with status: ${response.status}. ${errorMessage}`
-      );
+      const errorData = await response.json();
+      const errorMessage = errorData.error || "Unknown error occurred";
+
+      onError({
+        name: "Error",
+        statusCode: response.status,
+        message: errorMessage,
+      });
     }
 
     const data = await response.json();
@@ -52,7 +67,8 @@ export const sendTextToBackend = async (
 // Send the recorded audio to backend
 export const sendAudioToBackend = async (
   audioBlob: Blob | null,
-  onNewMessage: (message: Message) => void
+  onNewMessage: (message: Message) => void,
+  onError: (error: ApiError) => void
 ): Promise<void> => {
   if (audioBlob) {
     const formData = new FormData();
@@ -73,11 +89,16 @@ export const sendAudioToBackend = async (
     });
 
     if (!response.ok) {
-      const errorMessage = await response.text();
-      console.log(errorMessage);
-      throw new Error(
-        `Request failed with status: ${response.status}. ${errorMessage}`
-      );
+      const errorData = await response.json();
+      const errorMessage = errorData.error || "Unknown error occurred";
+
+      onError({
+        name: "Error",
+        statusCode: response.status,
+        message: errorMessage,
+      });
+
+      return;
     }
 
     const data = await response.json();

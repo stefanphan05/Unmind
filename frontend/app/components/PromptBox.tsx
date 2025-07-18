@@ -6,17 +6,20 @@ import Message from "@/types/message";
 import { sendAudioToBackend, sendTextToBackend } from "@/lib/api";
 import MessageInput from "./MessageInput";
 import AudioRecorder from "./AudioRecorder";
+import { ApiError } from "next/dist/server/api-utils";
 
 interface PromptBoxProps {
   onNewMessage: (message: Message) => void;
   onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
   onAudioProcessingChange: (isProcessing: boolean) => void;
+  onError: (error: ApiError) => void;
 }
 
 const PromptBox: React.FC<PromptBoxProps> = ({
   onNewMessage,
   onLoadingChange,
   onAudioProcessingChange,
+  onError,
 }) => {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -45,7 +48,7 @@ const PromptBox: React.FC<PromptBoxProps> = ({
         onLoadingChange(true, "text");
 
         try {
-          await sendAudioToBackend(currentAudioBlob, onNewMessage);
+          await sendAudioToBackend(currentAudioBlob, onNewMessage, onError);
         } finally {
           onLoadingChange(false);
         }
@@ -53,7 +56,7 @@ const PromptBox: React.FC<PromptBoxProps> = ({
     } else if (textMessage) {
       onLoadingChange(true, "text");
       try {
-        await sendTextToBackend(currentTextMessage, onNewMessage);
+        await sendTextToBackend(currentTextMessage, onNewMessage, onError);
       } finally {
         onLoadingChange(false);
       }

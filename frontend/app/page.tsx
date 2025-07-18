@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 
-import Message from "@/types/message";
-
 import PromptBox from "./components/PromptBox";
 import ChatMessage from "./components/ChatMessage";
 import TalkingCharacter from "./components/TalkingCharacter";
 import LoadingMessage from "./components/LoadingMessage";
+import ErrorModal from "./components/ErrorModal";
+
+import Message from "@/types/message";
+import { ApiError } from "next/dist/server/api-utils";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -23,6 +25,7 @@ export default function Home() {
     "text" | "audio" | undefined
   >();
   const [isAudioProcessing, setIsAudioProcessing] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
 
   const handleNewMessage = (newMessage: Message): void => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -35,6 +38,16 @@ export default function Home() {
 
   const handleAudioProcessingChange = (processing: boolean) => {
     setIsAudioProcessing(processing);
+  };
+
+  const handleError = (error: ApiError) => {
+    setError(error);
+    setIsLoading(false);
+    setIsAudioProcessing(false);
+  };
+
+  const closeErrorModal = () => {
+    setError(null);
   };
 
   return (
@@ -80,10 +93,12 @@ export default function Home() {
               onNewMessage={handleNewMessage}
               onLoadingChange={handleLoadingChange}
               onAudioProcessingChange={handleAudioProcessingChange}
+              onError={handleError}
             />
           </div>
         </div>
       </div>
+      <ErrorModal error={error} onClose={closeErrorModal} />
     </div>
   );
 }
