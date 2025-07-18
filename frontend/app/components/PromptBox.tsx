@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Send, Mic, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { Send } from "lucide-react";
 import Message from "@/types/message";
 import { sendAudioToBackend, sendTextToBackend } from "@/lib/api";
 import MessageInput from "./MessageInput";
@@ -9,9 +9,15 @@ import AudioRecorder from "./AudioRecorder";
 
 interface PromptBoxProps {
   onNewMessage: (message: Message) => void;
+  onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
+  onAudioProcessingChange: (isProcessing: boolean) => void;
 }
 
-const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
+const PromptBox: React.FC<PromptBoxProps> = ({
+  onNewMessage,
+  onLoadingChange,
+  onAudioProcessingChange,
+}) => {
   const [audioURL, setAudioURL] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [textMessage, setTextMessage] = useState<string>("");
@@ -29,9 +35,28 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
     setAudioBlob(null);
 
     if (audioURL) {
-      await sendAudioToBackend(currentAudioBlob, onNewMessage);
+      // First show audio processing
+      onAudioProcessingChange(true);
+
+      // Simulate audio processing time (1.5 seconds)
+      setTimeout(async () => {
+        onAudioProcessingChange(false);
+        // Then show thinking loading
+        onLoadingChange(true, "text");
+
+        try {
+          await sendAudioToBackend(currentAudioBlob, onNewMessage);
+        } finally {
+          onLoadingChange(false);
+        }
+      }, 1500);
     } else if (textMessage) {
-      await sendTextToBackend(currentTextMessage, onNewMessage);
+      onLoadingChange(true, "text");
+      try {
+        await sendTextToBackend(currentTextMessage, onNewMessage);
+      } finally {
+        onLoadingChange(false);
+      }
     }
   };
 

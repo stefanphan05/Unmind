@@ -6,6 +6,7 @@ import Message from "@/types/message";
 import PromptBox from "./components/PromptBox";
 import ChatMessage from "./components/ChatMessage";
 import TalkingCharacter from "./components/TalkingCharacter";
+import LoadingMessage from "./components/LoadingMessage";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -17,8 +18,23 @@ export default function Home() {
     },
   ]);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingType, setLoadingType] = useState<
+    "text" | "audio" | undefined
+  >();
+  const [isAudioProcessing, setIsAudioProcessing] = useState(false);
+
   const handleNewMessage = (newMessage: Message): void => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
+
+  const handleLoadingChange = (loading: boolean, type?: "text" | "audio") => {
+    setIsLoading(loading);
+    setLoadingType(type);
+  };
+
+  const handleAudioProcessingChange = (processing: boolean) => {
+    setIsAudioProcessing(processing);
   };
 
   return (
@@ -49,10 +65,22 @@ export default function Home() {
                   isLatest={index === messages.length - 1}
                 />
               ))}
+
+              {/* Loading Message */}
+              {(isLoading || isAudioProcessing) && (
+                <LoadingMessage
+                  loadingType={loadingType}
+                  isAudioProcessing={isAudioProcessing}
+                />
+              )}
             </div>
           </div>
           <div className="mt-auto">
-            <PromptBox onNewMessage={handleNewMessage} />
+            <PromptBox
+              onNewMessage={handleNewMessage}
+              onLoadingChange={handleLoadingChange}
+              onAudioProcessingChange={handleAudioProcessingChange}
+            />
           </div>
         </div>
       </div>
