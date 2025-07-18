@@ -1,11 +1,46 @@
+"use client";
 import Message from "@/types/message";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface ChatMessageProps {
   message: Message;
+  isLatest?: boolean;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  isLatest = false,
+}) => {
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    // Only apply typing effect to assistant messages that are the latest
+    if (message.role === "assistant" && isLatest) {
+      setIsTyping(true);
+      setDisplayedContent("");
+
+      let currentIndex = 0;
+      const typingSpeed = 25;
+
+      const typeMessage = () => {
+        if (currentIndex < message.content.length) {
+          setDisplayedContent(message.content.substring(0, currentIndex + 1));
+          currentIndex++;
+          setTimeout(typeMessage, typingSpeed);
+        } else {
+          setIsTyping(false);
+        }
+      };
+
+      // Start typing after a small delay
+      setTimeout(typeMessage, 100);
+    } else {
+      setDisplayedContent(message.content);
+      setIsTyping(false);
+    }
+  }, [message.content, message.role, isLatest]);
+
   return (
     <div
       className={`flex ${
@@ -19,7 +54,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-gray-100 text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl rounded-bl-md"
         }`}
       >
-        {message.content}
+        {displayedContent}
+        {isTyping && (
+          <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse"></span>
+        )}
       </div>
     </div>
   );

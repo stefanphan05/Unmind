@@ -15,60 +15,6 @@ export default function Home() {
       role: "assistant",
       timestamp: new Date(),
     },
-    {
-      id: "2",
-      content:
-        "Hey! I'm feeling a bit overwhelmed with work and personal life.",
-      role: "user",
-      timestamp: new Date(),
-    },
-    {
-      id: "3",
-      content:
-        "It sounds like you're dealing with a lot. It's important to take breaks and prioritize self-care. Have you had any time to relax recently?",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-    {
-      id: "4",
-      content: "Not really, I’ve been working late every day this week.",
-      role: "user",
-      timestamp: new Date(),
-    },
-    {
-      id: "5",
-      content:
-        "That sounds tough. It's essential to set boundaries for your mental health. Maybe start by scheduling some small breaks during your workday. Would you like some tips on relaxation techniques?",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-    {
-      id: "6",
-      content: "Yes, that would be helpful. I could really use some guidance.",
-      role: "user",
-      timestamp: new Date(),
-    },
-    {
-      id: "7",
-      content:
-        "One simple technique is deep breathing. Try inhaling for four counts, holding for four, and exhaling for four. You can also try journaling to clear your mind. What do you think? Would you like to try one of these?",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-    {
-      id: "8",
-      content:
-        "I think I’ll try deep breathing first. Thank you for the suggestion!",
-      role: "user",
-      timestamp: new Date(),
-    },
-    {
-      id: "9",
-      content:
-        "You're very welcome! I'm glad you're willing to give it a try. Take your time, and remember to be kind to yourself.",
-      role: "assistant",
-      timestamp: new Date(),
-    },
   ]);
 
   const handleNewMessage = (newMessage: Message): void => {
@@ -96,8 +42,12 @@ export default function Home() {
             </div>
             <div className="p-4 overflow-y-auto scrollbar-hide">
               {/* ------Messages------ */}
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+              {messages.map((message, index) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  isLatest={index === messages.length - 1}
+                />
               ))}
             </div>
           </div>

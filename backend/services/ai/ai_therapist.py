@@ -50,6 +50,7 @@ class AITherapistService:
             - Your responses will be read aloud, so keep them natural for speech
             - Encourage the user to share stories, feelings, and experiences
             - Be patient with speech difficulties or hesitations
+            - Keep the response short (around 100 words)
         """
 
         return prompt
@@ -127,9 +128,6 @@ class AITherapistService:
         response = self.__client.chat.completions.create(
             model=self.__model,
             messages=messages,
-
-            # Limit how long the AI's reply can be (200-300 words)
-            max_tokens=200,
 
             # Controls the creativity or randomness of the response
             temperature=0.6

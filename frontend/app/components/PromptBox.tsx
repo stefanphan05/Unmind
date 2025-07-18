@@ -11,9 +11,16 @@ interface PromptBoxProps {
 const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [textMessage, setTextMessage] = useState<string>("");
+
+  // Alternative states for temporary holding values
+  const [tempTextMessage, setTempTextMessage] = useState<string>("");
+  const [tempAudioURL, setTempAudioURL] = useState<string | null>(null);
+  const [tempAudioBlob, setTempAudioBlob] = useState<Blob | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   // Start recording
   const startRecording = (): void => {
@@ -66,12 +73,13 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
 
       // Add the Authorization token
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4iLCJleHAiOjE3NTI3NzM2ODB9.sR5fF27YrRGm3doRB9QZgmX7GOMOX5EoLY2rlgj9_jo";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4ifQ.eJOmRym9VXGNxixrIlXCvsAKUQVIPAt6bsI57QYAk9Q";
 
       try {
         const response = await fetch("http://127.0.0.1:5000/v1/unmind/ask", {
           method: "POST",
           headers: {
+            // "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
           body: formData,
@@ -102,9 +110,65 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
           role: "assistant",
           timestamp: new Date(),
         });
-        console.log(data);
+
+        // Clear the audio state after sending
+        setAudioURL(null);
+        setAudioBlob(null);
       } catch (error) {
         console.error("Error sending audio:", error);
+      }
+    }
+  };
+
+  const sendTextToBackend = async (): Promise<void> => {
+    if (textMessage) {
+      const payload = {
+        type: "text",
+        message: textMessage,
+      };
+
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4ifQ.eJOmRym9VXGNxixrIlXCvsAKUQVIPAt6bsI57QYAk9Q";
+
+      const response = await fetch("http://127.0.0.1:5000/v1/unmind/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        console.log(errorMessage);
+        throw new Error(
+          `Request failed with status: ${response.status}. ${errorMessage}`
+        );
+      }
+
+      const data = await response.json();
+
+      // Handle the response
+      onNewMessage({
+        id: Date.now().toString() + "-user",
+        content: data.question,
+        role: "user",
+        timestamp: new Date(),
+      });
+
+      onNewMessage({
+        id: Date.now().toString() + "-assistant",
+        content: data.answer,
+        role: "assistant",
+        timestamp: new Date(),
+      });
+
+      setTextMessage("");
+
+      try {
+      } catch (error) {
+        console.error("Error sending text message:", error);
       }
     }
   };
@@ -115,13 +179,35 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
     setAudioBlob(null);
   };
 
+  // Handle form submission and prevent reload
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (audioURL) {
+      setTempAudioURL(audioURL);
+      setTempAudioBlob(audioBlob);
+      setAudioURL(null); // clear immediately
+      sendAudioToBackend();
+    } else if (textMessage) {
+      setTempTextMessage(textMessage);
+      setTextMessage(""); // clear immediately
+      sendTextToBackend();
+    }
+  };
+
   return (
     <div className="glass text-[#5e5e5e] px-4 py-3 ">
-      <form className="flex flex-row gap-4 items-center">
+      <form
+        className="flex flex-row gap-4 items-center"
+        onSubmit={handleSubmit}
+      >
         {!audioURL ? (
           <input
             className="outline-none w-full resize-none overflow-hidden break-words bg-transparent text-[#262626] h-10"
             placeholder="Share what's on your mind..."
+            type="text"
+            value={textMessage}
+            onChange={(e) => setTextMessage(e.target.value)}
             required
           />
         ) : (
@@ -160,7 +246,7 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
 
           <p
             className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
-            onClick={sendAudioToBackend}
+            onClick={handleSubmit}
           >
             <Send className="h-5" />
           </p>

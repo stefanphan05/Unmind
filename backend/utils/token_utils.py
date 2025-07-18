@@ -18,7 +18,6 @@ class Token:
         """
         payload = {
             "username": username,
-            "exp": datetime.now(timezone.utc) + timedelta(seconds=self.__expires_in)
         }
 
         # Encode the payload into a JWT using the configured secret and algorithm
