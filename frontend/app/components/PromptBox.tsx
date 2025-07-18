@@ -16,24 +16,22 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [textMessage, setTextMessage] = useState<string>("");
 
-  const [tempAudioURL, setTempAudioURL] = useState<string | null>(null);
-  const [tempAudioBlob, setTempAudioBlob] = useState<Blob | null>(null);
-  const [tempTextMessage, setTempTextMessage] = useState<string>("");
-
   // Handle form submission and prevent reload
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear the input fields immediately after the send button is clicked
+    const currentTextMessage = textMessage;
+    const currentAudioBlob = audioBlob;
+
+    setTextMessage("");
+    setAudioURL(null);
+    setAudioBlob(null);
+
     if (audioURL) {
-      setTempAudioURL(audioURL);
-      setAudioBlob(audioBlob);
-      setAudioURL(null);
-      setAudioBlob(null);
-      await sendAudioToBackend(tempAudioBlob, onNewMessage);
+      await sendAudioToBackend(currentAudioBlob, onNewMessage);
     } else if (textMessage) {
-      setTempTextMessage(textMessage);
-      setTextMessage("");
-      await sendTextToBackend(tempTextMessage, onNewMessage);
+      await sendTextToBackend(currentTextMessage, onNewMessage);
     }
   };
 
@@ -62,12 +60,12 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onNewMessage }) => {
             setAudioBlob={setAudioBlob}
           />
 
-          <p
+          <button
             className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
             onClick={handleSubmit}
           >
             <Send className="h-5" />
-          </p>
+          </button>
         </div>
       </form>
     </div>

@@ -9,6 +9,13 @@ export const sendTextToBackend = async (
   onNewMessage: (message: Message) => void
 ): Promise<void> => {
   if (textMessage) {
+    onNewMessage({
+      id: Date.now().toString() + "-user",
+      content: textMessage,
+      role: "user",
+      timestamp: new Date(),
+    });
+
     const payload = {
       type: "text",
       message: textMessage,
@@ -32,14 +39,6 @@ export const sendTextToBackend = async (
     }
 
     const data = await response.json();
-
-    // Handle the response
-    onNewMessage({
-      id: Date.now().toString() + "-user",
-      content: data.question,
-      role: "user",
-      timestamp: new Date(),
-    });
 
     onNewMessage({
       id: Date.now().toString() + "-assistant",
