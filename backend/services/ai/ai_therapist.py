@@ -52,7 +52,7 @@ class AITherapistService:
             - Your responses will be read aloud, so keep them natural for speech
             - Encourage the user to share stories, feelings, and experiences
             - Be patient with speech difficulties or hesitations
-            - Keep the response short (around 50-80 words)
+            - Keep the response short (around 30-50 words)
         """
 
         return prompt
@@ -123,7 +123,8 @@ class AITherapistService:
 
         # Remove * in the answer
         cleaned_response = re.sub(
-            r'\*\*(.*?)\*\*', r'\1', response.text.strip())
+            r'\*{1,2}(.*?)\*{1,2}', r'\1', response.text.strip())
+
         return cleaned_response
 
     def __save_message_to_db(self, user_input: str, ai_response: str, session: str, username: str) -> None:
