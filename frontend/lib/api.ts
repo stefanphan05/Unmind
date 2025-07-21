@@ -1,10 +1,9 @@
 import Message from "@/types/message";
-
 import { ApiError } from "next/dist/server/api-utils";
 
 const API_URL = "http://127.0.0.1:5000/v1/unmind/ask";
 const AUTH_TOKEN =
-  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbnBoYW4ifQ.eJOmRym9VXGNxixrIlXCvsAKUQVIPAt6bsI57QYAk9Q";
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InN0ZWZhbiJ9.FnM01Z6ZTTtZ7ChnkOyBlokL0GA4LFsT8qF66f8bZn0";
 
 export const getAIanswer = async (
   textMessage: string,

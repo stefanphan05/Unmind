@@ -1,22 +1,24 @@
 import os
-import openai
-from . import app
+import google.generativeai as genai
 from dotenv import load_dotenv
 
-from typing import Dict, List
+from . import app
 
+from typing import Dict, List
 from models.message import Message
+
+import re
 
 
 class AITherapistService:
     def __init__(self, db_session) -> None:
         load_dotenv()
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY not found in .env")
+            raise ValueError("GOOGLE_API_KEY not found in .env")
 
-        self.__client = openai.OpenAI()
-        self.__model = "gpt-4o-mini"
+        genai.configure(api_key=api_key)
+        self.__model = genai.GenerativeModel("gemini-1.5-flash")
         self.__db_session = db_session
 
     def __system_prompt(self, username: str) -> str:
@@ -50,16 +52,15 @@ class AITherapistService:
             - Your responses will be read aloud, so keep them natural for speech
             - Encourage the user to share stories, feelings, and experiences
             - Be patient with speech difficulties or hesitations
-            - Keep the response short (around 100 words)
+            - Keep the response short (around 50-80 words)
         """
 
         return prompt
 
-    def send_message(self, username: str, user_input: str, input_type: str) -> str:
+    def send_message(self, username: str, user_input: str) -> str:
         if not self.__is_valid_message_input(
             username=username,
-            user_input=user_input,
-            input_type=input_type
+            user_input=user_input
         ):
             return "Invalid input. Please make sure all fields are correctly provided"
 
@@ -68,7 +69,7 @@ class AITherapistService:
             username=username)
 
         # Build messages with just system prompt + current question
-        messages = self.__build_openai_messages(
+        messages = self.__build_prompt(
             username=username,
             user_input=user_input,
             session_id=session.id,
@@ -83,7 +84,6 @@ class AITherapistService:
             self.__save_message_to_db(
                 user_input=user_input,
                 ai_response=ai_response,
-                input_type=input_type,
                 session=session,
                 username=username
             )
@@ -93,13 +93,11 @@ class AITherapistService:
             print(f"An error occurred: {e}")
             return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
 
-    def __is_valid_message_input(self, username: str, user_input: str, input_type: str) -> bool:
-        return bool(username and user_input and input_type)
+    def __is_valid_message_input(self, username: str, user_input: str) -> bool:
+        return bool(username and user_input)
 
-    def __build_openai_messages(self, username: str, user_input: str, session_id: str, load_history: bool) -> List[Dict[str, str]]:
-        messages = [
-            {"role": "system", "content": self.__system_prompt(username)}
-        ]
+    def __build_prompt(self, username: str, user_input: str, session_id: str, load_history: bool) -> List[Dict[str, str]]:
+        messages = [self.__system_prompt(username)]
 
         if load_history:
             """
@@ -111,35 +109,27 @@ class AITherapistService:
             ).order_by(Message.timestamp.desc()).limit(5).all()[::-1]
 
             for msg in history:
-                messages.append(
-                    {"role": "user", "content": msg.user_input}
-                )
-
-                messages.append(
-                    {"role": "assistant", "content": msg.ai_response}
-                )
+                messages.append(f"User: {msg.user_input}")
+                messages.append(f"Therapist: {msg.ai_response}")
 
         # Append the latest user message
-        messages.append({"role": "user", "content": user_input})
+        messages.append(f"User: {user_input}")
+        messages.append("Therapist:")
 
         return messages
 
     def __get_ai_response(self, messages: List[Dict[str, str]]) -> str:
-        response = self.__client.chat.completions.create(
-            model=self.__model,
-            messages=messages,
+        response = self.__model.generate_content(messages)
 
-            # Controls the creativity or randomness of the response
-            temperature=0.6
-        )
+        # Remove * in the answer
+        cleaned_response = re.sub(
+            r'\*\*(.*?)\*\*', r'\1', response.text.strip())
+        return cleaned_response
 
-        return response.choices[0].message.content.strip()
-
-    def __save_message_to_db(self, user_input: str, ai_response: str, input_type: str, session: str, username: str) -> None:
+    def __save_message_to_db(self, user_input: str, ai_response: str, session: str, username: str) -> None:
         new_message = Message(
             user_input=user_input,
             ai_response=ai_response,
-            input_type=input_type,
             therapy_session_id=session.id,
             username=username
         )

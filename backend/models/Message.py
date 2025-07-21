@@ -12,9 +12,6 @@ class Message(db.Model):
     user_input = db.Column(db.Text, nullable=False)
     ai_response = db.Column(db.Text, nullable=False)
 
-    # Using enum for a limited set of choices
-    input_type = db.Column(db.String(80), nullable=False)
-
     therapy_session_id = db.Column(
         db.Integer, ForeignKey("therapy_session.id"), nullable=False)
     username = db.Column(db.String(80), ForeignKey(

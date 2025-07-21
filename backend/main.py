@@ -6,7 +6,6 @@ from services.text.text_generator import TextGenerator
 from services.ai.ai_therapist import AITherapistService
 from services.voice.voice_generator import VoiceGenerator
 from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
-from services.audio.audio_service import AudioProcessingService
 from services.therapy_session.therapy_session import TherapySessionService
 
 from routes.auth import auth_bp
@@ -20,7 +19,6 @@ if __name__ == "__main__":
         # Services
         app.text_generator = TextGenerator()
         app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
-        app.audio_service = AudioProcessingService()
         app.ai_therapist = AITherapistService(db.session)
         app.auth_service = AuthService(db.session)
         app.therapy_session_service = TherapySessionService(db.session)
