@@ -1,0 +1,48 @@
+"use client";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useState } from "react";
+
+interface PasswordInputWithToggleProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export default function PasswordInputWithToggle({
+  value,
+  onChange,
+}: PasswordInputWithToggleProps) {
+  const [isShowingPassword, setIsShowingPassword] = useState(false);
+
+  return (
+    <div>
+      <label
+        htmlFor="password"
+        className="block text-sm text-gray-700 mb-2 font-semibold"
+      >
+        Password
+      </label>
+      <div className="relative">
+        <input
+          id="password"
+          name="password"
+          type={isShowingPassword ? "text" : "password"}
+          placeholder="••••••• ••••• ••••••••• •••••••"
+          value={value}
+          onChange={onChange}
+          className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
+        />
+        <button
+          type="button"
+          onClick={() => setIsShowingPassword(!isShowingPassword)}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+        >
+          {isShowingPassword ? (
+            <EyeOffIcon className="h-5 w-5 text-gray-400" />
+          ) : (
+            <EyeIcon className="h-5 w-5 text-gray-400" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}

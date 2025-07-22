@@ -3,14 +3,65 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 
+import { SignInPayload, signInUser } from "@/lib/api/auth";
+
+import ErrorModal from "../modals/ErrorModal";
+
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useRouter } from "next/navigation";
+import AuthInput from "../auth/AuthInput";
+import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
+import ContinueButton from "../auth/ContinueButton";
+
 export function SignInForm() {
+  const router = useRouter();
+
+  // ------------------ States ------------------
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
+  // ------------------ Handlers ------------------
+  const { error, handleError, closeErrorModal } = useErrorHandler();
+
+  // ------------------ Form Submission ------------------
+  const handleSubmit = async (e: React.FormEvent) => {
+    // Prevent default form submission behavior (page reload)
+    e.preventDefault();
+
+    // Track which fields are missing
+    const missingFields = [];
+
+    // Validate each field and collect missing ones
+    if (!email.trim()) missingFields.push("Email");
+    if (!password.trim()) missingFields.push("Password");
+
+    // If there are any missing fields, show an error message and stop the form submission
+    if (missingFields.length > 0) {
+      handleError({
+        name: "Missing fields",
+        statusCode: 400,
+        message: `${missingFields.join(", ")} ${
+          missingFields.length > 1 ? "are" : "is"
+        } required.`,
+      });
+      return;
+    }
+
+    // Prepare the data to be sent to the API
+    const payload: SignInPayload = {
+      email,
+      password,
+    };
+
+    // Send sign-up request and let the API handle validation or errors
+    await signInUser(payload, handleError);
+
+    // If the request is successful, show the success modal
+    router.push("/chat");
+  };
 
   return (
-    <div className="max-w-lg w-full space-y-8">
+    <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
       {/* -----------------Header----------------- */}
       <div>
         <h1 className="text-4xl font-bold text-gray-900 mb-8">
@@ -19,55 +70,22 @@ export function SignInForm() {
       </div>
 
       {/* -----------------Form----------------- */}
-      <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* -----------------Email Field----------------- */}
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm text-gray-700 mb-2 font-semibold"
-          >
-            Email address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="name@work-email.com"
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-          />
-        </div>
+        <AuthInput
+          id="email"
+          label="Email address"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="name@work-email.com"
+        />
 
         {/* -----------------Password Field----------------- */}
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm text-gray-700 mb-2 font-semibold"
-          >
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
-              type={isShowingPassword ? "text" : "password"}
-              placeholder="••••••• ••••• ••••••••• •••••••"
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setIsShowingPassword(!isShowingPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-            >
-              {isShowingPassword ? (
-                <EyeOffIcon className="h-5 w-5 text-gray-400" />
-              ) : (
-                <EyeIcon className="h-5 w-5 text-gray-400" />
-              )}
-            </button>
-          </div>
-        </div>
+        <PasswordInputWithToggle
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
         {/* --------------Remember Me and Forgot Password------------- */}
         <div className="flex items-center justify-between">
@@ -93,12 +111,7 @@ export function SignInForm() {
         </div>
 
         {/* -----------------Continue Button----------------- */}
-        <button
-          type="submit"
-          className="w-full flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-semibold text-white bg-cyan-400 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
-        >
-          Continue ▶
-        </button>
+        <ContinueButton />
 
         {/* -----------------Divider----------------- */}
         <div className="relative">
@@ -113,7 +126,7 @@ export function SignInForm() {
         {/* -----------------Google Login Button----------------- */}
         <button
           type="button"
-          className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
+          className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500  cursor-pointer"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path
@@ -146,6 +159,11 @@ export function SignInForm() {
             Create an account now
           </Link>
         </p>
+      </form>
+
+      {/* -----------------Modals----------------- */}
+      <div className="h-0">
+        <ErrorModal error={error} onClose={closeErrorModal} />
       </div>
     </div>
   );
