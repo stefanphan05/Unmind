@@ -4,7 +4,7 @@ import { useState } from "react";
 import PromptBox from "./components/PromptBox";
 import ChatMessage from "./components/ChatMessage";
 import LoadingMessage from "./components/LoadingMessage";
-import ErrorModal from "./components/ErrorModal";
+import ErrorModal from "./components/modals/ErrorModal";
 
 import Message from "@/types/message";
 import { ApiError } from "next/dist/server/api-utils";

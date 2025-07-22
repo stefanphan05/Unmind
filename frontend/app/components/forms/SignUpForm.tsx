@@ -1,16 +1,65 @@
 "use client";
+import { SignUpPayload, signUpUser } from "@/lib/api/auth";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { ApiError } from "next/dist/server/api-utils";
 import Link from "next/link";
 import React, { useState } from "react";
+import ErrorModal from "../modals/ErrorModal";
+import SuccessModal from "../modals/SuccessModal";
+import { useRouter } from "next/navigation";
 
 export function SignUpForm() {
+  const router = useRouter();
+
   const [email, setEmail] = useState<string>("");
+  const [username, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Error handlers
+  const handleError = (error: ApiError) => {
+    setError(error);
+    setIsLoading(false);
+  };
+
+  const closeErrorModal = () => {
+    setError(null);
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccess(false);
+    router.push("/signin");
+  };
 
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
 
-  const handleSubmit = () => {
-    console.log("Hello");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    if (!email.trim() || !username.trim() || !password.trim()) {
+      handleError({
+        name: "Missing required fields",
+        statusCode: 400,
+        message: "Email, username and password are required",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    const payload: SignUpPayload = {
+      email,
+      username,
+      password,
+    };
+
+    await signUpUser(payload, handleError);
+
+    // setIsLoading(false);
+    setShowSuccess(true);
   };
 
   return (
@@ -23,7 +72,7 @@ export function SignUpForm() {
       </div>
 
       {/* -----------------Form----------------- */}
-      <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* -----------------Email Field----------------- */}
         <div>
           <label
@@ -37,7 +86,27 @@ export function SignUpForm() {
             name="email"
             type="email"
             placeholder="name@work-email.com"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* -----------------Username Field----------------- */}
+        <div>
+          <label
+            htmlFor="username"
+            className="block text-sm text-gray-700 mb-2 font-semibold"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="username"
+            placeholder="Tony"
+            value={username}
+            onChange={(e) => setUserName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
           />
         </div>
@@ -56,6 +125,7 @@ export function SignUpForm() {
               name="password"
               type={isShowingPassword ? "text" : "password"}
               placeholder="••••••• ••••• ••••••••• •••••••"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
             />
@@ -76,9 +146,10 @@ export function SignUpForm() {
         {/* -----------------Continue Button----------------- */}
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-semibold text-white bg-cyan-400 hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
         >
-          Continue ▶
+          {isLoading ? "Creating account..." : "Continue ▶"}
         </button>
 
         {/* -----------------Divider----------------- */}
@@ -127,7 +198,14 @@ export function SignUpForm() {
             Sign in
           </Link>
         </p>
-      </div>
+      </form>
+      <ErrorModal error={error} onClose={closeErrorModal} />
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={closeSuccessModal}
+        title="Welcome aboard!"
+        message="Your account has been created successfully. You can now sign in to access your dashboard."
+      />
     </div>
   );
 }
