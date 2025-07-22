@@ -14,7 +14,7 @@ export const handleApiRequest = async <T>(
 
   // Add autorization header if token is provided
   if (token) {
-    headers["Authorization"] = `Bear ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const response = await fetch(url, {

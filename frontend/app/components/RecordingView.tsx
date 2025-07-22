@@ -3,9 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 
 import { ApiError } from "next/dist/server/api-utils";
-
-import { getAIanswer } from "@/lib/api";
 import Message from "@/types/message";
+import { getAIAnswer } from "@/lib/api/ai";
 
 declare global {
   interface Window {
@@ -88,9 +87,22 @@ export default function RecordingView({
         return;
       }
 
+      const token =
+        localStorage.getItem("authToken") ||
+        sessionStorage.getItem("authToken");
+
+      if (!token) {
+        onError({
+          name: "Auth Error",
+          statusCode: 401,
+          message: "You are not authenticated. Please sign in again.",
+        });
+        return;
+      }
+
       if (transcript) {
         try {
-          await getAIanswer(transcript, onNewMessage, onError);
+          await getAIAnswer(transcript, onNewMessage, onError, token);
         } finally {
           onLoadingChange(false);
         }

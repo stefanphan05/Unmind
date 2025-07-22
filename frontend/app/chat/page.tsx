@@ -61,9 +61,6 @@ export default function ChatRoute() {
               <h2 className="text-3xl font-semibold text-white">
                 Therapy Session
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Un-do the Chaos, Unmind the Peace.
-              </p>
             </div>
             <div className="p-4 overflow-y-auto scrollbar-hide">
               {/* ------Messages------ */}

@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import { Send } from "lucide-react";
 import Message from "@/types/message";
-import { getAIanswer } from "@/lib/api";
 import MessageInput from "./MessageInput";
 import { ApiError } from "next/dist/server/api-utils";
+
+import { getAIAnswer } from "@/lib/api/ai";
 
 interface PromptBoxProps {
   onNewMessage: (message: Message) => void;
@@ -24,14 +25,35 @@ export default function PromptBox({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!textMessage.trim()) {
+      onError({
+        name: "Error",
+        statusCode: 400,
+        message: "Please provide a message",
+      });
+      return;
+    }
+
     // Clear the input fields immediately after the send button is clicked
     const currentTextMessage = textMessage;
 
     setTextMessage("");
 
+    const token =
+      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+    if (!token) {
+      onError({
+        name: "Auth Error",
+        statusCode: 401,
+        message: "You are not authenticated. Please sign in again.",
+      });
+      return;
+    }
+
     if (textMessage) {
       try {
-        await getAIanswer(currentTextMessage, onNewMessage, onError);
+        await getAIAnswer(currentTextMessage, onNewMessage, onError, token);
       } finally {
         onLoadingChange(false);
       }
