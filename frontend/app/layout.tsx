@@ -2,6 +2,7 @@ import "./globals.css";
 import { Lato } from "next/font/google";
 import type { ReactNode } from "react";
 import Header from "./components/layout/Header";
+import { AuthProvider } from "@/context/AuthContext";
 
 const lato = Lato({
   weight: ["400", "700"],
@@ -27,8 +28,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={`${lato.className} antialiased leading-8 overflow-x-hidden min-h-screen`}
       >
-        <Header />
-        {children}
+        <AuthProvider>
+          <Header />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

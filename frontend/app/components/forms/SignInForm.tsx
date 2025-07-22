@@ -12,13 +12,16 @@ import { useRouter } from "next/navigation";
 import AuthInput from "../auth/AuthInput";
 import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
 import ContinueButton from "../auth/ContinueButton";
+import { useAuth } from "@/context/AuthContext";
 
 export function SignInForm() {
   const router = useRouter();
+  const { signIn } = useAuth();
 
   // ------------------ States ------------------
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isRememberMe, setIsRememberMe] = useState<boolean>(false);
 
   // ------------------ Handlers ------------------
   const { error, handleError, closeErrorModal } = useErrorHandler();
@@ -53,14 +56,26 @@ export function SignInForm() {
       password,
     };
 
-    // Send sign-up request and let the API handle validation or errors, get back the token
-    const token = await signInUser(payload, handleError);
+    try {
+      // Get token from API
+      const token = await signInUser(payload, handleError);
 
-    // Save to localStorage
-    localStorage.setItem("authToken", token);
+      console.log("Received token:", token);
 
-    // If the request is successful, show the success modal
-    router.push("/chat");
+      if (token) {
+        // Use context to sign in (this will update the header automatically!)
+        signIn(token, isRememberMe);
+
+        // Go to chat page
+        router.push("/chat");
+      }
+    } catch (error) {
+      handleError({
+        name: "Signin Errors",
+        statusCode: 400,
+        message: `Sign in failed:" ${error}`,
+      });
+    }
   };
 
   return (
@@ -97,6 +112,8 @@ export function SignInForm() {
               id="remember-me"
               name="remember-me"
               type="checkbox"
+              checked={isRememberMe}
+              onChange={(e) => setIsRememberMe(e.target.checked)}
               className="h-4 w-4 accent-cyan-400 focus:ring-cyan-500 border-gray-300"
             />
             <label

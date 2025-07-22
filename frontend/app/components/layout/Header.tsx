@@ -1,24 +1,15 @@
 "use client";
 
-import { Brain, LogOut, LogIn } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Brain, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Header() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, signOut } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-
-    setIsAuthenticated(!!token);
-  });
-
   const handleSignOut = () => {
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("authToken");
-    setIsAuthenticated(false);
+    signOut();
     router.push("/signin");
   };
 

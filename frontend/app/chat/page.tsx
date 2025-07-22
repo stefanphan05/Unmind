@@ -28,12 +28,13 @@ export default function ChatRoute() {
 
   // ------------------ Auth Check ------------------
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const token =
+      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
     if (!token) {
       router.replace("/signin");
     }
-  });
+  }, []);
 
   const handleNewMessage = (newMessage: Message): void => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
