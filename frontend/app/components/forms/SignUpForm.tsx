@@ -1,10 +1,20 @@
-import { EyeIcon } from "lucide-react";
+"use client";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 export function SignUpForm() {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
+
+  const handleSubmit = () => {
+    console.log("Hello");
+  };
+
   return (
-    <div className="max-w-lg w-full space-y-8">
+    <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
       {/* -----------------Header----------------- */}
       <div>
         <h1 className="text-4xl font-bold text-gray-900 mb-8">
@@ -27,23 +37,7 @@ export function SignUpForm() {
             name="email"
             type="email"
             placeholder="name@work-email.com"
-            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* -----------------Username Field----------------- */}
-        <div>
-          <label
-            htmlFor="username"
-            className="block text-sm text-gray-700 mb-2 font-semibold"
-          >
-            Username
-          </label>
-          <input
-            id="username"
-            name="username"
-            type="username"
-            placeholder="username"
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
           />
         </div>
@@ -60,15 +54,21 @@ export function SignUpForm() {
             <input
               id="password"
               name="password"
-              type="password"
+              type={isShowingPassword ? "text" : "password"}
               placeholder="••••••• ••••• ••••••••• •••••••"
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => setIsShowingPassword(!isShowingPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
             >
-              <EyeIcon className="h-5 w-5 text-gray-400" />
+              {isShowingPassword ? (
+                <EyeOffIcon className="h-5 w-5 text-gray-400" />
+              ) : (
+                <EyeIcon className="h-5 w-5 text-gray-400" />
+              )}
             </button>
           </div>
         </div>

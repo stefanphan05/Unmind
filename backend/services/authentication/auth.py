@@ -14,7 +14,7 @@ class AuthService:
     def __init__(self, db_session: Session) -> None:
         self.__db_session = db_session
 
-    def register_user(self, username: str, password: str) -> Tuple[bool, str]:
+    def register_user(self, email: str, username: str, password: str) -> Tuple[bool, str]:
         """
         Registers a new user in the database.
 
@@ -27,14 +27,15 @@ class AuthService:
                                and a message string.
         """
 
-        if self.__get_user(username):
-            return False, "Username already exists"
+        if self.__get_user_email(email):
+            return False, "Email already exists"
 
         try:
             hashed_password = generate_password_hash(password)
 
             # Create a new user instance (only store the hashpassword instead of plain password)
-            new_user = User(username=username, password=hashed_password)
+            new_user = User(email=email, username=username,
+                            password=hashed_password)
 
             self.__db_session.add(new_user)
             self.__db_session.commit()
@@ -45,31 +46,31 @@ class AuthService:
             self.__db_session.rollback()
             return False, f"Registration failed: {str(e)}"
 
-    def login_user(self, username: str, password: str) -> Tuple[bool, str]:
+    def login_user(self, email: str, password: str) -> Tuple[bool, str]:
         """
         Find user by username
         Check if the password matches the stored hash passowrd
         return user or raise an error
         """
 
-        user = self.__get_user(username)
+        user = self.__get_user_email(email)
 
         if not user:
-            return False, "Username doesn't exist"
+            return False, "Email doesn't exist"
 
         if not check_password_hash(user.password, password):
             return False, "Incorrect password"
 
         return True, "Successfully login"
 
-    def __get_user(self, username: str) -> Union[User, None]:
+    def __get_user_email(self, email: str) -> Union[User, None]:
         """
-        Checks if a user with the given username already exists in the database.
+        Checks if a user with the given email already exists in the database.
 
         Args:
-            username (str): The username to check.
+            username (str): The email to check.
 
         Returns:
             Union[User, None]: The User object if the user exists, otherwise None.
         """
-        return User.query.filter_by(username=username).first()
+        return User.query.filter_by(email=email).first()

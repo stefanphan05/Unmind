@@ -23,7 +23,7 @@ def token_required(func):
             data = app.token_handler.decode_token(token)
 
             # Extract current user from the token payload
-            current_user = data['username']
+            current_user = data['email']
 
         except jwt.ExpiredSignatureError:
             return jsonify({"message": "Token has expired!"}), 401

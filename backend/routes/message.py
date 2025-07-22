@@ -10,7 +10,7 @@ message_bp = Blueprint("message", __name__)
 
 @message_bp.route('/ask', methods=['POST'])
 @token_required
-def send_text_message(username):
+def send_text_message(email):
     user_input, error = extract_text_input()
 
     if error:
@@ -18,7 +18,7 @@ def send_text_message(username):
 
     # Get AI Response
     ai_answer = app.ai_therapist.send_message(
-        username=username,
+        email=email,
         user_input=user_input
     )
 

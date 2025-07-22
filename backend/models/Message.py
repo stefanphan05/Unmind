@@ -7,15 +7,14 @@ class Message(db.Model):
     __tablename__ = 'message'
 
     id = db.Column(db.Integer, primary_key=True)
-
-    # Large text inputs/outputs
     user_input = db.Column(db.Text, nullable=False)
     ai_response = db.Column(db.Text, nullable=False)
 
-    therapy_session_id = db.Column(
-        db.Integer, ForeignKey("therapy_session.id"), nullable=False)
-    username = db.Column(db.String(80), ForeignKey(
-        "user.username"), nullable=False)
+    therapy_session_id = db.Column(db.Integer, ForeignKey(
+        "therapy_session.id"), nullable=False)
+
+    email = db.Column(db.String(80), ForeignKey(
+        "user.email"), nullable=False)
 
     timestamp = db.Column(db.DateTime, nullable=False,
                           default=datetime.now(timezone.utc))

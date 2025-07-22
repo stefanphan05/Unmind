@@ -1,5 +1,6 @@
-import jwt
+from config import app
 from datetime import datetime, timedelta, timezone
+import jwt
 
 
 class Token:
@@ -12,19 +13,22 @@ class Token:
         self.__algorithm = algorithm
         self.__expires_in = expires_in  # Token will never expire
 
-    def generate_token(self, username: str) -> str:
+    def generate_token(self, email: str) -> str:
         """
         Generates a JWT token for a given username. The token includes the username and an expiration timestamp
         """
+        username = app.user_service.get_username_by_email(email)
+
         payload = {
-            "username": username,
+            "email": email,
+            "username": username
         }
 
         # Encode the payload into a JWT using the configured secret and algorithm
         return jwt.encode(
             payload,
             self.__secret,
-            self.__algorithm
+            algorithm=self.__algorithm
         )
 
     def decode_token(self, token: str) -> dict:
@@ -34,5 +38,5 @@ class Token:
         return jwt.decode(
             token,
             self.__secret,
-            [self.__algorithm]
+            algorithms=[self.__algorithm]
         )

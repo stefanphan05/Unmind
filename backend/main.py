@@ -7,6 +7,7 @@ from services.ai.ai_therapist import AITherapistService
 from services.voice.voice_generator import VoiceGenerator
 from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 from services.therapy_session.therapy_session import TherapySessionService
+from services.user.user_service import UserService
 
 from routes.auth import auth_bp
 from routes.message import message_bp
@@ -22,6 +23,7 @@ if __name__ == "__main__":
         app.ai_therapist = AITherapistService(db.session)
         app.auth_service = AuthService(db.session)
         app.therapy_session_service = TherapySessionService(db.session)
+        app.user_service = UserService(db.session)
         app.token_handler = Token(app.config["SECRET_KEY"])
 
         # Register blueprints with prefix /v1/app
