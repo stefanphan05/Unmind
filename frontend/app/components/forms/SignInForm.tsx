@@ -1,8 +1,14 @@
-import { EyeIcon } from "lucide-react";
+"use client";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 export function SignInForm() {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
+
   return (
     <div className="max-w-lg w-full space-y-8">
       {/* -----------------Header----------------- */}
@@ -27,6 +33,7 @@ export function SignInForm() {
             name="email"
             type="email"
             placeholder="name@work-email.com"
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
           />
         </div>
@@ -43,15 +50,21 @@ export function SignInForm() {
             <input
               id="password"
               name="password"
-              type="password"
+              type={isShowingPassword ? "text" : "password"}
               placeholder="••••••• ••••• ••••••••• •••••••"
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => setIsShowingPassword(!isShowingPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
             >
-              <EyeIcon className="h-5 w-5 text-gray-400" />
+              {isShowingPassword ? (
+                <EyeOffIcon className="h-5 w-5 text-gray-400" />
+              ) : (
+                <EyeIcon className="h-5 w-5 text-gray-400" />
+              )}
             </button>
           </div>
         </div>
