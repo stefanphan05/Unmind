@@ -31,7 +31,7 @@ export const signInUser = async (
   payload: SignInPayload,
   onError: (error: ApiError) => void
 ): Promise<string> => {
-  const data = await handleApiRequest<{ message: string }>(
+  const data = await handleApiRequest<{ token: string }>(
     "http://127.0.0.1:5000/v1/unmind/signin",
     payload,
     "POST",
@@ -39,5 +39,5 @@ export const signInUser = async (
     "SignUpError"
   );
 
-  return data.message;
+  return data.token;
 };

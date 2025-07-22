@@ -53,8 +53,11 @@ export function SignInForm() {
       password,
     };
 
-    // Send sign-up request and let the API handle validation or errors
-    await signInUser(payload, handleError);
+    // Send sign-up request and let the API handle validation or errors, get back the token
+    const token = await signInUser(payload, handleError);
+
+    // Save to localStorage
+    localStorage.setItem("authToken", token);
 
     // If the request is successful, show the success modal
     router.push("/chat");
