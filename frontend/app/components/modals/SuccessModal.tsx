@@ -12,8 +12,8 @@ interface SuccessModalProps {
 const SuccessModal: React.FC<SuccessModalProps> = ({
   isOpen,
   onClose,
-  title = "Success!",
-  message = "Your account has been created successfully.",
+  title = "",
+  message = "",
 }) => {
   return (
     <AnimatePresence>
@@ -99,11 +99,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.3 }}
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px rgba(34, 197, 94, 0.3)",
-                }}
-                whileTap={{ scale: 0.98 }}
                 onClick={onClose}
                 className="bg-green-400 hover:bg-green-500 cursor-pointer text-white px-8 py-3 rounded-full font-medium transition-colors"
               >

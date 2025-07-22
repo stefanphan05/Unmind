@@ -101,11 +101,6 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.3 }}
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px rgba(239, 68, 68, 0.3)",
-                }}
-                whileTap={{ scale: 0.98 }}
                 onClick={onClose}
                 className="bg-red-400 hover:bg-red-500 cursor-pointer text-white px-8 py-3 rounded-full font-medium transition-colors"
               >

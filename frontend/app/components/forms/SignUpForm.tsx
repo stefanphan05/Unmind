@@ -1,50 +1,44 @@
 "use client";
+import Link from "next/link";
 import { SignUpPayload, signUpUser } from "@/lib/api/auth";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { ApiError } from "next/dist/server/api-utils";
-import Link from "next/link";
 import React, { useState } from "react";
+
 import ErrorModal from "../modals/ErrorModal";
 import SuccessModal from "../modals/SuccessModal";
-import { useRouter } from "next/navigation";
+
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { useSuccessHandler } from "@/hooks/useSuccessHandler";
 
 export function SignUpForm() {
-  const router = useRouter();
-
   const [email, setEmail] = useState<string>("");
   const [username, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Error handlers
-  const handleError = (error: ApiError) => {
-    setError(error);
-    setIsLoading(false);
-  };
-
-  const closeErrorModal = () => {
-    setError(null);
-  };
-
-  const closeSuccessModal = () => {
-    setShowSuccess(false);
-    router.push("/signin");
-  };
+  const { showSuccess, openSuccessModal, closeSuccessModal } =
+    useSuccessHandler("/signin");
+  const { error, handleError, closeErrorModal } = useErrorHandler();
 
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
-    if (!email.trim() || !username.trim() || !password.trim()) {
+    const missingFields = [];
+
+    if (!email.trim()) missingFields.push("Email");
+    if (!username.trim()) missingFields.push("Username");
+    if (!password.trim()) missingFields.push("Password");
+
+    if (missingFields.length > 0) {
       handleError({
-        name: "Missing required fields",
+        name: "Missing fields",
         statusCode: 400,
-        message: "Email, username and password are required",
+        message: `${missingFields.join(", ")} ${
+          missingFields.length > 1 ? "are" : "is"
+        } required.`,
       });
       setIsLoading(false);
       return;
@@ -56,10 +50,12 @@ export function SignUpForm() {
       password,
     };
 
-    await signUpUser(payload, handleError);
-
-    // setIsLoading(false);
-    setShowSuccess(true);
+    try {
+      await signUpUser(payload, handleError);
+      openSuccessModal();
+    } finally {
+      setIsLoading(false); // Always stop loading
+    }
   };
 
   return (
@@ -199,13 +195,15 @@ export function SignUpForm() {
           </Link>
         </p>
       </form>
-      <ErrorModal error={error} onClose={closeErrorModal} />
-      <SuccessModal
-        isOpen={showSuccess}
-        onClose={closeSuccessModal}
-        title="Welcome aboard!"
-        message="Your account has been created successfully. You can now sign in to access your dashboard."
-      />
+      <div className="h-0">
+        <ErrorModal error={error} onClose={closeErrorModal} />
+        <SuccessModal
+          isOpen={showSuccess}
+          onClose={closeSuccessModal}
+          title="Welcome aboard!"
+          message="Your account has been created successfully. You can now sign in to access your dashboard."
+        />
+      </div>
     </div>
   );
 }
