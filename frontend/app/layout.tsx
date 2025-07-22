@@ -24,7 +24,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        className={`${lato.className} antialiased leading-8 overflow-x-hidden`}
+        className={`${lato.className} antialiased leading-8 overflow-x-hidden `}
       >
         {children}
       </body>

@@ -122,7 +122,7 @@ export default function RecordingView({
         </div>
       )}
 
-      <div className="flex items-center w-full">
+      <div className="flex items-center">
         {isRecording ? (
           // Button for stopping recording
           <button
