@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 
 import { ApiError } from "next/dist/server/api-utils";
-import Message from "@/types/message";
 import { getAIAnswer } from "@/lib/api/ai";
 
 declare global {
@@ -13,16 +12,10 @@ declare global {
 }
 
 interface RecordingViewProps {
-  onNewMessage: (userText: string) => void | Promise<void>;
   onError: (error: ApiError) => void;
-  onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
 }
 
-export default function RecordingView({
-  onError,
-  onNewMessage,
-  onLoadingChange,
-}: RecordingViewProps) {
+export default function RecordingView({ onError }: RecordingViewProps) {
   // State variables to manage recording status, completion, and transcript
   const [isRecording, setIsRecording] = useState(false);
   const [isShowingTranscript, setIsShowingTranscript] = useState(false);
@@ -76,7 +69,6 @@ export default function RecordingView({
     if (recognitionRef.current) {
       // Stop the speech recognition and mark recording as complete
       recognitionRef.current.stop();
-      onLoadingChange(true);
 
       if (!transcript.trim()) {
         onError({
@@ -101,11 +93,7 @@ export default function RecordingView({
       }
 
       if (transcript) {
-        try {
-          await getAIAnswer(transcript, onNewMessage, onError, token);
-        } finally {
-          onLoadingChange(false);
-        }
+        await getAIAnswer(transcript, onError, token);
 
         setTranscript("");
         setIsShowingTranscript(false);

@@ -2,23 +2,16 @@
 
 import React, { useState } from "react";
 import { Send } from "lucide-react";
-import Message from "@/types/message";
 import MessageInput from "./MessageInput";
 import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";
 
 interface PromptBoxProps {
-  onNewMessage: (userText: string) => void | Promise<void>;
-  onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
   onError: (error: ApiError) => void;
 }
 
-export default function PromptBox({
-  onNewMessage,
-  onLoadingChange,
-  onError,
-}: PromptBoxProps) {
+export default function PromptBox({ onError }: PromptBoxProps) {
   const [textMessage, setTextMessage] = useState<string>("");
 
   // Handle form submission and prevent reload
@@ -52,11 +45,7 @@ export default function PromptBox({
     }
 
     if (textMessage) {
-      try {
-        await getAIAnswer(currentTextMessage, onNewMessage, onError, token);
-      } finally {
-        onLoadingChange(false);
-      }
+      await getAIAnswer(currentTextMessage, onError, token);
     }
   };
 

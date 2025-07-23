@@ -11,9 +11,6 @@ import ErrorModal from "../components/modals/ErrorModal";
 import TypingIndicator from "../components/chat/TypingIndicator";
 
 import Message from "@/types/message";
-import { handleApiRequest } from "@/lib/api/request";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export default function ChatRoute() {
   const router = useRouter();
@@ -32,71 +29,14 @@ export default function ChatRoute() {
       router.replace("/signin");
       return;
     }
-
-    // Fetch initial messages
-    fetchMessages(token);
   }, []);
-
-  const fetchMessages = async (token: string) => {
-    try {
-      const data = await handleApiRequest<Message>(
-        `${BASE_URL}/messages`,
-        {},
-        "GET",
-        handleError,
-        "fetch messages",
-        token
-      );
-      setMessages((prev) => [...prev, data]);
-    } catch (error) {
-      console.error("Failed to fetch messages:", error);
-    }
-  };
-
-  // ------------------ Message Sending ------------------
-  const handleNewMessage = async (userText: string) => {
-    const timestamp = new Date();
-    const userMessage: Message = {
-      id: `user-${timestamp.getTime()}`,
-      content: userText,
-      role: "user",
-      timestamp,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    try {
-      const aiResponse = await handleApiRequest<Message>(
-        `${BASE_URL}/chat`,
-        { user_input: userText },
-        "POST",
-        handleError,
-        "send message"
-      );
-
-      setMessages((prev) => [...prev, aiResponse]);
-    } catch (err) {
-      console.error("AI response error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLoadingChange = (loading: boolean) => {
-    setIsLoading(loading);
-  };
 
   return (
     <div>
       <div className="mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6">
         {/* ---------- Left: Recording Panel ---------- */}
         <div className="lg:w-3/5 flex items-center justify-center">
-          <RecordingView
-            onNewMessage={handleNewMessage}
-            onLoadingChange={handleLoadingChange}
-            onError={handleError}
-          />
+          <RecordingView onError={handleError} />
         </div>
         {/* ---------- Right: Chat Panel ---------- */}
         <div className="lg:w-2/5 flex flex-col gap-3">
@@ -125,11 +65,7 @@ export default function ChatRoute() {
 
           {/* Prompt Box */}
           <div className="mt-auto">
-            <PromptBox
-              onNewMessage={handleNewMessage}
-              onLoadingChange={handleLoadingChange}
-              onError={handleError}
-            />
+            <PromptBox onError={handleError} />
           </div>
         </div>
       </div>

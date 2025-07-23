@@ -14,6 +14,8 @@ import ContinueButton from "../auth/ContinueButton";
 import AuthDivider from "../auth/AuthDivider";
 import GoogleAuthButton from "../auth/GoogleAuthButton";
 import AuthFormTitle from "../auth/AuthFormTitle";
+import { AuthFormLayout } from "./AuthFormLayout";
+import { getMissingFields } from "@/utils/getMissingAuthFields";
 
 export function SignUpForm() {
   // ------------------ States ------------------
@@ -31,24 +33,19 @@ export function SignUpForm() {
     // Prevent default form submission behavior (page reload)
     e.preventDefault();
 
-    // Track which fields are missing
-    const missingFields = [];
+    // Check all fields
+    const errorMessage = getMissingFields([
+      ["Email", email],
+      ["Username", username],
+      ["Password", password],
+    ]);
 
-    // Validate each field and collect missing ones
-    if (!email.trim()) missingFields.push("Email");
-    if (!username.trim()) missingFields.push("Username");
-    if (!password.trim()) missingFields.push("Password");
-
-    // If there are any missing fields, show an error message and stop the form submission
-    if (missingFields.length > 0) {
+    if (errorMessage) {
       handleError({
         name: "Missing fields",
         statusCode: 400,
-        message: `${missingFields.join(", ")} ${
-          missingFields.length > 1 ? "are" : "is"
-        } required.`,
+        message: errorMessage,
       });
-
       return;
     }
 
@@ -59,76 +56,73 @@ export function SignUpForm() {
       password,
     };
 
-    // Send sign-up request and let the API handle validation or errors
-    await signUpUser(payload, handleError);
+    // Get the result from signUpUser
+    const result = await signUpUser(payload, handleError);
 
-    // If the request is successful, show the success modal
-    openSuccessModal();
+    // Only show success modal if signup was actually successful
+    if (result) {
+      openSuccessModal();
+    }
   };
 
   return (
-    <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
-      {/* -----------------Header----------------- */}
-      <AuthFormTitle title="Create an account" />
+    <AuthFormLayout
+      title="Create an account"
+      onSubmit={handleSubmit}
+      error={error}
+      onCloseError={closeErrorModal}
+      successModal={{
+        isOpen: showSuccess,
+        onClose: closeSuccessModal,
+        title: "Welcome aboard!",
+        message:
+          "Your account has been created successfully. You can now sign in to access your dashboard.",
+      }}
+    >
+      {/* -----------------Email Field----------------- */}
+      <AuthInput
+        id="email"
+        label="Email address"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="name@work-email.com"
+      />
 
-      {/* -----------------Form----------------- */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* -----------------Email Field----------------- */}
-        <AuthInput
-          id="email"
-          label="Email address"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@work-email.com"
-        />
+      {/* -----------------Username Field----------------- */}
+      <AuthInput
+        id="username"
+        label="Username"
+        value={username}
+        onChange={(e) => setUserName(e.target.value)}
+        placeholder="Tony"
+      />
 
-        {/* -----------------Username Field----------------- */}
-        <AuthInput
-          id="username"
-          label="Username"
-          value={username}
-          onChange={(e) => setUserName(e.target.value)}
-          placeholder="Tony"
-        />
+      {/* -----------------Password Field----------------- */}
+      <PasswordInputWithToggle
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-        {/* -----------------Password Field----------------- */}
-        <PasswordInputWithToggle
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      {/* -----------------Continue Button----------------- */}
+      <ContinueButton />
 
-        {/* -----------------Continue Button----------------- */}
-        <ContinueButton />
+      {/* -----------------Divider----------------- */}
+      <AuthDivider />
 
-        {/* -----------------Divider----------------- */}
-        <AuthDivider />
+      {/* -----------------Google Login Button----------------- */}
+      <GoogleAuthButton label="Sign up with Google" />
 
-        {/* -----------------Google Login Button----------------- */}
-        <GoogleAuthButton label="Sign up with Google" />
-
-        {/* -----------------Create Account Link----------------- */}
-        <p className="text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link
-            href="signin"
-            className="text-cyan-500 hover:text-cyan-600 font-semibold"
-          >
-            Sign in
-          </Link>
-        </p>
-      </form>
-
-      {/* -----------------Modals----------------- */}
-      <div className="h-0">
-        <ErrorModal error={error} onClose={closeErrorModal} />
-        <SuccessModal
-          isOpen={showSuccess}
-          onClose={closeSuccessModal}
-          title="Welcome aboard!"
-          message="Your account has been created successfully. You can now sign in to access your dashboard."
-        />
-      </div>
-    </div>
+      {/* -----------------Create Account Link----------------- */}
+      <p className="text-center text-sm text-gray-600">
+        Already have an account?{" "}
+        <Link
+          href="signin"
+          className="text-cyan-500 hover:text-cyan-600 font-semibold"
+        >
+          Sign in
+        </Link>
+      </p>
+    </AuthFormLayout>
   );
 }

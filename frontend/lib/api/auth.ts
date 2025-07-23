@@ -1,5 +1,5 @@
-import { handleApiRequest } from "./request";
 import { ApiError } from "next/dist/server/api-utils";
+import { handleMutationRequest } from "./handler";
 
 const AUTH_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -12,16 +12,20 @@ export interface SignUpPayload {
 export const signUpUser = async (
   payload: SignUpPayload,
   onError: (error: ApiError) => void
-): Promise<string> => {
-  const data = await handleApiRequest<{ message: string }>(
-    `${AUTH_BASE_URL}/signup`,
-    payload,
-    "POST",
-    onError,
-    "SignUpError"
-  );
+): Promise<string | null> => {
+  try {
+    const data = await handleMutationRequest<{ message: string }>(
+      `${AUTH_BASE_URL}/signup`,
+      "SignUpError",
+      payload,
+      "POST"
+    );
 
-  return data.message;
+    return data.message;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
 };
 
 export interface SignInPayload {
@@ -32,28 +36,30 @@ export interface SignInPayload {
 export const signInUser = async (
   payload: SignInPayload,
   onError: (error: ApiError) => void
-): Promise<string> => {
-  const data = await handleApiRequest<{ token: string }>(
-    `${AUTH_BASE_URL}/signin`,
-    payload,
-    "POST",
-    onError,
-    "SignUpError"
-  );
-
-  return data.token;
+): Promise<string | null> => {
+  try {
+    const data = await handleMutationRequest<{ token: string }>(
+      `${AUTH_BASE_URL}/signin`,
+      "SignUpError",
+      payload,
+      "POST"
+    );
+    return data.token;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
 };
 
 export const signInWithGoogle = async (
   googleToken: string,
   onError: (error: ApiError) => void
 ): Promise<string> => {
-  const data = await handleApiRequest<{ token: string }>(
+  const data = await handleMutationRequest<{ token: string }>(
     `${AUTH_BASE_URL}/google-signin`,
+    "Google signin",
     { credential: googleToken },
-    "POST",
-    onError,
-    "Google signin"
+    "POST"
   );
 
   return data.token;

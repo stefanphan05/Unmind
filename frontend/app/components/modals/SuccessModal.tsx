@@ -2,7 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 
-interface SuccessModalProps {
+export interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
