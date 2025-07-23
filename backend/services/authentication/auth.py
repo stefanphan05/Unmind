@@ -27,7 +27,7 @@ class AuthService:
                                and a message string.
         """
 
-        if self.__get_user_email(email):
+        if self.user_exists(email):
             return False, "Email already exists"
 
         try:
@@ -53,7 +53,7 @@ class AuthService:
         return user or raise an error
         """
 
-        user = self.__get_user_email(email)
+        user = self.user_exists(email)
 
         if not user:
             return False, "Email doesn't exist"
@@ -63,7 +63,7 @@ class AuthService:
 
         return True, "Successfully login"
 
-    def __get_user_email(self, email: str) -> Union[User, None]:
+    def user_exists(self, email: str) -> Union[User, None]:
         """
         Checks if a user with the given email already exists in the database.
 

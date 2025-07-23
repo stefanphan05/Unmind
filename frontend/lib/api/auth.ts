@@ -41,3 +41,18 @@ export const signInUser = async (
 
   return data.token;
 };
+
+export const signInWithGoogle = async (
+  googleToken: string,
+  onError: (error: ApiError) => void
+): Promise<string> => {
+  const data = await handleApiRequest<{ token: string }>(
+    "http://127.0.0.1:5000/v1/unmind/google-signin",
+    { credential: googleToken },
+    "POST",
+    onError,
+    "Google signin"
+  );
+
+  return data.token;
+};

@@ -1,5 +1,8 @@
+import requests
 from . import app
 from flask import Blueprint, request, jsonify
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -47,3 +50,40 @@ def register():
         return jsonify({"message": message}), 200
     else:
         return jsonify({"message": message}), 400
+
+
+@auth_bp.route("/google-signin", methods=["POST"])
+def google_signin():
+    data = request.json
+    token = data.get("credential") or data.get("access_token")
+
+    if not token:
+        return jsonify({"message": "Missing Google credential"}), 400
+
+    try:
+        if token.count('.') == 2:
+            user_info = id_token.verify_oauth2_token(
+                token, google_requests.Request())
+            email = user_info["email"]
+            name = user_info.get("name", "Anonymous")
+        else:
+            response = requests.get(
+                f"https://www.googleapis.com/oauth2/v2/userinfo?access_token={token}"
+            )
+
+            if response.status_code != 200:
+                raise Exception("Invalid access token")
+
+            user_info = response.json()
+            email = user_info["email"]
+            name = user_info.get("name", "Anonymous")
+
+        # Register user if not exists
+        if not app.auth_service.user_exists(email):
+            app.auth_service.register_user(email, name, "")
+
+        app_token = app.token_handler.generate_token(email)
+
+        return jsonify({"token": app_token}), 200
+    except Exception as e:
+        return jsonify({"message": f"Invalid Google token: {str(e)}"}), 400

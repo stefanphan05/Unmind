@@ -3,7 +3,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 
-import { SignInPayload, signInUser } from "@/lib/api/auth";
+import { SignInPayload, signInUser, signInWithGoogle } from "@/lib/api/auth";
 
 import ErrorModal from "../modals/ErrorModal";
 
@@ -13,6 +13,7 @@ import AuthInput from "../auth/AuthInput";
 import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
 import ContinueButton from "../auth/ContinueButton";
 import { useAuth } from "@/context/AuthContext";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 
 export function SignInForm() {
   const router = useRouter();
@@ -77,6 +78,44 @@ export function SignInForm() {
       });
     }
   };
+
+  const googleSignin = useGoogleLogin({
+    onSuccess: async (credentialResponse: any) => {
+      try {
+        const googleToken = credentialResponse?.access_token;
+
+        if (!googleToken) {
+          handleError({
+            name: "Google Login",
+            statusCode: 400,
+            message: `No Google token received`,
+          });
+          return;
+        }
+
+        const appToken = await signInWithGoogle(googleToken, handleError);
+        signIn(appToken, true);
+        router.push("/chat");
+      } catch (error) {
+        handleError({
+          name: "Google Signup",
+          statusCode: 400,
+          message:
+            error instanceof Error
+              ? `Google login failed: ${error.message}`
+              : `Google login failed: ${JSON.stringify(error)}`,
+        });
+      }
+    },
+    onError: () => {
+      handleError({
+        name: "Google SignUp",
+        statusCode: 400,
+        message: "Google signup failed",
+      });
+    },
+    scope: "profile email",
+  });
 
   return (
     <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
@@ -146,6 +185,7 @@ export function SignInForm() {
         {/* -----------------Google Login Button----------------- */}
         <button
           type="button"
+          onClick={() => googleSignin()}
           className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500  cursor-pointer"
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

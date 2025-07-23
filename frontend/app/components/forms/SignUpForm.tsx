@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import { SignUpPayload, signUpUser } from "@/lib/api/auth";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { signInWithGoogle, SignUpPayload, signUpUser } from "@/lib/api/auth";
 import React, { useState } from "react";
 
 import ErrorModal from "../modals/ErrorModal";
@@ -12,13 +11,18 @@ import { useSuccessHandler } from "@/hooks/useSuccessHandler";
 import AuthInput from "../auth/AuthInput";
 import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
 import ContinueButton from "../auth/ContinueButton";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export function SignUpForm() {
+  const { signIn } = useAuth();
+  const router = useRouter();
+
   // ------------------ States ------------------
   const [email, setEmail] = useState<string>("");
   const [username, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
 
   // ------------------ Handlers ------------------
   const { showSuccess, openSuccessModal, closeSuccessModal } =
@@ -64,6 +68,44 @@ export function SignUpForm() {
     // If the request is successful, show the success modal
     openSuccessModal();
   };
+
+  const googleSignup = useGoogleLogin({
+    onSuccess: async (credentialResponse: any) => {
+      try {
+        const googleToken = credentialResponse?.access_token;
+
+        if (!googleToken) {
+          handleError({
+            name: "Google Login",
+            statusCode: 400,
+            message: `No Google token received`,
+          });
+          return;
+        }
+
+        const appToken = await signInWithGoogle(googleToken, handleError);
+        signIn(appToken, true);
+        router.push("/chat");
+      } catch (error) {
+        handleError({
+          name: "Google Signup",
+          statusCode: 400,
+          message:
+            error instanceof Error
+              ? `Google login failed: ${error.message}`
+              : `Google login failed: ${JSON.stringify(error)}`,
+        });
+      }
+    },
+    onError: () => {
+      handleError({
+        name: "Google SignUp",
+        statusCode: 400,
+        message: "Google signup failed",
+      });
+    },
+    scope: "profile email",
+  });
 
   return (
     <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
@@ -116,6 +158,7 @@ export function SignUpForm() {
 
         {/* -----------------Google SignUp Button----------------- */}
         <button
+          onClick={() => googleSignup()}
           type="button"
           className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500  cursor-pointer"
         >
