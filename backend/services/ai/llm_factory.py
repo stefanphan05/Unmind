@@ -6,7 +6,7 @@ from .openai_strategy import OpenAIStrategy
 
 
 def llm_factory():
-    provider = os.getenv("LLM_PROVIDER", "openai").lower()
+    provider = os.getenv("LLM_PROVIDER", "gemini").lower()
     if provider == "gemini":
         print("using gemini")
         return GeminiStrategy()

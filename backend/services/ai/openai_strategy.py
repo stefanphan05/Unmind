@@ -22,9 +22,6 @@ class OpenAIStrategy(LLMStrategy):
         ]
 
         if load_history:
-            """
-            Get the newest first and then [::-1] reverse back to the chronological order after get desc()
-            """
             # Only load the last 5 turns
             history = db.session.query(Message).filter_by(
                 email=email

@@ -88,11 +88,13 @@ export default function ChatRoute() {
                 />
               ))}
 
-              {/* Scroll target */}
-              <div ref={messageEndRef} />
-
               {/* Loading Message */}
               {isAILoading && <TypingIndicator />}
+
+              <div className="h-30"></div>
+
+              {/* Scroll target */}
+              <div ref={messageEndRef} />
             </div>
           </div>
 
