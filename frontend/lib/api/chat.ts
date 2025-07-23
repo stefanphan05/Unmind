@@ -21,20 +21,16 @@ export const getAllMessages = async (
   }
 };
 
-export interface SaveUserInputProps {
-  content: string;
-}
-
 export const saveUserInput = async (
   token: string,
   onError: (error: ApiError) => void,
-  payload: SaveUserInputProps
+  content: string
 ): Promise<void> => {
   try {
     await handleMutationRequest<Message[]>(
       `${BASE_URL}/messages/user`,
       "Save user input error",
-      payload,
+      { content },
       "POST",
       token
     );

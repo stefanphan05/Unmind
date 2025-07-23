@@ -6,7 +6,7 @@ import MessageInput from "../MessageInput";
 import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";
-import { saveUserInput, SaveUserInputProps } from "@/lib/api/chat";
+import { saveUserInput } from "@/lib/api/chat";
 
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
@@ -41,11 +41,6 @@ export default function PromptBox({
 
     setIsAILoading(true);
 
-    // Prepare the data to be sent to the API
-    const payload: SaveUserInputProps = {
-      content: currentTextMessage,
-    };
-
     const token =
       localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
@@ -58,7 +53,7 @@ export default function PromptBox({
       return;
     }
 
-    await saveUserInput(token, onError, payload);
+    await saveUserInput(token, onError, currentTextMessage);
     onRefresh();
 
     if (currentTextMessage) {

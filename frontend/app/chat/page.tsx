@@ -66,6 +66,7 @@ export default function ChatRoute() {
           <RecordingView
             onError={handleError}
             setIsAILoading={setIsAILoading}
+            onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
           />
         </div>
         {/* ---------- Right: Chat Panel ---------- */}

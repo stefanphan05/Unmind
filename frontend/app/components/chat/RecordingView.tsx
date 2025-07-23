@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 
 import { ApiError } from "next/dist/server/api-utils";
 import { getAIAnswer } from "@/lib/api/ai";
+import { saveUserInput } from "@/lib/api/chat";
 
 declare global {
   interface Window {
@@ -14,11 +15,13 @@ declare global {
 interface RecordingViewProps {
   onError: (error: ApiError) => void;
   setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
+  onRefresh: () => void;
 }
 
 export default function RecordingView({
   onError,
   setIsAILoading,
+  onRefresh,
 }: RecordingViewProps) {
   // State variables to manage recording status, completion, and transcript
   const [isRecording, setIsRecording] = useState(false);
@@ -78,10 +81,15 @@ export default function RecordingView({
         onError({
           name: "Error",
           statusCode: 400,
-          message: "Please provide a message",
+          message: "Please talk something",
         });
         return;
       }
+
+      const currentTranscript = transcript;
+      setTranscript("");
+      setIsShowingTranscript(false);
+      setRecordingComplete(false);
 
       const token =
         localStorage.getItem("authToken") ||
@@ -96,12 +104,16 @@ export default function RecordingView({
         return;
       }
 
-      if (transcript) {
-        await getAIAnswer(transcript, onError, token);
+      setIsAILoading(true);
 
-        setTranscript("");
-        setIsShowingTranscript(false);
-        setRecordingComplete(false);
+      if (currentTranscript) {
+        await saveUserInput(token, onError, currentTranscript);
+        onRefresh();
+
+        await getAIAnswer(currentTranscript, onError, token);
+        onRefresh();
+
+        setIsAILoading(false);
       }
     }
   };
