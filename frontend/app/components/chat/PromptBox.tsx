@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Send } from "lucide-react";
-import MessageInput from "./MessageInput";
+import MessageInput from "../MessageInput";
 import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";

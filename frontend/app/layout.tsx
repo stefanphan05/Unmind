@@ -29,7 +29,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        className={`${lato.className} antialiased leading-8 overflow-x-hidden min-h-screen`}
+        className={`${lato.className} antialiased leading-8 overflow-x-hidden min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50`}
       >
         <GoogleOAuthProvider clientId={clientId!}>
           <AuthProvider>

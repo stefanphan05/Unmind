@@ -1,13 +1,15 @@
-"use client";
 import Message from "@/types/message";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { Typewriter } from "react-simple-typewriter";
 
 interface ChatMessageProps {
   message: Message;
   isLatest?: boolean;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
+  const isAssistant = message.role === "assistant";
+
   return (
     <div
       className={`flex ${
@@ -21,7 +23,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-gray-100 text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl rounded-bl-md"
         }`}
       >
-        {message.content}
+        {isAssistant && isLatest ? (
+          <Typewriter
+            words={[message.content]}
+            typeSpeed={25}
+            cursor
+            cursorStyle="|"
+          />
+        ) : (
+          message.content
+        )}
       </div>
     </div>
   );

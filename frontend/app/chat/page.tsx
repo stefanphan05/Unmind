@@ -6,7 +6,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 import RecordingView from "../components/RecordingView";
 import ChatMessage from "../components/chat/ChatMessage";
-import PromptBox from "../components/PromptBox";
+import PromptBox from "../components/chat/PromptBox";
 import ErrorModal from "../components/modals/ErrorModal";
 import TypingIndicator from "../components/chat/TypingIndicator";
 
@@ -36,11 +36,9 @@ export default function ChatRoute() {
 
   const fetchMessages = async (token: string) => {
     try {
-      console.log("Fetching messages...");
       const fetched = await getAllMessages(token, handleError);
-      console.log("Fetched messages:", fetched);
+
       if (fetched) {
-        console.log("Setting messages:", fetched);
         setMessages(fetched);
       }
     } catch (error) {
@@ -54,7 +52,7 @@ export default function ChatRoute() {
 
   return (
     <div>
-      <div className="mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6">
+      <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6 ">
         {/* ---------- Left: Recording Panel ---------- */}
         <div className="lg:w-3/5 flex items-center justify-center">
           <RecordingView onError={handleError} />
