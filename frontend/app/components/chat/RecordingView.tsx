@@ -13,9 +13,13 @@ declare global {
 
 interface RecordingViewProps {
   onError: (error: ApiError) => void;
+  setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function RecordingView({ onError }: RecordingViewProps) {
+export default function RecordingView({
+  onError,
+  setIsAILoading,
+}: RecordingViewProps) {
   // State variables to manage recording status, completion, and transcript
   const [isRecording, setIsRecording] = useState(false);
   const [isShowingTranscript, setIsShowingTranscript] = useState(false);

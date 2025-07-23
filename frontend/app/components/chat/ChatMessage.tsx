@@ -24,12 +24,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
         }`}
       >
         {isAssistant && isLatest ? (
-          <Typewriter
-            words={[message.content]}
-            typeSpeed={25}
-            cursor
-            cursorStyle="|"
-          />
+          <Typewriter words={[message.content]} typeSpeed={25} />
         ) : (
           message.content
         )}

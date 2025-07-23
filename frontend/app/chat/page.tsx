@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
-import RecordingView from "../components/RecordingView";
+import RecordingView from "../components/chat/RecordingView";
 import ChatMessage from "../components/chat/ChatMessage";
 import PromptBox from "../components/chat/PromptBox";
 import ErrorModal from "../components/modals/ErrorModal";
@@ -14,13 +14,15 @@ import Message from "@/types/message";
 import { getAllMessages } from "@/lib/api/chat";
 
 export default function ChatRoute() {
+  const messageEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // ------------------ States ------------------
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { error, handleError, closeErrorModal } = useErrorHandler();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isAILoading, setIsAILoading] = useState<boolean>(false);
+
+  const { error, handleError, closeErrorModal } = useErrorHandler();
 
   // ------------------ Auth Check ------------------
   useEffect(() => {
@@ -51,12 +53,20 @@ export default function ChatRoute() {
     }
   };
 
+  // Scroll to bottom after message updates
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <div>
       <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6 ">
         {/* ---------- Left: Recording Panel ---------- */}
         <div className="lg:w-3/5 flex items-center justify-center">
-          <RecordingView onError={handleError} />
+          <RecordingView
+            onError={handleError}
+            setIsAILoading={setIsAILoading}
+          />
         </div>
         {/* ---------- Right: Chat Panel ---------- */}
         <div className="lg:w-2/5 flex flex-col gap-3">
@@ -78,8 +88,11 @@ export default function ChatRoute() {
                 />
               ))}
 
+              {/* Scroll target */}
+              <div ref={messageEndRef} />
+
               {/* Loading Message */}
-              {isLoading && <TypingIndicator />}
+              {isAILoading && <TypingIndicator />}
             </div>
           </div>
 
@@ -88,6 +101,7 @@ export default function ChatRoute() {
             <PromptBox
               onError={handleError}
               onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
+              setIsAILoading={setIsAILoading}
             />
           </div>
         </div>

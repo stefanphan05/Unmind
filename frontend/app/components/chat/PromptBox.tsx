@@ -11,9 +11,14 @@ import { saveUserInput, SaveUserInputProps } from "@/lib/api/chat";
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
   onRefresh: () => void;
+  setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function PromptBox({ onError, onRefresh }: PromptBoxProps) {
+export default function PromptBox({
+  onError,
+  onRefresh,
+  setIsAILoading,
+}: PromptBoxProps) {
   const [message, setMessage] = useState<string>("");
 
   // Handle form submission and prevent reload
@@ -33,6 +38,8 @@ export default function PromptBox({ onError, onRefresh }: PromptBoxProps) {
     const currentTextMessage = message;
 
     setMessage("");
+
+    setIsAILoading(true);
 
     // Prepare the data to be sent to the API
     const payload: SaveUserInputProps = {
@@ -56,6 +63,7 @@ export default function PromptBox({ onError, onRefresh }: PromptBoxProps) {
 
     if (currentTextMessage) {
       await getAIAnswer(currentTextMessage, onError, token);
+      setIsAILoading(false);
     }
     onRefresh();
   };
