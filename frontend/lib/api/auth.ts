@@ -1,6 +1,8 @@
 import { handleApiRequest } from "./request";
 import { ApiError } from "next/dist/server/api-utils";
 
+const AUTH_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
 export interface SignUpPayload {
   email: string;
   username: string;
@@ -12,7 +14,7 @@ export const signUpUser = async (
   onError: (error: ApiError) => void
 ): Promise<string> => {
   const data = await handleApiRequest<{ message: string }>(
-    "http://127.0.0.1:5000/v1/unmind/signup",
+    `${AUTH_BASE_URL}/signup`,
     payload,
     "POST",
     onError,
@@ -32,7 +34,7 @@ export const signInUser = async (
   onError: (error: ApiError) => void
 ): Promise<string> => {
   const data = await handleApiRequest<{ token: string }>(
-    "http://127.0.0.1:5000/v1/unmind/signin",
+    `${AUTH_BASE_URL}/signin`,
     payload,
     "POST",
     onError,
@@ -47,7 +49,7 @@ export const signInWithGoogle = async (
   onError: (error: ApiError) => void
 ): Promise<string> => {
   const data = await handleApiRequest<{ token: string }>(
-    "http://127.0.0.1:5000/v1/unmind/google-signin",
+    `${AUTH_BASE_URL}/google-signin`,
     { credential: googleToken },
     "POST",
     onError,
