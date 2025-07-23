@@ -20,6 +20,7 @@ export default function ChatRoute() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { error, handleError, closeErrorModal } = useErrorHandler();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // ------------------ Auth Check ------------------
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function ChatRoute() {
     }
 
     fetchMessages(token);
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchMessages = async (token: string) => {
     try {
@@ -84,7 +85,10 @@ export default function ChatRoute() {
 
           {/* Prompt Box */}
           <div className="mt-auto">
-            <PromptBox onError={handleError} />
+            <PromptBox
+              onError={handleError}
+              onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
+            />
           </div>
         </div>
       </div>

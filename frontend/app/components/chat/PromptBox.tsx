@@ -6,19 +6,21 @@ import MessageInput from "../MessageInput";
 import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";
+import { saveUserInput, SaveUserInputProps } from "@/lib/api/chat";
 
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
+  onRefresh: () => void;
 }
 
-export default function PromptBox({ onError }: PromptBoxProps) {
-  const [textMessage, setTextMessage] = useState<string>("");
+export default function PromptBox({ onError, onRefresh }: PromptBoxProps) {
+  const [message, setMessage] = useState<string>("");
 
   // Handle form submission and prevent reload
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!textMessage.trim()) {
+    if (!message.trim()) {
       onError({
         name: "Error",
         statusCode: 400,
@@ -28,9 +30,14 @@ export default function PromptBox({ onError }: PromptBoxProps) {
     }
 
     // Clear the input fields immediately after the send button is clicked
-    const currentTextMessage = textMessage;
+    const currentTextMessage = message;
 
-    setTextMessage("");
+    setMessage("");
+
+    // Prepare the data to be sent to the API
+    const payload: SaveUserInputProps = {
+      content: currentTextMessage,
+    };
 
     const token =
       localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
@@ -44,9 +51,13 @@ export default function PromptBox({ onError }: PromptBoxProps) {
       return;
     }
 
-    if (textMessage) {
+    await saveUserInput(token, onError, payload);
+    onRefresh();
+
+    if (currentTextMessage) {
       await getAIAnswer(currentTextMessage, onError, token);
     }
+    onRefresh();
   };
 
   return (
@@ -55,10 +66,7 @@ export default function PromptBox({ onError }: PromptBoxProps) {
         className="flex flex-row gap-4 items-center"
         onSubmit={(e) => e.preventDefault()}
       >
-        <MessageInput
-          textMessage={textMessage}
-          setTextMessage={setTextMessage}
-        />
+        <MessageInput textMessage={message} setTextMessage={setMessage} />
         <div className="flex gap-2 items-center">
           <button
             className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -40,11 +40,18 @@ class AuthService:
             new_user = User(email=email, username=username,
                             password=hashed_password)
 
+            # Get the current date and time
+            now = datetime.now(timezone.utc)
+
+            # Subtract 1 year from the current date
+            one_year_ago = now - timedelta(days=365)
+
+            # Create the default message with the modified timestamp
             default_message = Message(
                 content="Hey, I’m here for you. Whatever’s on your mind, you can talk to me.",
                 role="assistant",
                 email=email,
-                timestamp=datetime.now(timezone.utc)
+                timestamp=one_year_ago
             )
 
             self.__db_session.add(default_message)
