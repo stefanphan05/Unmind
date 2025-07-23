@@ -1,7 +1,8 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Brain, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
@@ -9,8 +10,8 @@ export default function Header() {
   const router = useRouter();
 
   const handleSignOut = () => {
-    signOut();
     router.push("/signin");
+    signOut();
   };
 
   return (
@@ -18,22 +19,12 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div
-              className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-700 bg-clip-text text-transparent tracking-tight"
-              style={{
-                fontFamily:
-                  "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-              }}
-            >
-              Unmind
-            </div>
-          </div>
+          <Image
+            src={"/images/unmind-logo.png"}
+            alt="Logo"
+            width={130}
+            height={20}
+          />
 
           {/* Navigation Section */}
           <div className="flex items-center space-x-4">

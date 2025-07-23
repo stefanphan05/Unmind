@@ -3,8 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 
 import { ApiError } from "next/dist/server/api-utils";
+
 import { getAIAnswer } from "@/lib/api/ai";
 import { saveUserInput } from "@/lib/api/chat";
+
+import { FaMicrophone, FaPause, FaStop } from "react-icons/fa6";
+import { RxCross2 } from "react-icons/rx";
 
 declare global {
   interface Window {
@@ -30,6 +34,7 @@ export default function RecordingView({
   const [transcript, setTranscript] = useState("");
 
   const [error, setError] = useState<ApiError | null>(null);
+  const transcriptContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Reference to store the SpeechRecognition instance
   const recognitionRef = useRef<any>(null);
@@ -58,6 +63,14 @@ export default function RecordingView({
     // Start the speech recognition
     recognitionRef.current.start();
   };
+
+  // Scroll to the bottom of the transcript container when the transcript changes
+  useEffect(() => {
+    if (transcriptContainerRef.current) {
+      transcriptContainerRef.current.scrollTop =
+        transcriptContainerRef.current.scrollHeight;
+    }
+  }, [transcript]);
 
   // Cleanup effect when the component unmounts
   useEffect(() => {
@@ -118,6 +131,47 @@ export default function RecordingView({
     }
   };
 
+  const cancelRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsRecording(false);
+    setTranscript("");
+    setIsShowingTranscript(false);
+    setRecordingComplete(false);
+  };
+
+  const clearTranscript = () => {
+    // Stop the current recognition
+    recognitionRef.current.stop();
+
+    // Clear the transcript
+    setTranscript("");
+
+    // Restart recognition after a brief delay to avoid conflicts
+    setTimeout(() => {
+      if (isRecording) {
+        recognitionRef.current = new window.webkitSpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+
+        // Event handler for speech recognition results
+        recognitionRef.current.onresult = (event: any) => {
+          let fullTranscript = "";
+
+          for (let i = 0; i < event.results.length; i++) {
+            fullTranscript += event.results[i][0].transcript;
+          }
+
+          setTranscript(fullTranscript.trim());
+        };
+
+        // Restart the speech recognition
+        recognitionRef.current.start();
+      }
+    }, 100);
+  };
+
   // Toggle recording state and manage recording actions
   const handleToggleRecording = (e: React.FormEvent) => {
     setIsRecording(!isRecording);
@@ -129,46 +183,57 @@ export default function RecordingView({
   };
 
   return (
-    <div className="flex-col">
+    <div className="relative h-[calc(100vh-64px)] flex items-center justify-center ">
       {isShowingTranscript && (
-        <div className="flex items-center justify-center">
-          <div className="max-w-lg p-3 bg-black/5 rounded-2xl">
-            <p className="mb-0">{transcript}</p>
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 mb-10">
+          <div
+            ref={transcriptContainerRef}
+            className="w-96 p-3 bg-black/5 rounded-2xl max-h-40 overflow-y-auto scrollbar-hide"
+          >
+            <p className="mb-0 text-sm leading-relaxed">
+              {transcript || "Listening..."}
+            </p>
           </div>
         </div>
       )}
 
-      <div className="flex items-center">
+      {/* Buttons */}
+      <div className="flex items-center justify-center">
         {isRecording ? (
-          // Button for stopping recording
-          <button
-            onClick={handleToggleRecording}
-            className="mt-10 m-auto flex items-center justify-center bg-red-400 hover:bg-red-500 ring-4 ring-red-300 animate-expand rounded-full w-20 h-20 focus:outline-none cursor-pointer"
-          >
-            <svg
-              className="h-12 w-12 "
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="flex flex-row justify-center items-center">
+            {/* Clear transcript button */}
+            <button
+              onClick={clearTranscript}
+              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
+              title="Clear transcript"
             >
-              <path fill="white" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-          </button>
+              <RxCross2 className="text-gray-600 w-6 h-6" />
+            </button>
+
+            {/* Button for stopping recording */}
+            <button
+              onClick={handleToggleRecording}
+              className="flex items-center justify-center bg-red-400 hover:bg-red-500 ring-4 ring-red-300 animate-expand rounded-full w-40 h-40 focus:outline-none cursor-pointer ml-10 mr-10"
+            >
+              <FaPause className="text-white w-24 h-24" />
+            </button>
+
+            {/* Cancel recording button */}
+            <button
+              onClick={cancelRecording}
+              className="flex items-center justify-center bg-red-100 hover:bg-red-200 border-2 border-red-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
+              title="Cancel recording"
+            >
+              <FaStop className="text-red-600 w-6 h-6" />
+            </button>
+          </div>
         ) : (
           // Button for starting recording
           <button
             onClick={handleToggleRecording}
-            className="mt-10 m-auto flex items-center justify-center bg-blue-400 hover:bg-blue-500 rounded-full w-20 h-20 focus:outline-none cursor-pointer"
+            className="flex items-center justify-center bg-blue-400 hover:bg-blue-500 rounded-full w-40 h-40 focus:outline-none cursor-pointer"
           >
-            <svg
-              viewBox="0 0 256 256"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-12 h-12 text-white"
-            >
-              <path
-                fill="currentColor"
-                d="M128 176a48.05 48.05 0 0 0 48-48V64a48 48 0 0 0-96 0v64a48.05 48.05 0 0 0 48 48ZM96 64a32 32 0 0 1 64 0v64a32 32 0 0 1-64 0Zm40 143.6V232a8 8 0 0 1-16 0v-24.4A80.11 80.11 0 0 1 48 128a8 8 0 0 1 16 0a64 64 0 0 0 128 0a8 8 0 0 1 16 0a80.11 80.11 0 0 1-72 79.6Z"
-              />
-            </svg>
+            <FaMicrophone className="text-white w-24 h-24" />
           </button>
         )}
       </div>
