@@ -54,13 +54,18 @@ export const signInUser = async (
 export const signInWithGoogle = async (
   googleToken: string,
   onError: (error: ApiError) => void
-): Promise<string> => {
-  const data = await handleMutationRequest<{ token: string }>(
-    `${AUTH_BASE_URL}/google-signin`,
-    "Google signin",
-    { credential: googleToken },
-    "POST"
-  );
+): Promise<string | null> => {
+  try {
+    const data = await handleMutationRequest<{ token: string }>(
+      `${AUTH_BASE_URL}/google-signin`,
+      "Google signin",
+      { credential: googleToken },
+      "POST"
+    );
 
-  return data.token;
+    return data.token;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
 };

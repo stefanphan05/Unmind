@@ -1,6 +1,5 @@
 export default interface Message {
-  id: string;
+  id: number;
   content: string;
   role: "user" | "assistant";
-  timestamp: Date;
 }

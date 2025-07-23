@@ -1,9 +1,12 @@
+from datetime import datetime, timezone
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Types
 from sqlalchemy.orm import Session
 from typing import Tuple, Union
+
+from models.message import Message
 
 
 class AuthService:
@@ -37,6 +40,14 @@ class AuthService:
             new_user = User(email=email, username=username,
                             password=hashed_password)
 
+            default_message = Message(
+                content="Hey, I’m here for you. Whatever’s on your mind, you can talk to me.",
+                role="assistant",
+                email=email,
+                timestamp=datetime.now(timezone.utc)
+            )
+
+            self.__db_session.add(default_message)
             self.__db_session.add(new_user)
             self.__db_session.commit()
 

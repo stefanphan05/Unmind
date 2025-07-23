@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 import RecordingView from "../components/RecordingView";
-import ChatMessage from "../components/ChatMessage";
+import ChatMessage from "../components/chat/ChatMessage";
 import PromptBox from "../components/PromptBox";
 import ErrorModal from "../components/modals/ErrorModal";
 import TypingIndicator from "../components/chat/TypingIndicator";
 
 import Message from "@/types/message";
+import { getAllMessages } from "@/lib/api/chat";
 
 export default function ChatRoute() {
   const router = useRouter();
@@ -29,7 +30,27 @@ export default function ChatRoute() {
       router.replace("/signin");
       return;
     }
+
+    fetchMessages(token);
   }, []);
+
+  const fetchMessages = async (token: string) => {
+    try {
+      console.log("Fetching messages...");
+      const fetched = await getAllMessages(token, handleError);
+      console.log("Fetched messages:", fetched);
+      if (fetched) {
+        console.log("Setting messages:", fetched);
+        setMessages(fetched);
+      }
+    } catch (error) {
+      handleError({
+        name: "Failed to fetch messages",
+        statusCode: 400,
+        message: "Failed to fetch messages",
+      });
+    }
+  };
 
   return (
     <div>

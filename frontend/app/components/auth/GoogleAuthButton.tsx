@@ -28,7 +28,7 @@ export default function GoogleAuthButton({ label }: GoogleAuthButtonProps) {
         }
 
         const appToken = await signInWithGoogle(googleToken, handleError);
-        signIn(appToken, true);
+        if (appToken) signIn(appToken, true);
         router.push("/chat");
       } catch (error) {
         handleError({

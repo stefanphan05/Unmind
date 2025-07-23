@@ -62,4 +62,8 @@ def get_ai_response(email):
 @token_required
 def get_all_messages(email):
     messages = app.message_service.get_all_messages(email)
-    return jsonify([message.to_dict() for message in messages]), 200
+    return jsonify([{
+        "id": message.id,
+        "content": message.content,
+        "role": message.role
+    } for message in messages]), 200
