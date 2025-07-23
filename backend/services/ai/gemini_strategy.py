@@ -43,9 +43,13 @@ class GeminiStrategy(LLMStrategy):
         return messages
 
     def generate_response(self, prompt: str) -> str:
-        response = self.__model.generate_content(prompt)
+        try:
+            response = self.__model.generate_content(prompt)
 
-        # Remove * in the answer
-        cleaned_response = re.sub(
-            r'\*\*(.*?)\*\*', r'\1', response.text.strip())
-        return cleaned_response
+            cleaned_response = re.sub(
+                r'\*\*(.*?)\*\*', r'\1', response.text.strip())
+            return cleaned_response
+
+        except Exception as e:
+            print(f"[Gemini Error] {e}")
+            return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"

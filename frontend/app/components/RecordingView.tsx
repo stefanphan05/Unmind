@@ -13,7 +13,7 @@ declare global {
 }
 
 interface RecordingViewProps {
-  onNewMessage: (message: Message) => void;
+  onNewMessage: (userText: string) => void | Promise<void>;
   onError: (error: ApiError) => void;
   onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
 }

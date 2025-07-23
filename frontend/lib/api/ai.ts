@@ -7,17 +7,12 @@ const API_URL = `${BASE_URL}/ask`;
 
 export const getAIAnswer = async (
   message: string,
-  onNewMessage: (message: Message) => void,
+  onNewMessage: (userText: string) => void | Promise<void>,
   onError: (error: ApiError) => void,
   token: string
 ): Promise<void> => {
   // Add the user's message immediately
-  onNewMessage({
-    id: Date.now().toString() + "-user",
-    content: message,
-    role: "user",
-    timestamp: new Date(),
-  });
+  onNewMessage(message);
 
   const response = await handleApiRequest<{ answer: string }>(
     API_URL,
@@ -28,10 +23,5 @@ export const getAIAnswer = async (
     token
   );
 
-  onNewMessage({
-    id: Date.now().toString() + "-assistant",
-    content: response.answer,
-    role: "assistant",
-    timestamp: new Date(),
-  });
+  onNewMessage(response.answer);
 };

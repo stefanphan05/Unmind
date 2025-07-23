@@ -61,10 +61,6 @@ class AITherapistService:
         ):
             return "Invalid input. Please make sure all fields are correctly provided"
 
-        # Get the session or create a new session
-        session = app.therapy_session_service.get_or_create_session(
-            email=email)
-
         # Get username by email
         username = app.user_service.get_username_by_email(email)
 
@@ -72,24 +68,15 @@ class AITherapistService:
 
         messages = self.__llm.format_messages(
             user_input=user_input,
-            session_id=session.id,
             system_prompt=system_prompt,
+            email=email,
 
             # Load message history to make the ai smarter
             load_history=True
         )
 
         try:
-            ai_response = self.__get_ai_response(messages=messages)
-
-            self.__save_message_to_db(
-                user_input=user_input,
-                ai_response=ai_response,
-                session=session,
-                email=email
-            )
-
-            return ai_response
+            return self.__get_ai_response(messages=messages)
         except Exception as e:
             print(f"An error occurred: {e}")
             return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment"
@@ -99,13 +86,3 @@ class AITherapistService:
 
     def __get_ai_response(self, messages) -> str:
         return self.__llm.generate_response(messages)
-
-    def __save_message_to_db(self, user_input: str, ai_response: str, session: str, email: str) -> None:
-        new_message = Message(
-            user_input=user_input,
-            ai_response=ai_response,
-            therapy_session_id=session.id,
-            email=email
-        )
-        self.__db.add(new_message)
-        self.__db.commit()

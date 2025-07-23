@@ -9,7 +9,7 @@ import { ApiError } from "next/dist/server/api-utils";
 import { getAIAnswer } from "@/lib/api/ai";
 
 interface PromptBoxProps {
-  onNewMessage: (message: Message) => void;
+  onNewMessage: (userText: string) => void | Promise<void>;
   onLoadingChange: (isLoading: boolean, loadingType?: "text" | "audio") => void;
   onError: (error: ApiError) => void;
 }

@@ -14,9 +14,9 @@ class OpenAIStrategy(LLMStrategy):
             raise ValueError("OPENAI_API_KEY not found in .env")
 
         self.__client = openai.OpenAI()
-        self.__model = "gpt-4o-mini"
+        self.__model = "gpt-3.5-turbo"
 
-    def format_messages(self, user_input: str, session_id: str, load_history: bool, system_prompt: str):
+    def format_messages(self, user_input: str, load_history: bool, system_prompt: str, email: str):
         messages = [
             {"role": "system", "content": system_prompt}
         ]
@@ -27,20 +27,14 @@ class OpenAIStrategy(LLMStrategy):
             """
             # Only load the last 5 turns
             history = db.session.query(Message).filter_by(
-                therapy_session_id=session_id
-            ).order_by(Message.timestamp.desc()).limit(5).all()[::-1]
+                email=email
+            ).order_by(Message.timestamp).all()
 
+            messages = []
             for msg in history:
-                messages.append(
-                    {"role": "user", "content": msg.user_input}
-                )
+                messages.append({"role": msg.role, "content": msg.content})
 
-                messages.append(
-                    {"role": "assistant", "content": msg.ai_response}
-                )
-
-        # Append the latest user message
-        messages.append({"role": "user", "content": user_input})
+            messages.append({"role": "user", "content": user_input})
 
         return messages
 

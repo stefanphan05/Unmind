@@ -8,5 +8,5 @@ class LLMStrategy(ABC):
         pass
 
     @abstractmethod
-    def format_messages(self, user_input: str, session_id: str, load_history: bool, system_prompt: str) -> any:
+    def format_messages(self, user_input: str, load_history: bool, system_prompt: str, email: str) -> any:
         pass
