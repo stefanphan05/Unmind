@@ -95,13 +95,11 @@ export default function ChatRoute() {
           </div>
 
           {/* Prompt Box */}
-          <div className="sticky bottom-0 w-full bg-white px-4">
-            <PromptBox
-              onError={handleError}
-              onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
-              setIsAILoading={setIsAILoading}
-            />
-          </div>
+          <PromptBox
+            onError={handleError}
+            onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
+            setIsAILoading={setIsAILoading}
+          />
         </div>
       </div>
 

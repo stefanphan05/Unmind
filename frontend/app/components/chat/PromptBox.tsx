@@ -67,7 +67,7 @@ export default function PromptBox({
   };
 
   return (
-    <div className="bg-gray-100 rounded-4xl text-[#5e5e5e] px-4 py-1 border border-gray-300">
+    <div className="bg-gray-100 rounded-4xl text-[#5e5e5e] px-4 py-1 border border-gray-300 sticky bottom-0 w-full">
       <form
         className="flex flex-row gap-4 items-center"
         onSubmit={(e) => e.preventDefault()}
