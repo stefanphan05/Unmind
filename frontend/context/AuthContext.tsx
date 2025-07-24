@@ -1,54 +1,65 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import {
+  clearStoredToken,
+  DecodedToken,
+  decodeToken,
+  getStoredToken,
+  storeToken,
+} from "@/utils/authToken";
 
-// Define the interface of the context
+// ----------------Types----------------
 interface AuthContextType {
   isAuthenticated: boolean;
+  user: DecodedToken | null;
   signIn: (token: string, rememberMe: boolean) => void;
   signOut: () => void;
 }
 
-// Create an actual context
+// ----------------Create Context----------------
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
+  user: null,
   signIn: () => {},
   signOut: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
 
+// ----------------Provider Component----------------
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<DecodedToken | null>(null);
 
+  // On inital load, check if a token is stored and decode it
   useEffect(() => {
-    const token =
-      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const token = getStoredToken();
 
-    setIsAuthenticated(!!token);
+    if (token) {
+      const decodedUser = decodeToken(token);
+      setUser(decodedUser);
+      setIsAuthenticated(!!token);
+    }
   }, []);
 
-  // Sign in and store token based on "remmeber me"
+  // Sign in by storing token and decoding user info
   const signIn = (token: string, rememberMe: boolean) => {
-    if (rememberMe) {
-      localStorage.setItem("authToken", token);
-      sessionStorage.removeItem("authToken");
-    } else {
-      sessionStorage.setItem("authToken", token);
-      localStorage.removeItem("authToken");
-    }
-    setIsAuthenticated(true);
+    storeToken(token, rememberMe);
+    const decodedUser = decodeToken(token);
+    setUser(decodedUser);
+    setIsAuthenticated(!!token);
   };
 
-  // Sign out and remove tokens
+  // Sign out by clearing token and resetting state
   const signOut = () => {
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("authToken");
+    clearStoredToken();
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, signOut }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

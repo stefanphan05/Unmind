@@ -13,7 +13,7 @@ import { LogOut } from "lucide-react";
 import { MdOutlineEmail } from "react-icons/md";
 
 export default function Header() {
-  const { isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, user, signOut } = useAuth();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -54,15 +54,15 @@ export default function Header() {
             )}
 
             {menuOpen && (
-              <div className="absolute right-4 top-12 mt-2 w-100 bg-white rounded-xl shadow-lg border border-gray-300 z-50">
+              <div className="absolute right-4 top-12 mt-2 w-max min-w-[12rem] bg-white rounded-xl shadow-lg border border-gray-300 z-50">
                 <ul className="p-1">
                   <li className="px-4 py-1 hover:bg-gray-100 rounded-xl cursor-pointer flex items-center gap-2 text-gray-500">
                     <MdOutlineEmail className="w-5 h-5" />
-                    <span>phannguyentuanhung2005@gmail.com</span>
+                    <span className="break-all">{user?.email}</span>
                   </li>
                   <li className="px-4 py-1 hover:bg-gray-100 rounded-xl cursor-pointer flex items-center gap-2 text-gray-500">
                     <CgProfile className="w-5 h-5" />
-                    <span>Stefan</span>
+                    <span>{user?.username}</span>
                   </li>
                   <li
                     onClick={handleSignOut}

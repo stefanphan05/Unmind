@@ -7,8 +7,6 @@ import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";
 import { saveUserInput } from "@/lib/api/chat";
-import { IoSendSharp } from "react-icons/io5";
-import { RiSendPlaneFill } from "react-icons/ri";
 import { BiSolidSend } from "react-icons/bi";
 
 interface PromptBoxProps {
