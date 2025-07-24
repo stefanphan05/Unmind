@@ -1,34 +1,44 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
+// Component imports
 import RecordingView from "../components/chat/RecordingView";
 import ChatMessage from "../components/chat/ChatMessage";
 import PromptBox from "../components/chat/PromptBox";
 import ErrorModal from "../components/modals/ErrorModal";
 import TypingIndicator from "../components/chat/TypingIndicator";
-
-import Message from "@/types/message";
-import { getAllMessages } from "@/lib/api/chat";
 import Header from "../components/layout/Header";
+import Sidebar from "../components/chat/Sidebar";
+
+// Type imports
+import Message from "@/types/message";
+
+// API imports
+import { getAllMessages } from "@/lib/api/chat";
+import { getStoredToken } from "@/utils/authToken";
+import ChatConversationPanel from "../components/chat/ChatConversationPanel";
 
 export default function ChatRoute() {
-  const messageEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { error, handleError, closeErrorModal } = useErrorHandler();
 
   // ------------------ States ------------------
   const [messages, setMessages] = useState<Message[]>([]);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [messageRefreshTrigger, setMessageRefreshTrigger] = useState(0);
   const [isAILoading, setIsAILoading] = useState<boolean>(false);
-
-  const { error, handleError, closeErrorModal } = useErrorHandler();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // ------------------ Auth Check ------------------
+
+  /**
+   * Handle user authentication check and inital message loading
+   * TODO: Redicts to signin if no valid token found (FOR NOW, consider allow guest using the application)
+   */
   useEffect(() => {
-    const token =
-      localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    const token = getStoredToken();
 
     if (!token) {
       router.replace("/signin");
@@ -36,8 +46,11 @@ export default function ChatRoute() {
     }
 
     fetchMessages(token);
-  }, [refreshTrigger]);
+  }, [messageRefreshTrigger]);
 
+  /**
+   * Fetches all chat messages from the server using the provided token
+   */
   const fetchMessages = async (token: string) => {
     try {
       const fetched = await getAllMessages(token, handleError);
@@ -54,56 +67,51 @@ export default function ChatRoute() {
     }
   };
 
-  // Scroll to bottom after message updates
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  /**
+   * Triggers a refresh of chat messages from the server after sending new messages
+   */
+  const triggerChatMessageRefresh = (): void => {
+    setMessageRefreshTrigger((prev) => prev + 1);
+  };
 
   return (
-    <div>
-      <Header />
-      <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6 ">
-        {/* ---------- Left: Recording Panel ---------- */}
-        <div className="lg:w-3/5 flex items-center justify-center">
-          <RecordingView
-            onError={handleError}
-            setIsAILoading={setIsAILoading}
-            onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
-          />
-        </div>
-        {/* ---------- Right: Chat Panel ---------- */}
-        <div className="lg:w-2/5 flex flex-col overflow-y-auto">
-          <div className="flex flex-1 flex-col overflow-y-auto scroll-smooth">
-            {/* Chat Messages */}
-            <div className="p-4 overflow-y-auto">
-              {messages.map((message, index) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  isLatest={index === messages.length - 1}
-                />
-              ))}
+    <div className="flex h-screen">
+      {/* -----------Therapy Sessions Sidebar - including previous sessions----------- */}
+      <Sidebar isOpen={isSidebarOpen} />
 
-              {/* Loading Message */}
-              {isAILoading && <TypingIndicator />}
+      {/* -----------Main Chat Interface Container----------- */}
+      <div className="flex flex-1 flex-col">
+        {/* -----------Application Header with navigation and controls----------- */}
+        <Header
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
 
-              <div className="h-30"></div>
-
-              {/* Scroll target */}
-              <div ref={messageEndRef} />
-            </div>
+        {/* -----------Main Chat Content Area----------- */}
+        <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-72px)] flex flex-col lg:flex-row gap-6 ">
+          {/* -----------Left Panel: Voice Recording Interface----------- */}
+          <div className="lg:w-3/5 flex items-center justify-center">
+            <RecordingView
+              onError={handleError}
+              setIsAILoading={setIsAILoading}
+              onRefresh={triggerChatMessageRefresh}
+            />
           </div>
 
-          {/* Prompt Box */}
-          <PromptBox
-            onError={handleError}
-            onRefresh={() => setRefreshTrigger((prev) => prev + 1)}
-            setIsAILoading={setIsAILoading}
-          />
+          {/* -----------Right Panel: Chat Conversation Display and Input----------- */}
+          <div className="lg:w-2/5 flex flex-col">
+            <ChatConversationPanel
+              messages={messages}
+              isTherapistResponseLoading={isAILoading}
+              onError={handleError}
+              onRefresh={triggerChatMessageRefresh}
+              setIsTherapistResponseLoading={setIsAILoading}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Error Modal */}
+      {/* -----------Error Modal - Displays error messages to user----------- */}
       <ErrorModal error={error} onClose={closeErrorModal} />
     </div>
   );
