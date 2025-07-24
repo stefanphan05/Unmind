@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import Header from "./components/layout/Header";
+
 import { AuthProvider } from "@/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
@@ -32,13 +32,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        className={`${poppins.className} antialiased leading-8 overflow-x-hidden min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50`}
+        className={`${poppins.className} antialiased leading-8 overflow-x-hidden min-h-screen bg-white`}
       >
         <GoogleOAuthProvider clientId={clientId!}>
-          <AuthProvider>
-            <Header />
-            {children}
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

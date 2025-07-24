@@ -12,6 +12,7 @@ import TypingIndicator from "../components/chat/TypingIndicator";
 
 import Message from "@/types/message";
 import { getAllMessages } from "@/lib/api/chat";
+import Header from "../components/layout/Header";
 
 export default function ChatRoute() {
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -60,6 +61,7 @@ export default function ChatRoute() {
 
   return (
     <div>
+      <Header />
       <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col lg:flex-row gap-6 ">
         {/* ---------- Left: Recording Panel ---------- */}
         <div className="lg:w-3/5 flex items-center justify-center">
@@ -70,17 +72,10 @@ export default function ChatRoute() {
           />
         </div>
         {/* ---------- Right: Chat Panel ---------- */}
-        <div className="lg:w-2/5 flex flex-col gap-3">
-          <div className="flex flex-1 flex-col glass overflow-y-auto">
-            {/* Chat Header */}
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-3xl font-semibold text-white">
-                Therapy Session
-              </h2>
-            </div>
-
+        <div className="lg:w-2/5 flex flex-col overflow-y-auto">
+          <div className="flex flex-1 flex-col overflow-y-auto scroll-smooth">
             {/* Chat Messages */}
-            <div className="p-4 overflow-y-auto scrollbar-hide">
+            <div className="p-4 overflow-y-auto">
               {messages.map((message, index) => (
                 <ChatMessage
                   key={message.id}
@@ -100,7 +95,7 @@ export default function ChatRoute() {
           </div>
 
           {/* Prompt Box */}
-          <div className="mt-auto">
+          <div className="sticky bottom-0 w-full bg-white px-4">
             <PromptBox
               onError={handleError}
               onRefresh={() => setRefreshTrigger((prev) => prev + 1)}

@@ -7,6 +7,9 @@ import { ApiError } from "next/dist/server/api-utils";
 
 import { getAIAnswer } from "@/lib/api/ai";
 import { saveUserInput } from "@/lib/api/chat";
+import { IoSendSharp } from "react-icons/io5";
+import { RiSendPlaneFill } from "react-icons/ri";
+import { BiSolidSend } from "react-icons/bi";
 
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
@@ -64,7 +67,7 @@ export default function PromptBox({
   };
 
   return (
-    <div className="glass text-[#5e5e5e] px-4 py-3 ">
+    <div className="bg-gray-100 rounded-4xl text-[#5e5e5e] px-4 py-1 border border-gray-300">
       <form
         className="flex flex-row gap-4 items-center"
         onSubmit={(e) => e.preventDefault()}
@@ -72,10 +75,10 @@ export default function PromptBox({
         <MessageInput textMessage={message} setTextMessage={setMessage} />
         <div className="flex gap-2 items-center">
           <button
-            className="glass flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-[#2b2b2b] hover:text-white transition"
+            className="flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-gray-300 hover:text-black bg-gray-200 rounded-2xl transition"
             onClick={handleSubmit}
           >
-            <Send className="h-5" />
+            <BiSolidSend className="h-5" />
           </button>
         </div>
       </form>
