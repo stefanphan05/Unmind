@@ -55,7 +55,7 @@ export default function GoogleAuthButton({ label }: GoogleAuthButtonProps) {
     <button
       type="button"
       onClick={() => googleSignin()}
-      className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500  cursor-pointer"
+      className="w-full flex items-center justify-center py-5 px-4 text-sm rounded-2xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition cursor-pointer"
     >
       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
         <path

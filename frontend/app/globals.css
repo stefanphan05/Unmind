@@ -5,6 +5,10 @@ body {
   font-family: "Lato", Arial, Helvetica, sans-serif;
 }
 
+:root {
+  --grey-background: rgba(0, 0, 0, 0.04);
+}
+
 /* ----------------------Heart animation---------------------- */
 @keyframes expandRing {
   0% {
@@ -71,4 +75,8 @@ body {
 /* ----------------------Hide scrollbar---------------------- */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+.input-field {
+  background-color: var(--grey-background);
 }

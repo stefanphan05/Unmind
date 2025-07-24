@@ -1,21 +1,21 @@
 "use client";
 import Link from "next/link";
-import { SignUpPayload, signUpUser } from "@/lib/api/auth";
 import React, { useState } from "react";
 
-import ErrorModal from "../modals/ErrorModal";
-import SuccessModal from "../modals/SuccessModal";
+import { SignUpPayload, signUpUser } from "@/lib/api/auth";
 
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useSuccessHandler } from "@/hooks/useSuccessHandler";
+
+import { getMissingFields } from "@/utils/getMissingAuthFields";
+
+import { AuthFormLayout } from "./AuthFormLayout";
+
 import AuthInput from "../auth/AuthInput";
 import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
-import ContinueButton from "../auth/ContinueButton";
 import AuthDivider from "../auth/AuthDivider";
 import GoogleAuthButton from "../auth/GoogleAuthButton";
-import AuthFormTitle from "../auth/AuthFormTitle";
-import { AuthFormLayout } from "./AuthFormLayout";
-import { getMissingFields } from "@/utils/getMissingAuthFields";
+import SubmitButton from "../auth/SubmitButton";
 
 export function SignUpForm() {
   // ------------------ States ------------------
@@ -67,7 +67,7 @@ export function SignUpForm() {
 
   return (
     <AuthFormLayout
-      title="Create an account"
+      title="Sign up"
       onSubmit={handleSubmit}
       error={error}
       onCloseError={closeErrorModal}
@@ -104,8 +104,8 @@ export function SignUpForm() {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      {/* -----------------Continue Button----------------- */}
-      <ContinueButton />
+      {/* -----------------Submit Button----------------- */}
+      <SubmitButton label="Sign up" />
 
       {/* -----------------Divider----------------- */}
       <AuthDivider />
@@ -114,11 +114,11 @@ export function SignUpForm() {
       <GoogleAuthButton label="Sign up with Google" />
 
       {/* -----------------Create Account Link----------------- */}
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm">
         Already have an account?{" "}
         <Link
           href="signin"
-          className="text-cyan-500 hover:text-cyan-600 font-semibold"
+          className="text-black hover:text-gray-700 font-semibold transition"
         >
           Sign in
         </Link>

@@ -6,16 +6,17 @@ import React, { useState } from "react";
 import { SignInPayload, signInUser } from "@/lib/api/auth";
 
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+
+import { getMissingFields } from "@/utils/getMissingAuthFields";
+
 import AuthInput from "../auth/AuthInput";
 import PasswordInputWithToggle from "../auth/PasswordInputWithToggle";
-import ContinueButton from "../auth/ContinueButton";
-import { useAuth } from "@/context/AuthContext";
 import GoogleAuthButton from "../auth/GoogleAuthButton";
 import AuthDivider from "../auth/AuthDivider";
 import { AuthFormLayout } from "./AuthFormLayout";
-import { getMissingFields } from "@/utils/getMissingAuthFields";
-
-import { useErrorHandler } from "@/hooks/useErrorHandler";
+import SubmitButton from "../auth/SubmitButton";
 
 export function SignInForm() {
   const router = useRouter();
@@ -69,7 +70,7 @@ export function SignInForm() {
 
   return (
     <AuthFormLayout
-      title="Welcome to Unmind"
+      title="Sign in"
       onSubmit={handleSubmit}
       error={error}
       onCloseError={closeErrorModal}
@@ -99,7 +100,7 @@ export function SignInForm() {
             type="checkbox"
             checked={isRememberMe}
             onChange={(e) => setIsRememberMe(e.target.checked)}
-            className="h-4 w-4 accent-cyan-400 focus:ring-cyan-500 border-gray-300"
+            className="h-4 w-4 accent-gray-700 border-gray-300"
           />
           <label
             htmlFor="remember-me"
@@ -109,14 +110,14 @@ export function SignInForm() {
           </label>
         </div>
         <div className="text-sm">
-          <a href="#" className="text-cyan-500 hover:text-cyan-600">
+          <a href="#" className="text-gray-700">
             Forgot password?
           </a>
         </div>
       </div>
 
-      {/* -----------------Continue Button----------------- */}
-      <ContinueButton />
+      {/* -----------------Submit Button----------------- */}
+      <SubmitButton label="Sign in" />
 
       {/* -----------------Divider----------------- */}
       <AuthDivider />
@@ -125,11 +126,11 @@ export function SignInForm() {
       <GoogleAuthButton label="Sign in with Google" />
 
       {/* -----------------Create Account Link----------------- */}
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm">
         Not using Unmind yet?{" "}
         <Link
           href="signup"
-          className="text-cyan-500 hover:text-cyan-600 font-semibold"
+          className="text-black hover:text-gray-700 font-semibold transition"
         >
           Create an account now
         </Link>
