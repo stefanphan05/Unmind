@@ -38,3 +38,22 @@ export const saveUserInput = async (
     onError(error as ApiError);
   }
 };
+
+export const removeAllMessages = async (
+  token: string,
+  onError: (error: ApiError) => void
+): Promise<Message[] | null> => {
+  try {
+    const data = await handleMutationRequest<Message[]>(
+      `${BASE_URL}/messages`,
+      "Remove messages",
+      {},
+      "DELETE",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};

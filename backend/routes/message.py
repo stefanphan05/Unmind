@@ -67,3 +67,10 @@ def get_all_messages(email):
         "content": message.content,
         "role": message.role
     } for message in messages]), 200
+
+
+@message_bp.route("/messages", methods=["DELETE"])
+@token_required
+def delete_all_messages(email):
+    app.message_service.delete_all_messages(email)
+    return jsonify({"message": "All messages deleted successfully"}), 201

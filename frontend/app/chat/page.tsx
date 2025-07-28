@@ -6,10 +6,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 // Component imports
 import RecordingView from "../components/chat/RecordingView";
-import ChatMessage from "../components/chat/ChatMessage";
-import PromptBox from "../components/chat/PromptBox";
 import ErrorModal from "../components/modals/ErrorModal";
-import TypingIndicator from "../components/chat/TypingIndicator";
 import Header from "../components/layout/Header";
 import Sidebar from "../components/chat/Sidebar";
 
@@ -85,6 +82,8 @@ export default function ChatRoute() {
         <Header
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+          onError={handleError}
+          onRefresh={triggerChatMessageRefresh}
         />
 
         {/* -----------Main Chat Content Area----------- */}
@@ -99,7 +98,7 @@ export default function ChatRoute() {
           </div>
 
           {/* -----------Right Panel: Chat Conversation Display and Input----------- */}
-          <div className="lg:w-2/5 flex flex-col">
+          <div className="lg:w-2/5">
             <ChatConversationPanel
               messages={messages}
               isTherapistResponseLoading={isAILoading}

@@ -7,28 +7,47 @@ import { useState } from "react";
 
 import { FaAngleDown } from "react-icons/fa6";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
-
 import { CgProfile } from "react-icons/cg";
 import { LogOut } from "lucide-react";
 import { MdOutlineEmail } from "react-icons/md";
+import { BsThreeDots } from "react-icons/bs";
+import { FiTrash2 } from "react-icons/fi";
+import { removeAllMessages } from "@/lib/api/chat";
+import { getStoredToken } from "@/utils/authToken";
+import { ApiError } from "next/dist/server/api-utils";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
+  onError: (error: ApiError) => void;
+  onRefresh: () => void;
 }
 
 export default function Header({
   isSidebarOpen,
   setIsSidebarOpen,
+  onError,
+  onRefresh,
 }: HeaderProps) {
   const router = useRouter();
   const { isAuthenticated, user, signOut } = useAuth();
 
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [chatMenuOpen, setChatMenuOpen] = useState(false);
 
   const handleSignOut = () => {
     router.push("/signin");
     signOut();
+  };
+
+  const handleDeleteMessages = async () => {
+    const token = getStoredToken();
+    if (token) {
+      await removeAllMessages(token, onError);
+    }
+
+    setChatMenuOpen(false);
+    onRefresh();
   };
 
   return (
@@ -60,18 +79,42 @@ export default function Header({
 
           {/* ---------- RIGHT SECTION: User Profile Dropdown ---------- */}
           <div>
+            {isAuthenticated && (
+              <button
+                className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
+                onClick={() => setChatMenuOpen((prev) => !prev)}
+              >
+                <BsThreeDots className="w-6 h-6" />
+              </button>
+            )}
+
+            {chatMenuOpen && (
+              <div className="absolute right-13 top-12 mt-2 w-max min-w-[12rem] bg-white rounded-xl shadow-lg border border-gray-300 z-50">
+                <ul className="p-1">
+                  {/* Sign out button */}
+                  <li
+                    onClick={handleDeleteMessages}
+                    className="px-4 py-1 hover:bg-red-50 rounded-xl text-red-600 cursor-pointer flex items-center gap-2"
+                  >
+                    <FiTrash2 className="w-5 h-5" />
+                    <span>Delete</span>
+                  </li>
+                </ul>
+              </div>
+            )}
+
             {/* Profile icon button to toggle menu */}
             {isAuthenticated && (
               <button
                 className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
-                onClick={() => setMenuOpen((prev) => !prev)}
+                onClick={() => setUserMenuOpen((prev) => !prev)}
               >
                 <CgProfile className="w-6 h-6" />
               </button>
             )}
 
             {/* Profile dropdown menu */}
-            {menuOpen && (
+            {userMenuOpen && (
               <div className="absolute right-4 top-12 mt-2 w-max min-w-[12rem] bg-white rounded-xl shadow-lg border border-gray-300 z-50">
                 <ul className="p-1">
                   {/* Show user email if available */}

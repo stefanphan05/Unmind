@@ -29,13 +29,19 @@ export default function ChatConversationPanel({
         {/* ------------------Chat Messages Display Area------------------ */}
         <div className="p-4 overflow-y-auto scroll-smooth">
           {/* ------------------Render all existing messages------------------ */}
-          {messages.map((message, index) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              isLatest={isLatestMessage(index)}
-            />
-          ))}
+          {messages.length > 0 ? (
+            messages.map((message, index) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isLatest={isLatestMessage(index)}
+              />
+            ))
+          ) : (
+            <div className="text-gray-500 text-center py-10">
+              No messages yet. Start a conversation!
+            </div>
+          )}
 
           {/* ------------------AI response loading indicator------------------ */}
           {isTherapistResponseLoading && <TypingIndicator />}

@@ -21,3 +21,7 @@ class MessageService:
     def get_all_messages(self, email: str) -> List[Message]:
         return self.__db.query(Message).filter(Message.email == email).order_by(
             Message.timestamp.asc()).all()
+
+    def delete_all_messages(self, email: str) -> None:
+        self.__db.query(Message).filter(Message.email == email).delete()
+        self.__db.commit()
