@@ -8,6 +8,8 @@ from typing import Tuple, Union
 
 from models.message import Message
 
+from config import app
+
 
 class AuthService:
     """
@@ -40,21 +42,9 @@ class AuthService:
             new_user = User(email=email, username=username,
                             password=hashed_password)
 
-            # Get the current date and time
-            now = datetime.now(timezone.utc)
+            # Create a default message
+            app.message_service.create_default_message(email)
 
-            # Subtract 1 year from the current date
-            one_year_ago = now - timedelta(days=365)
-
-            # Create the default message with the modified timestamp
-            default_message = Message(
-                content="Hey, I’m here for you. Whatever’s on your mind, you can talk to me.",
-                role="assistant",
-                email=email,
-                timestamp=one_year_ago
-            )
-
-            self.__db_session.add(default_message)
             self.__db_session.add(new_user)
             self.__db_session.commit()
 
