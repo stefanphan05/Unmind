@@ -87,7 +87,7 @@ export default function ChatRoute() {
         />
 
         {/* -----------Main Chat Content Area----------- */}
-        <div className="max-w-7xl mx-auto p-6 h-[calc(100vh-72px)] flex flex-col lg:flex-row gap-6 ">
+        <div className="p-6 h-[calc(100vh-72px)] flex flex-col lg:flex-row gap-6 ">
           {/* -----------Left Panel: Voice Recording Interface----------- */}
           <div className="lg:w-3/5 flex items-center justify-center">
             <RecordingView
