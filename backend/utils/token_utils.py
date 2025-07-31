@@ -1,6 +1,6 @@
+import jwt
 from config import app
 from datetime import datetime, timedelta, timezone
-import jwt
 
 
 class Token:
@@ -40,3 +40,36 @@ class Token:
             self.__secret,
             algorithms=[self.__algorithm]
         )
+
+    def generate_reset_token(self, email: str, expires_in: int = 900) -> str:
+        """
+        Generates a JWT token for password reset (15 mins)
+        """
+        payload = {
+            "email": email,
+            "purpose": "reset_password",
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        }
+
+        return jwt.encode(payload, self.__secret, algorithm=self.__algorithm)
+
+    def verify_reset_token(self, token: str) -> str:
+        """
+        Decodes and verifies a password reset token
+
+        Returns:
+            str: the email embedded in the token
+        """
+        try:
+            payload = jwt.decode(token, self.__secret,
+                                 algorithms=[self.__algorithm])
+
+            if payload.get("purpose") != "reset_password":
+                raise ValueError("Invalid token purpose")
+
+            return payload["email"]
+        except jwt.ExpiredSignatureError:
+            raise jwt.ExpiredSignatureError("Reset token has expired")
+        except jwt.InvalidTokenError as e:
+            raise jwt.InvalidTokenError(f"Invalid reset token: {str(e)}")

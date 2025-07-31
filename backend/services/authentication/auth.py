@@ -1,14 +1,11 @@
-from datetime import datetime, timedelta, timezone
+from config import app
+
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Types
 from sqlalchemy.orm import Session
 from typing import Tuple, Union
-
-from models.message import Message
-
-from config import app
 
 
 class AuthService:
@@ -17,7 +14,7 @@ class AuthService:
     """
 
     def __init__(self, db_session: Session) -> None:
-        self.__db_session = db_session
+        self.__db = db_session
 
     def register_user(self, email: str, username: str, password: str) -> Tuple[bool, str]:
         """
@@ -45,13 +42,13 @@ class AuthService:
             # Create a default message
             app.message_service.create_default_message(email)
 
-            self.__db_session.add(new_user)
-            self.__db_session.commit()
+            self.__db.add(new_user)
+            self.__db.commit()
 
             return True, "User registered successfully"
 
         except Exception as e:
-            self.__db_session.rollback()
+            self.__db.rollback()
             return False, f"Registration failed: {str(e)}"
 
     def login_user(self, email: str, password: str) -> Tuple[bool, str]:
@@ -82,3 +79,32 @@ class AuthService:
             Union[User, None]: The User object if the user exists, otherwise None.
         """
         return User.query.filter_by(email=email).first()
+
+    def update_password(self, email: str, new_password: str) -> Tuple[bool, str]:
+        """
+        Updates the password for a user
+
+        Args:
+            email (str): The email of the user whose password is to be updated
+            new_password (str): The new plain-text password
+
+        Returns:
+            Tuple[bool, str]: A tuple indicating success/failure and a message
+        """
+        user = self.user_exists(email)
+
+        if not user:
+            return False, "User with this email does not exist"
+        try:
+            # Hash the new password
+            hashed_password = generate_password_hash(new_password)
+
+            # Update and commit changes
+            user.password = hashed_password
+            self.__db.commit()
+
+            return True, "Password updated successfully"
+
+        except Exception as e:
+            self.__db.rollback()
+            return False, f"Registration failed: {str(e)}"
