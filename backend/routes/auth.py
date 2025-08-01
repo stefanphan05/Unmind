@@ -1,3 +1,5 @@
+import random
+from flask_mailman import EmailMessage
 import requests
 from . import app
 from flask import Blueprint, request, jsonify
@@ -101,13 +103,11 @@ def request_password_reset():
     if not user:
         return jsonify({"message": "User with this email does not exist"}), 404
 
-    # Generate a reset token
-    token = app.token_handler.generate_reset_token(email)
-
-    # Send email with token
-    # TODO: Send email with token for user email
+    app.email_service.send_password_reset_code(email)
 
     return jsonify({"message": "Reset email sent"}), 200
+
+# If user type in the code right, allow user to reset password
 
 
 @auth_bp.route("/reset-password", methods=["POST"])

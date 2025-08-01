@@ -8,6 +8,7 @@ from services.voice.voice_generator import VoiceGenerator
 from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 from services.user.user_service import UserService
 from services.messages.message_service import MessageService
+from services.email.email_service import EmailService
 
 from routes.auth import auth_bp
 from routes.message import message_bp
@@ -23,6 +24,7 @@ if __name__ == "__main__":
         app.auth_service = AuthService(db.session)
         app.user_service = UserService(db.session)
         app.message_service = MessageService(db.session)
+        app.email_service = EmailService()
         app.token_handler = Token(app.config["SECRET_KEY"])
 
         # Register blueprints with prefix /v1/app

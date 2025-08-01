@@ -1,14 +1,26 @@
+import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import os
+from flask_mailman import Mail
+
+mail = Mail()
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Creates a flask app instance
 app = Flask(__name__)
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT"))
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_USE_TLS"] = False
+app.config["MAIL_USE_SSL"] = True
+
+mail.init_app(app)
 
 # Enables cors
 CORS(app)
