@@ -107,27 +107,35 @@ def request_password_reset():
 
     return jsonify({"message": "Reset email sent"}), 200
 
-# If user type in the code right, allow user to reset password
+
+# @auth_bp.route("/verify_reset_code", methods=["POST"])
+# def verify_reset_code():
+#     data = request.json
+#     email = data.get("email")
+#     code = data.get("code")
+
+#     if not email or not code:
+#         return jsonify({"message": "Code and email are required"}), 400
 
 
-@auth_bp.route("/reset-password", methods=["POST"])
-def reset_password():
-    data = request.json
-    token = data.get("token")
-    new_password = data.get("new_password")
+# @auth_bp.route("/reset-password", methods=["POST"])
+# def reset_password():
+#     data = request.json
+#     token = data.get("code")
+#     new_password = data.get("new_password")
 
-    if not token or not new_password:
-        return jsonify({"message": "Token and new password are required"}), 400
+#     if not token or not new_password:
+#         return jsonify({"message": "Code and new password are required"}), 400
 
-    try:
-        # Exact email from token
-        email = app.token_handler.verify_reset_token(token)
-    except Exception as e:
-        return jsonify({"message": f"Invalid or expired token: {str(e)}"}), 400
+#     try:
+#         # Exact email from token
+#         email = app.token_handler.verify_reset_token(token)
+#     except Exception as e:
+#         return jsonify({"message": f"Invalid or expired token: {str(e)}"}), 400
 
-    success, message = app.auth_service.update_password(email, new_password)
+#     success, message = app.auth_service.update_password(email, new_password)
 
-    if success:
-        return jsonify({"message": "Password reset successful"}), 200
-    else:
-        return jsonify({"message": message}), 400
+#     if success:
+#         return jsonify({"message": "Password reset successful"}), 200
+#     else:
+#         return jsonify({"message": message}), 400

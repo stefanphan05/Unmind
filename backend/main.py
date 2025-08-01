@@ -1,5 +1,6 @@
 from config import app, db
 from utils.token_utils import Token
+from redis import Redis
 
 from services.authentication.auth import AuthService
 from services.text.text_generator import TextGenerator
@@ -17,6 +18,12 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
+        redis_client = Redis(
+            host="localhost",
+            port=6379,
+            decode_responses=False
+        )
+
         # Services
         app.text_generator = TextGenerator()
         app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
@@ -24,7 +31,7 @@ if __name__ == "__main__":
         app.auth_service = AuthService(db.session)
         app.user_service = UserService(db.session)
         app.message_service = MessageService(db.session)
-        app.email_service = EmailService()
+        app.email_service = EmailService(redis_client)
         app.token_handler = Token(app.config["SECRET_KEY"])
 
         # Register blueprints with prefix /v1/app
