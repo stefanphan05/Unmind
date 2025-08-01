@@ -64,7 +64,7 @@ class EmailService:
         if stored_code is None:
             return False, "Reset code expired or not found."
         if stored_code.decode() != code_input:
-            return False, "Invalud reset code"
+            return False, "Invalid reset code"
 
         # Code is valid, delete from Redis to prevent reuse
         self.__redis.delete(f"reset_code:{email}")
