@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 from typing import List
-from config import db
 from models.message import Message
 
 

@@ -1,5 +1,5 @@
+from flask import current_app
 import jwt
-from config import app
 from datetime import datetime, timedelta, timezone
 
 
@@ -17,7 +17,7 @@ class Token:
         """
         Generates a JWT token for a given username. The token includes the username and an expiration timestamp
         """
-        username = app.user_service.get_username_by_email(email)
+        username = current_app.user_service.get_username_by_email(email)
 
         payload = {
             "email": email,

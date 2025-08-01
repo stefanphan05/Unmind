@@ -5,7 +5,7 @@ import os
 import re
 from .base_llm import LLMStrategy
 from models.message import Message
-from config import db
+from config.extensions import db
 
 
 class GeminiStrategy(LLMStrategy):

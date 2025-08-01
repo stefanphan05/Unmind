@@ -1,5 +1,4 @@
-from . import app
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from utils.token_required import token_required
 
 
@@ -18,7 +17,7 @@ def save_user_input(email):
 
     content = data.get('content')
 
-    message = app.message_service.save_message(
+    message = current_app.message_service.save_message(
         content=content,
         role="user",
         email=email
@@ -41,19 +40,19 @@ def get_ai_response(email):
     user_input = data.get('content')
 
     # Get AI Response
-    ai_answer = app.ai_therapist.send_message(
+    ai_answer = current_app.ai_therapist.send_message(
         email=email,
         user_input=user_input
     )
 
-    message = app.message_service.save_message(
+    message = current_app.message_service.save_message(
         content=ai_answer,
         role="assistant",
         email=email
     )
 
     # Convert response to voice
-    app.voice_generator.speak_default(message.content)
+    current_app.voice_generator.speak_default(message.content)
 
     return jsonify({"question": user_input, "answer": message.to_dict()}), 200
 
@@ -61,7 +60,7 @@ def get_ai_response(email):
 @message_bp.route('/messages', methods=['GET'])
 @token_required
 def get_all_messages(email):
-    messages = app.message_service.get_all_messages(email)
+    messages = current_app.message_service.get_all_messages(email)
     return jsonify([{
         "id": message.id,
         "content": message.content,
@@ -72,5 +71,5 @@ def get_all_messages(email):
 @message_bp.route("/messages", methods=["DELETE"])
 @token_required
 def delete_all_messages(email):
-    app.message_service.delete_all_messages(email)
+    current_app.message_service.delete_all_messages(email)
     return jsonify({"message": "All messages deleted successfully"}), 201

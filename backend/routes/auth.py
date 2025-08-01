@@ -1,14 +1,13 @@
-from config import app
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 
 from controllers.auth.auth_handlers import AuthHandlers
 
 auth_bp = Blueprint("auth", __name__)
 
 auth_handlers = AuthHandlers(
-    token_handler=app.token_handler,
-    auth_service=app.auth_service,
-    email_service=app.email_service
+    token_handler=current_app.token_handler,
+    auth_service=current_app.auth_service,
+    email_service=current_app.email_service
 )
 
 

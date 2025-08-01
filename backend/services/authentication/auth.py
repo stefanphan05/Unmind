@@ -1,5 +1,4 @@
-from config import app
-
+from flask import current_app
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -40,7 +39,7 @@ class AuthService:
                             password=hashed_password)
 
             # Create a default message
-            app.message_service.create_default_message(email)
+            current_app.message_service.create_default_message(email)
 
             self.__db.add(new_user)
             self.__db.commit()

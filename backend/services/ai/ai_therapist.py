@@ -1,15 +1,4 @@
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
-import openai
-
-from . import app
-
-from typing import Dict, List
-from models.message import Message
-
-import re
-
+from flask import current_app
 from .llm_factory import llm_factory
 
 
@@ -62,7 +51,7 @@ class AITherapistService:
             return "Invalid input. Please make sure all fields are correctly provided"
 
         # Get username by email
-        username = app.user_service.get_username_by_email(email)
+        username = current_app.user_service.get_username_by_email(email)
 
         system_prompt = self.__system_prompt(username)
 
