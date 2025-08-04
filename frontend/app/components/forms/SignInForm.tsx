@@ -110,7 +110,7 @@ export function SignInForm() {
           </label>
         </div>
         <div className="text-sm">
-          <a href="#" className="text-gray-700">
+          <a href="/forgot-password" className="text-gray-700">
             Forgot password?
           </a>
         </div>
