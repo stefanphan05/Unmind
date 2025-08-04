@@ -6,6 +6,9 @@ import { useState } from "react";
 import AuthDivider from "../auth/AuthDivider";
 import GoogleAuthButton from "../auth/GoogleAuthButton";
 import Link from "next/link";
+import { getMissingFields } from "@/utils/getMissingAuthFields";
+import { requestPasswordReset } from "@/lib/api/request-password-reset";
+import SubmitButton from "../auth/SubmitButton";
 
 export function ForgotPasswordForm() {
   // ------------------ States ------------------
@@ -14,7 +17,24 @@ export function ForgotPasswordForm() {
   // ------------------ Handlers ------------------
   const { error, handleError, closeErrorModal } = useErrorHandler();
 
-  const handleSubmit = () => {};
+  const handleSubmit = async (e: React.FormEvent) => {
+    // Prevent default form submission behavior (page reload)
+    e.preventDefault();
+
+    // Check all fields
+    const errorMessage = getMissingFields([["Email", email]]);
+
+    if (errorMessage) {
+      handleError({
+        name: "Missing fields",
+        statusCode: 400,
+        message: errorMessage,
+      });
+      return;
+    }
+
+    await requestPasswordReset(email, handleError);
+  };
   return (
     <AuthFormLayout
       title="Forgot password?"
@@ -31,6 +51,9 @@ export function ForgotPasswordForm() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="name@work-email.com"
       />
+
+      {/* -----------------Submit Button----------------- */}
+      <SubmitButton label="Reset your password" />
 
       {/* -----------------Divider----------------- */}
       <AuthDivider />
