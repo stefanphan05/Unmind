@@ -1,4 +1,5 @@
 from flask import Flask
+
 from .extensions import db, cors, mail
 from .settings import Config
 from redis import Redis
@@ -11,6 +12,7 @@ from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 from services.user.user_service import UserService
 from services.messages.message_service import MessageService
 from services.email.email_service import EmailService
+from services.sessions.session_service import TherapySessionService
 
 from utils.token_utils import Token
 
@@ -38,6 +40,7 @@ def create_app():
         app.auth_service = AuthService(db.session)
         app.user_service = UserService(db.session)
         app.message_service = MessageService(db.session)
+        app.session_service = TherapySessionService(db.session)
         app.email_service = EmailService(redis_client)
         app.token_handler = Token(app.config["SECRET_KEY"])
 

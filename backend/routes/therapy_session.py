@@ -1,10 +1,22 @@
 from flask import Blueprint, jsonify, request, current_app
+from controllers.sessions.session_handlers import TherapySessionHandlers
 from utils.token_required import token_required
 
 
 therapy_session_bp = Blueprint("therapy_session", __name__)
 
+therapy_session_handlers = TherapySessionHandlers(
+    session_service=current_app.session_service
+)
+
 
 @therapy_session_bp.route('/sessions', methods=["GET"])
-def get():
-    return jsonify({"message": "Hi"}), 200
+@token_required
+def get_all_sessions(email):
+    return therapy_session_handlers.handle_get_all_sessions(email)
+
+
+@therapy_session_bp.route('/sessions', methods=["POST"])
+@token_required
+def create_session(email):
+    return therapy_session_handlers.handle_session_creation(email)

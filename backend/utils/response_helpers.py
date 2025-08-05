@@ -6,8 +6,12 @@ class ResponseHelper:
     @staticmethod
     def success_response(data: Any = None, message: str = None, status_code: int = 200):
         response_data = {}
-        if data:
-            response_data.update(data)
+
+        if data is not None:
+            if isinstance(data, dict):
+                response_data.update(data)
+            elif isinstance(data, list):
+                response_data["sessions"] = data
 
         if message:
             response_data["message"] = message
