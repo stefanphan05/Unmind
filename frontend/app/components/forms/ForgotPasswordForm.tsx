@@ -260,7 +260,7 @@ export function ForgotPasswordForm() {
 
       {/* -----------------Google Login Button----------------- */}
 
-      <GoogleAuthButton label="Sign in with Google" />
+      <GoogleAuthButton label="Sign in with Google" isLoading={isLoading} />
 
       {/* -----------------Links----------------- */}
       {currentStep === "email" && (

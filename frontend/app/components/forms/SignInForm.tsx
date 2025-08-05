@@ -152,7 +152,7 @@ export function SignInForm() {
       <AuthDivider />
 
       {/* -----------------Google Login Button----------------- */}
-      <GoogleAuthButton label="Sign in with Google" />
+      <GoogleAuthButton label="Sign in with Google" isLoading={isLoading} />
 
       {/* -----------------Create Account Link----------------- */}
       <p className="text-center text-sm">

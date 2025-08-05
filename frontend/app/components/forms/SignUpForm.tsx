@@ -22,6 +22,7 @@ export function SignUpForm() {
   const [email, setEmail] = useState<string>("");
   const [username, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // ------------------ Handlers ------------------
   const { showSuccess, openSuccessModal, closeSuccessModal } =
@@ -32,6 +33,9 @@ export function SignUpForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     // Prevent default form submission behavior (page reload)
     e.preventDefault();
+
+    // Do not submit if already loading
+    if (isLoading) return;
 
     // Check all fields
     const errorMessage = getMissingFields([
@@ -56,8 +60,14 @@ export function SignUpForm() {
       password,
     };
 
+    // Start loading
+    setIsLoading(true);
+
     // Get the result from signUpUser
     const result = await signUpUser(payload, handleError);
+
+    // Stop loading
+    setIsLoading(false);
 
     // Only show success modal if signup was actually successful
     if (result) {
@@ -87,6 +97,7 @@ export function SignUpForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="name@work-email.com"
+        disabled={isLoading}
       />
 
       {/* -----------------Username Field----------------- */}
@@ -96,22 +107,27 @@ export function SignUpForm() {
         value={username}
         onChange={(e) => setUserName(e.target.value)}
         placeholder="Tony"
+        disabled={isLoading}
       />
 
       {/* -----------------Password Field----------------- */}
       <PasswordInputWithToggle
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
       />
 
       {/* -----------------Submit Button----------------- */}
-      <SubmitButton label="Sign up" />
+      <SubmitButton
+        label={isLoading ? "Signing up..." : "Sign up"}
+        isLoading={isLoading}
+      />
 
       {/* -----------------Divider----------------- */}
       <AuthDivider />
 
       {/* -----------------Google Login Button----------------- */}
-      <GoogleAuthButton label="Sign up with Google" />
+      <GoogleAuthButton label="Sign up with Google" isLoading={isLoading} />
 
       {/* -----------------Create Account Link----------------- */}
       <p className="text-center text-sm">

@@ -12,7 +12,7 @@ export default function SubmitButton({
   return (
     <button
       type="submit"
-      className={`w-full flex justify-center py-5 px-4 border border-transparent rounded-2xl text-sm text-white bg-black  transition         ${
+      className={`w-full flex justify-center py-5 px-4 border border-transparent rounded-2xl text-sm text-white bg-black  transition${
         isLoading || disabled
           ? "bg-gray-400 cursor-not-allowed"
           : "bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
