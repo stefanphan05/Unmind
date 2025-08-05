@@ -44,9 +44,11 @@ def create_app():
         # Register routes
         from routes.auth import auth_bp
         from routes.message import message_bp
+        from routes.therapy_session import therapy_session_bp
 
         BASE_API_PREFIX = "/v1/unmind"
         app.register_blueprint(auth_bp, url_prefix=BASE_API_PREFIX)
         app.register_blueprint(message_bp, url_prefix=BASE_API_PREFIX)
+        app.register_blueprint(therapy_session_bp, url_prefix=BASE_API_PREFIX)
 
     return app

@@ -14,6 +14,8 @@ class Message(db.Model):
 
     email = db.Column(db.String(80), ForeignKey(
         "user.email"), nullable=False)
+    therapy_session_id = db.Column(db.Integer, ForeignKey(
+        "therapy_session.id"), nullable=False)
 
     def to_dict(self):
         return {
@@ -21,5 +23,6 @@ class Message(db.Model):
             "content": self.content,
             "role": self.role,
             "timestamp": self.timestamp.isoformat(),
-            "email": self.email
+            "email": self.email,
+            "therapy_session_id": self.therapy_session_id
         }

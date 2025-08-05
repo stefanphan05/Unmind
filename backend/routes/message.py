@@ -5,9 +5,9 @@ from utils.token_required import token_required
 message_bp = Blueprint("message", __name__)
 
 
-@message_bp.route('/messages/user', methods=["POST"])
+@message_bp.route('/sessions/<int:therapy_session_id>/messages', methods=["POST"])
 @token_required
-def save_user_input(email):
+def save_user_input(email, therapy_session_id):
     # Get json data from request
     data = request.json
 
@@ -20,15 +20,16 @@ def save_user_input(email):
     message = current_app.message_service.save_message(
         content=content,
         role="user",
-        email=email
+        email=email,
+        therapy_session_id=therapy_session_id
     )
 
     return jsonify(message.to_dict()), 201
 
 
-@message_bp.route('/messages/ai/respond', methods=['POST'])
+@message_bp.route('/sessions/<int:therapy_session_id>/messages/ai', methods=['POST'])
 @token_required
-def get_ai_response(email):
+def get_ai_response(email, therapy_session_id):
     # Get json data from request
     data = request.json
 
@@ -48,7 +49,8 @@ def get_ai_response(email):
     message = current_app.message_service.save_message(
         content=ai_answer,
         role="assistant",
-        email=email
+        email=email,
+        therapy_session_id=therapy_session_id
     )
 
     # Convert response to voice
@@ -57,10 +59,11 @@ def get_ai_response(email):
     return jsonify({"question": user_input, "answer": message.to_dict()}), 200
 
 
-@message_bp.route('/messages', methods=['GET'])
+@message_bp.route('/sessions/<int:therapy_session_id>/messages', methods=['GET'])
 @token_required
-def get_all_messages(email):
-    messages = current_app.message_service.get_all_messages(email)
+def get_all_messages(email, therapy_session_id):
+    messages = current_app.message_service.get_all_messages(
+        email, therapy_session_id)
     return jsonify([{
         "id": message.id,
         "content": message.content,
@@ -68,8 +71,8 @@ def get_all_messages(email):
     } for message in messages]), 200
 
 
-@message_bp.route("/messages", methods=["DELETE"])
+@message_bp.route("/sessions/<int:therapy_session_id>/messages", methods=["DELETE"])
 @token_required
-def delete_all_messages(email):
-    current_app.message_service.delete_all_messages(email)
+def delete_all_messages(email, therapy_session_id):
+    current_app.message_service.delete_all_messages(email, therapy_session_id)
     return jsonify({"message": "All messages deleted successfully"}), 201
