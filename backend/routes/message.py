@@ -28,10 +28,10 @@ def get_ai_response(email, therapy_session_id):
 @message_bp.route('/sessions/<int:therapy_session_id>/messages', methods=['GET'])
 @token_required
 def get_all_messages(email, therapy_session_id):
-    return message_handlers.handle_get_all_messages(email=email, therapy_session_id=therapy_session_id, data=request.json)
+    return message_handlers.handle_get_all_messages(email=email, therapy_session_id=therapy_session_id)
 
 
 @message_bp.route("/sessions/<int:therapy_session_id>/messages", methods=["DELETE"])
 @token_required
 def delete_all_messages(email, therapy_session_id):
-    return message_handlers.handle_delete_all_messages(email=email, therapy_session_id=therapy_session_id, data=request.json)
+    return message_handlers.handle_delete_all_messages(email=email, therapy_session_id=therapy_session_id)

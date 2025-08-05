@@ -11,7 +11,7 @@ class ResponseHelper:
             if isinstance(data, dict):
                 response_data.update(data)
             elif isinstance(data, list):
-                response_data["sessions"] = data
+                response_data["data"] = data
 
         if message:
             response_data["message"] = message

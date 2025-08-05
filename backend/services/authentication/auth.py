@@ -1,4 +1,3 @@
-from flask import current_app
 from models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -37,9 +36,6 @@ class AuthService:
             # Create a new user instance (only store the hashpassword instead of plain password)
             new_user = User(email=email, username=username,
                             password=hashed_password)
-
-            # Create a default message
-            current_app.message_service.create_default_message(email)
 
             self.__db.add(new_user)
             self.__db.commit()
