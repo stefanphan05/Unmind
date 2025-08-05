@@ -5,11 +5,13 @@ import { useState } from "react";
 interface PasswordInputWithToggleProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 export default function PasswordInputWithToggle({
   value,
   onChange,
+  disabled,
 }: PasswordInputWithToggleProps) {
   const [isShowingPassword, setIsShowingPassword] = useState(false);
 
@@ -27,6 +29,7 @@ export default function PasswordInputWithToggle({
           value={value}
           onChange={onChange}
           className="w-full px-3 py-4 input-field placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-2xl pr-10"
+          disabled={disabled}
         />
         <button
           type="button"

@@ -26,6 +26,7 @@ export function ForgotPasswordForm() {
 
   const [currentStep, setCurrentStep] = useState<Step>("email");
   const [resetToken, setResetToken] = useState<string | null>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { showSuccess, openSuccessModal, closeSuccessModal } =
     useSuccessHandler("/signin");
@@ -46,10 +47,16 @@ export function ForgotPasswordForm() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       await requestPasswordReset(email, handleError);
       setCurrentStep("code");
-    } catch (error) {}
+    } catch (error) {
+      console.log("Email submission failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCodeSubmit = async () => {
@@ -64,13 +71,18 @@ export function ForgotPasswordForm() {
       });
       return;
     }
+
+    setIsLoading(true);
+
     try {
       const token = await verifyResetCode(code, email, handleError);
 
       setResetToken(token);
       setCurrentStep("newPassword");
     } catch (error) {
-      console.log("Code verification failed: ", error);
+      console.log("Email submission failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,17 +111,25 @@ export function ForgotPasswordForm() {
       });
       return;
     }
+
+    setIsLoading(true);
+
     try {
       await resetPassword(resetToken, newPassword, handleError);
       openSuccessModal();
     } catch (error) {
-      console.log("Password reset failed: ", error);
+      console.log("Email submission failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     // Prevent default form submission behavior (page reload)
     e.preventDefault();
+
+    // Do not submit if already loading
+    if (isLoading) return;
 
     switch (currentStep) {
       case "email":
@@ -138,6 +158,19 @@ export function ForgotPasswordForm() {
   };
 
   const getSubmitLabel = () => {
+    if (isLoading) {
+      switch (currentStep) {
+        case "email":
+          return "Sending Code...";
+        case "code":
+          return "Verifying...";
+        case "newPassword":
+          return "Resetting Password...";
+        default:
+          return "Loading...";
+      }
+    }
+
     switch (currentStep) {
       case "email":
         return "Send Code";
@@ -173,6 +206,7 @@ export function ForgotPasswordForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="name@work-email.com"
+          disabled={isLoading}
         />
       )}
 
@@ -189,6 +223,7 @@ export function ForgotPasswordForm() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="******"
+            disabled={isLoading}
           />
         </>
       )}
@@ -203,6 +238,7 @@ export function ForgotPasswordForm() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Enter your new password"
+            disabled={isLoading}
           />
           <AuthInput
             id="confirmPassword"
@@ -211,12 +247,13 @@ export function ForgotPasswordForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm your new password"
+            disabled={isLoading}
           />
         </>
       )}
 
       {/* -----------------Submit Button----------------- */}
-      <SubmitButton label={getSubmitLabel()} />
+      <SubmitButton label={getSubmitLabel()} isLoading={isLoading} />
 
       {/* -----------------Divider----------------- */}
       <AuthDivider />
@@ -231,7 +268,11 @@ export function ForgotPasswordForm() {
           Already have an account?{" "}
           <Link
             href="signin"
-            className="text-black hover:text-gray-700 font-semibold transition"
+            className={`font-semibold transition ${
+              isLoading
+                ? "text-gray-400 pointer-events-none"
+                : "text-black hover:text-gray-700"
+            }`}
           >
             Sign in
           </Link>
@@ -245,7 +286,12 @@ export function ForgotPasswordForm() {
           <button
             type="button"
             onClick={() => setCurrentStep("email")}
-            className="text-black hover:text-gray-700 font-semibold transition"
+            disabled={isLoading}
+            className={`font-semibold transition ${
+              isLoading
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-black hover:text-gray-700"
+            }`}
           >
             Try again
           </button>

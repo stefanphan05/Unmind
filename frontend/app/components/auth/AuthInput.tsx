@@ -5,6 +5,7 @@ interface AuthInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export default function ({
@@ -14,6 +15,7 @@ export default function ({
   value,
   onChange,
   placeholder,
+  disabled,
 }: AuthInputProps) {
   return (
     <div>
@@ -28,6 +30,7 @@ export default function ({
         onChange={onChange}
         placeholder={placeholder}
         className="w-full px-3 py-4 input-field placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-2xl"
+        disabled={disabled}
       />
     </div>
   );
