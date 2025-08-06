@@ -1,4 +1,5 @@
-from models import User
+from datetime import datetime, timedelta, timezone
+from models import User, Message, TherapySession
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Types
@@ -34,12 +35,33 @@ class AuthService:
             hashed_password = generate_password_hash(password)
 
             # Create a new user instance (only store the hashpassword instead of plain password)
-            new_user = User(email=email, username=username,
-                            password=hashed_password)
-
+            new_user = User(
+                email=email,
+                username=username,
+                password=hashed_password
+            )
             self.__db.add(new_user)
-            self.__db.commit()
+            self.__db.flush()
 
+            # Create a therapy session for the new user
+            therapy_session = TherapySession(email=email)
+            self.__db.add(therapy_session)
+            self.__db.flush()
+
+            # Subtract 1 year from the current date
+            one_year_ago = datetime.now(timezone.utc) - timedelta(days=365)
+
+            # Create the default message with the modified timestamp
+            default_message = Message(
+                content="Hey, I’m here for you. Whatever’s on your mind, you can talk to me.",
+                role="assistant",
+                email=email,
+                therapy_session_id=therapy_session.id,
+                timestamp=one_year_ago
+            )
+            self.__db.add(default_message)
+
+            self.__db.commit()
             return True, "User registered successfully"
 
         except Exception as e:
