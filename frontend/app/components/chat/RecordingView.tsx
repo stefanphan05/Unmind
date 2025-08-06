@@ -9,6 +9,7 @@ import { saveUserInput } from "@/lib/api/chat";
 
 import { FaMicrophone, FaPause, FaStop } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
+import { useParams } from "next/navigation";
 
 declare global {
   interface Window {
@@ -32,6 +33,10 @@ export default function RecordingView({
   const [isShowingTranscript, setIsShowingTranscript] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
   const [transcript, setTranscript] = useState("");
+
+  const params = useParams();
+
+  const therapySessionId = Number(params?.therapySessionId);
 
   const [error, setError] = useState<ApiError | null>(null);
   const transcriptContainerRef = useRef<HTMLDivElement | null>(null);
@@ -120,10 +125,15 @@ export default function RecordingView({
       setIsAILoading(true);
 
       if (currentTranscript) {
-        await saveUserInput(token, onError, currentTranscript);
+        await saveUserInput(
+          token,
+          therapySessionId,
+          onError,
+          currentTranscript
+        );
         onRefresh();
 
-        await getAIAnswer(currentTranscript, onError, token);
+        await getAIAnswer(currentTranscript, therapySessionId, onError, token);
         onRefresh();
 
         setIsAILoading(false);

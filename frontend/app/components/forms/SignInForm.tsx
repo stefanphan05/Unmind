@@ -72,7 +72,7 @@ export function SignInForm() {
         signIn(token, isRememberMe);
 
         // Go to chat page
-        router.push("/chat");
+        router.push("/chat/1");
       }
     } catch (error) {
       console.log("Sign in error", error);

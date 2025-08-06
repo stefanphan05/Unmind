@@ -1,16 +1,19 @@
 from flask import jsonify
-from typing import Any, Tuple
+from typing import Any
 
 
 class ResponseHelper:
     @staticmethod
     def success_response(data: Any = None, message: str = None, status_code: int = 200):
+        if isinstance(data, list):
+            return jsonify(data), status_code
+
         response_data = {}
 
         if data is not None:
             if isinstance(data, dict):
                 response_data.update(data)
-            elif isinstance(data, list):
+            else:
                 response_data["data"] = data
 
         if message:

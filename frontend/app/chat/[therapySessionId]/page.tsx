@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 // Component imports
-import RecordingView from "../components/chat/RecordingView";
-import ErrorModal from "../components/modals/ErrorModal";
-import Header from "../components/layout/Header";
-import Sidebar from "../components/chat/Sidebar";
+import RecordingView from "../../components/chat/RecordingView";
+import ErrorModal from "../../components/modals/ErrorModal";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
 
 // Type imports
 import Message from "@/types/message";
@@ -16,11 +16,15 @@ import Message from "@/types/message";
 // API imports
 import { getAllMessages } from "@/lib/api/chat";
 import { getStoredToken } from "@/utils/authToken";
-import ChatConversationPanel from "../components/chat/ChatConversationPanel";
+import ChatConversationPanel from "../../components/chat/ChatConversationPanel";
 
 export default function ChatRoute() {
   const router = useRouter();
+  const params = useParams();
+
   const { error, handleError, closeErrorModal } = useErrorHandler();
+
+  const therapySessionId = Number(params?.therapySessionId);
 
   // ------------------ States ------------------
   const [messages, setMessages] = useState<Message[]>([]);
@@ -50,7 +54,11 @@ export default function ChatRoute() {
    */
   const fetchMessages = async (token: string) => {
     try {
-      const fetched = await getAllMessages(token, handleError);
+      const fetched = await getAllMessages(
+        token,
+        therapySessionId,
+        handleError
+      );
 
       if (fetched) {
         setMessages(fetched);

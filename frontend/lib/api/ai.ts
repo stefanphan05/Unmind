@@ -6,12 +6,13 @@ const API_URL = `${BASE_URL}/messages/ai/respond`;
 
 export const getAIAnswer = async (
   content: string,
+  therapySessionId: number,
   onError: (error: ApiError) => void,
   token: string
 ): Promise<void> => {
   try {
     await handleMutationRequest<{ answer: string }>(
-      API_URL,
+      `${BASE_URL}/sessions/${therapySessionId}/messages/ai`,
       "get AI answer",
       { content },
       "POST",

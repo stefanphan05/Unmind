@@ -8,6 +8,7 @@ import { ApiError } from "next/dist/server/api-utils";
 import { getAIAnswer } from "@/lib/api/ai";
 import { saveUserInput } from "@/lib/api/chat";
 import { BiSolidSend } from "react-icons/bi";
+import { useParams } from "next/navigation";
 
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
@@ -21,6 +22,10 @@ export default function PromptBox({
   setIsAILoading,
 }: PromptBoxProps) {
   const [message, setMessage] = useState<string>("");
+
+  const params = useParams();
+
+  const therapySessionId = Number(params?.therapySessionId);
 
   // Handle form submission and prevent reload
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,11 +59,11 @@ export default function PromptBox({
       return;
     }
 
-    await saveUserInput(token, onError, currentTextMessage);
+    await saveUserInput(token, therapySessionId, onError, currentTextMessage);
     onRefresh();
 
     if (currentTextMessage) {
-      await getAIAnswer(currentTextMessage, onError, token);
+      await getAIAnswer(currentTextMessage, therapySessionId, onError, token);
       setIsAILoading(false);
     }
     onRefresh();

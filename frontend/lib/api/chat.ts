@@ -6,11 +6,12 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export const getAllMessages = async (
   token: string,
+  therapySessionId: number,
   onError: (error: ApiError) => void
 ): Promise<Message[] | null> => {
   try {
     const data = await handleGetRequest<Message[]>(
-      `${BASE_URL}/messages`,
+      `${BASE_URL}/sessions/${therapySessionId}/messages`,
       "Fetch messages",
       token
     );
@@ -23,12 +24,13 @@ export const getAllMessages = async (
 
 export const saveUserInput = async (
   token: string,
+  therapySessionId: number,
   onError: (error: ApiError) => void,
   content: string
 ): Promise<void> => {
   try {
     await handleMutationRequest<Message[]>(
-      `${BASE_URL}/messages/user`,
+      `${BASE_URL}/sessions/${therapySessionId}/messages`,
       "Save user input error",
       { content },
       "POST",
@@ -41,11 +43,12 @@ export const saveUserInput = async (
 
 export const removeAllMessages = async (
   token: string,
+  therapySessionId: number,
   onError: (error: ApiError) => void
 ): Promise<Message[] | null> => {
   try {
     const data = await handleMutationRequest<Message[]>(
-      `${BASE_URL}/messages`,
+      `${BASE_URL}/sessions/${therapySessionId}/messages`,
       "Remove messages",
       {},
       "DELETE",

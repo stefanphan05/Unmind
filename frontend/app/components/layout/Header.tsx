@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FaAngleDown } from "react-icons/fa6";
@@ -32,6 +32,10 @@ export default function Header({
   const router = useRouter();
   const { isAuthenticated, user, signOut } = useAuth();
 
+  const params = useParams();
+
+  const therapySessionId = Number(params?.therapySessionId);
+
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [chatMenuOpen, setChatMenuOpen] = useState(false);
 
@@ -43,7 +47,7 @@ export default function Header({
   const handleDeleteMessages = async () => {
     const token = getStoredToken();
     if (token) {
-      await removeAllMessages(token, onError);
+      await removeAllMessages(token, therapySessionId, onError);
     }
 
     setChatMenuOpen(false);
