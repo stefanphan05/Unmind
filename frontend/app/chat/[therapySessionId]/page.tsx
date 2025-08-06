@@ -36,7 +36,6 @@ export default function ChatRoute() {
 
   /**
    * Handle user authentication check and inital message loading
-   * TODO: Redicts to signin if no valid token found (FOR NOW, consider allow guest using the application)
    */
   useEffect(() => {
     const token = getStoredToken();

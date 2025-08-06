@@ -1,6 +1,12 @@
 "use client";
 
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { getAllSessions } from "@/lib/api/session";
+import { TherapySession } from "@/types/therapySession";
+import { getStoredToken } from "@/utils/authToken";
 import { Calendar, Plus, Search, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
 import { BsDashCircle } from "react-icons/bs";
 
@@ -8,60 +14,41 @@ interface SidebarProps {
   isOpen: boolean;
 }
 
-interface TherapySession {
-  id: string;
-  title: string;
-  date: string;
-  result: "positive" | "negative" | "neutral";
-  status: "completed" | "upcoming" | "ongoing";
-}
-
 export default function Sidebar({ isOpen }: SidebarProps) {
-  // Mock therapy session data
-  const therapySessions: TherapySession[] = [
-    {
-      id: "1",
-      title: "Anxiety Management Session",
-      date: "2025-07-24",
-      result: "positive",
-      status: "upcoming",
-    },
-    {
-      id: "2",
-      title: "Family Dynamics Discussion",
-      date: "2025-07-22",
-      result: "neutral",
-      status: "completed",
-    },
-    {
-      id: "3",
-      title: "Cognitive Behavioral Therapy",
-      date: "2025-07-20",
-      result: "positive",
-      status: "completed",
-    },
-    {
-      id: "4",
-      title: "Group Support Session",
-      date: "2025-07-18",
-      result: "negative",
-      status: "ongoing",
-    },
-    {
-      id: "5",
-      title: "Stress Reduction Techniques",
-      date: "2025-07-15",
-      result: "positive",
-      status: "completed",
-    },
-    {
-      id: "6",
-      title: "Mindfulness Practice",
-      date: "2025-07-13",
-      result: "positive",
-      status: "ongoing",
-    },
-  ];
+  const router = useRouter();
+  const [sessions, setSessions] = useState<TherapySession[]>([]);
+
+  const { error, handleError, closeErrorModal } = useErrorHandler();
+
+  /**
+   * Handle user authentication check and inital message loading
+   */
+  useEffect(() => {
+    const token = getStoredToken();
+
+    if (!token) {
+      router.replace("/signin");
+      return;
+    }
+
+    fetchSessions(token);
+  });
+
+  const fetchSessions = async (token: string) => {
+    try {
+      const fetched = await getAllSessions(token, handleError);
+
+      if (fetched) {
+        setSessions(fetched);
+      }
+    } catch (error) {
+      handleError({
+        name: "Failed to fetch sessions",
+        statusCode: 400,
+        message: "Failed to fetch session",
+      });
+    }
+  };
 
   const getStatusColor = (status: TherapySession["status"]) => {
     switch (status) {
@@ -131,7 +118,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       >
         <div className="p-4">
           <div className="space-y-3">
-            {therapySessions.map((session, index) => (
+            {sessions.map((session, index) => (
               <div
                 key={session.id}
                 className={`p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:shadow-sm hover:border-gray-300 transform hover:scale-[1.02] ${
@@ -145,7 +132,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
               >
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
-                    {session.title}
+                    {session.name}
                   </h3>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
