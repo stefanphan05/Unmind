@@ -56,10 +56,7 @@ class MessageHandlers:
             therapy_session_id
         )
 
-        return ResponseHelper.success_response([
-            {"id": 1, "content": "Hello", "role": "assistant"},
-            {"id": 2, "content": "Hi", "role": "user"},
-        ])
+        return ResponseHelper.success_response([msg.to_dict() for msg in messages])
 
     def handle_delete_all_messages(self, email: str, therapy_session_id: int):
         self.__message_service.delete_all_messages(email, therapy_session_id)

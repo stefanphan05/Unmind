@@ -1,10 +1,10 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 
-import { AuthProvider } from "@/context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { Poppins } from "next/font/google";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],

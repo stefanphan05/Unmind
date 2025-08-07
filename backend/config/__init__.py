@@ -6,7 +6,7 @@ from redis import Redis
 
 from services.authentication.auth import AuthService
 from services.text.text_generator import TextGenerator
-from services.ai.ai_therapist import AITherapistService
+from services.ai.therapist import AITherapistService
 from services.voice.voice_generator import VoiceGenerator
 from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
 from services.user.user_service import UserService
@@ -36,7 +36,8 @@ def create_app():
         # Services
         app.text_generator = TextGenerator()
         app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
-        app.ai_therapist = AITherapistService(db.session)
+        app.ai_therapist = AITherapistService()
+
         app.auth_service = AuthService(db.session)
         app.user_service = UserService(db.session)
         app.message_service = MessageService(db.session)

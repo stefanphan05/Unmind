@@ -2,21 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
-
-// Component imports
-import RecordingView from "../../components/chat/RecordingView";
-import ErrorModal from "../../components/modals/ErrorModal";
-import Header from "../../components/layout/Header";
-import Sidebar from "../../components/layout/Sidebar";
+import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
 
 // Type imports
 import Message from "@/types/message";
 
 // API imports
 import { getAllMessages } from "@/lib/api/chat";
-import { getStoredToken } from "@/utils/authToken";
-import ChatConversationPanel from "../../components/chat/ChatConversationPanel";
+import { getStoredToken } from "@/lib/utils/authToken";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
+import RecordingView from "@/components/features/chat/RecordingView";
+import ChatConversationPanel from "@/components/features/chat/ChatConversationPanel";
+import ErrorModal from "@/components/features/modals/ErrorModal";
 
 export default function ChatRoute() {
   const router = useRouter();

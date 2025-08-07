@@ -1,6 +1,5 @@
 import { ApiError } from "next/dist/server/api-utils";
-import { handleGetRequest, handleMutationRequest } from "./handler";
-import Message from "@/types/message";
+import { handleGetRequest } from "./handler";
 import { TherapySession } from "@/types/therapySession";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
