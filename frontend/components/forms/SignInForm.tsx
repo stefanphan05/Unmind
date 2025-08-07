@@ -17,6 +17,7 @@ import AuthInput from "../features/auth/AuthInput";
 import GoogleAuthButton from "../features/auth/GoogleAuthButton";
 import PasswordInputWithToggle from "../features/auth/PasswordInputWithToggle";
 import SubmitButton from "../features/auth/SubmitButton";
+import InputWithLabel from "../ui/InputWithLabel";
 
 export function SignInForm() {
   const router = useRouter();
@@ -90,7 +91,7 @@ export function SignInForm() {
       onCloseError={closeErrorModal}
     >
       {/* -----------------Email Field----------------- */}
-      <AuthInput
+      <InputWithLabel
         id="email"
         label="Email address"
         type="email"
