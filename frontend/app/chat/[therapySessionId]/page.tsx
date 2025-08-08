@@ -10,7 +10,7 @@ import Message from "@/types/message";
 // API imports
 import { getAllMessages } from "@/lib/api/chat";
 import { getStoredToken } from "@/lib/utils/authToken";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/components/features/sessions/components/sidebar/Sidebar";
 import Header from "@/components/layout/Header";
 import RecordingView from "@/components/features/chat/RecordingView";
 import ChatConversationPanel from "@/components/features/chat/ChatConversationPanel";
