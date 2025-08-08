@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from utils.find_user import user_exists
 from models import User, Message, TherapySession
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -85,18 +86,6 @@ class AuthService:
 
         return True, "Successfully login"
 
-    def user_exists(self, email: str) -> Union[User, None]:
-        """
-        Checks if a user with the given email already exists in the database.
-
-        Args:
-            username (str): The email to check.
-
-        Returns:
-            Union[User, None]: The User object if the user exists, otherwise None.
-        """
-        return User.query.filter_by(email=email).first()
-
     def update_password(self, email: str, new_password: str) -> Tuple[bool, str]:
         """
         Updates the password for a user
@@ -108,7 +97,7 @@ class AuthService:
         Returns:
             Tuple[bool, str]: A tuple indicating success/failure and a message
         """
-        user = self.user_exists(email)
+        user = user_exists(email)
 
         if not user:
             return False, "User with this email does not exist"

@@ -1,4 +1,5 @@
 from typing import List
+from utils.find_user import user_exists
 from models.therapy_session import TherapySession
 
 
@@ -17,3 +18,11 @@ class TherapySessionService:
         self.__db.commit()
 
         return new_session
+
+    def update_session(self, email: str) -> None:
+        user = user_exists(email)
+
+        if not user:
+            return False, "User with this email does not exist"
+
+        pass
