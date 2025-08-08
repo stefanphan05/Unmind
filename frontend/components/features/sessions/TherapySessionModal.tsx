@@ -13,7 +13,8 @@ interface TherapySessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   session?: TherapySession | null;
-  onSave: (session: TherapySession) => void;
+  onCreate: (session: TherapySession) => void;
+  onUpdate: (session: TherapySession) => void;
   mode: "edit" | "create";
 }
 
@@ -21,7 +22,8 @@ export default function TherapySessionModal({
   isOpen,
   onClose,
   session,
-  onSave,
+  onCreate,
+  onUpdate,
   mode,
 }: TherapySessionModalProps) {
   const [name, setName] = useState("");
@@ -67,7 +69,11 @@ export default function TherapySessionModal({
       result,
     };
 
-    onSave(sessionData);
+    if (mode === "create") {
+      onCreate({ name, date, status, result });
+    } else {
+      onUpdate({ id, name, date, status, result });
+    }
     onClose();
   };
 

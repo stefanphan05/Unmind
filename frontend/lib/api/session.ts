@@ -40,3 +40,23 @@ export const createSession = async (
     return null;
   }
 };
+
+export const updateSession = async (
+  token: string,
+  onError: (error: ApiError) => void,
+  payload: TherapySession
+): Promise<TherapySession | null> => {
+  try {
+    const data = await handleMutationRequest<TherapySession>(
+      `${BASE_URL}/sessions`,
+      "Update session",
+      payload,
+      "PATCH",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};
