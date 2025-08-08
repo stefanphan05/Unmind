@@ -19,7 +19,7 @@ def get_all_sessions(email):
 @therapy_session_bp.route('/sessions', methods=["POST"])
 @token_required
 def create_session(email):
-    return therapy_session_handlers.handle_session_creation(email)
+    return therapy_session_handlers.handle_session_creation(email=email, data=request.json)
 
 
 @therapy_session_bp.route("/sessions", methods=["UPDATE"])

@@ -8,12 +8,21 @@ class TherapySessionService:
         self.__db = db_session
 
     def get_all_sessions(self, email: str) -> List[TherapySession]:
-        return self.__db.query(TherapySession).filter(
-            TherapySession.email == email
-        ).order_by(TherapySession.date.asc()).all()
+        return (
+            self.__db.query(TherapySession)
+                .filter(TherapySession.email == email)
+                .order_by(TherapySession.date.desc())
+                .all()
+        )
 
-    def create_session(self, email: str) -> TherapySession:
-        new_session = TherapySession(email=email)
+    def create_session(self, email: str, name: str, date: str, status: str, result: str) -> TherapySession:
+        new_session = TherapySession(
+            email=email,
+            name=name,
+            date=date,
+            status=status,
+            result=result
+        )
         self.__db.add(new_session)
         self.__db.commit()
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
-import { getAllSessions } from "@/lib/api/session";
+import { createSession, getAllSessions } from "@/lib/api/session";
 import { TherapySession } from "@/types/therapySession";
 import { getStoredToken } from "@/lib/utils/authToken";
 import { Calendar, Plus, Search, User } from "lucide-react";
@@ -96,7 +96,27 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     setIsModalOpen(true);
   };
 
-  const handleSaveSession = () => {};
+  const handleSaveSession = async (sessionData: TherapySession) => {
+    const token = getStoredToken();
+    if (!token) {
+      router.replace("signin");
+      return;
+    }
+    const payload = {
+      name: sessionData.name,
+      date: sessionData.date,
+      status: sessionData.status,
+      result: sessionData.result,
+    };
+
+    const created = await createSession(token, handleError, payload);
+
+    if (created) {
+      await fetchSessions(token);
+    }
+
+    setIsModalOpen(false);
+  };
 
   return (
     <>
