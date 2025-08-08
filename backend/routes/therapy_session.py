@@ -22,7 +22,7 @@ def create_session(email):
     return therapy_session_handlers.handle_session_creation(email=email, data=request.json)
 
 
-@therapy_session_bp.route("/sessions", methods=["UPDATE"])
+@therapy_session_bp.route("/sessions", methods=["PATCH"])
 @token_required
 def update_session(email):
     return therapy_session_handlers.handle_update_session(email=email, data=request.json)

@@ -1,4 +1,6 @@
-from typing import List
+import datetime
+from typing import List, Optional
+from utils.find_session import find_session_by_id_for_user
 from utils.find_user import user_exists
 from models.therapy_session import TherapySession
 
@@ -15,7 +17,7 @@ class TherapySessionService:
                 .all()
         )
 
-    def create_session(self, email: str, name: str, date: str, status: str, result: str) -> TherapySession:
+    def create_session(self, email: str, name: str, date: datetime, status: str, result: str) -> TherapySession:
         new_session = TherapySession(
             email=email,
             name=name,
@@ -28,10 +30,23 @@ class TherapySessionService:
 
         return new_session
 
-    def update_session(self, email: str) -> None:
+    def update_session(self, email: str, id: str, name: str, date: datetime, status: str, result: str) -> Optional[TherapySession]:
         user = user_exists(email)
 
         if not user:
-            return False, "User with this email does not exist"
+            return None
 
-        pass
+        session = find_session_by_id_for_user(self.__db, id, email)
+        if not session:
+            return None
+
+        if not session:
+            return None
+
+        session.name = name
+        session.date = date
+        session.status = status
+        session.result = result
+
+        self.__db.commit()
+        return session
