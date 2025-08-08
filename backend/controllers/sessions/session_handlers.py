@@ -1,4 +1,4 @@
-from utils.convert_string_to_date import convert_to_date
+from datetime import datetime
 from controllers.sessions.session_validators import SessionValidator
 from utils.response_helpers import ResponseHelper
 
@@ -16,21 +16,13 @@ class TherapySessionHandlers:
     def handle_session_creation(self, email: str, data: dict):
         # Because if these data can be empty by default so no need to validate
         name = data.get('name', "")
-        date_str = data.get('date', "")
         status = data.get('status', "")
         result = data.get('result', '')
-
-        date_obj = convert_to_date(date_str)
-        if not date_obj:
-            return ResponseHelper.error_response(
-                "Invalid date format. Use YYYY-MM-DD.",
-                status_code=400
-            )
 
         session = self.__session_service.create_session(
             email=email,
             name=name,
-            date=date_obj,
+            date=datetime.now(),
             status=status,
             result=result
         )
@@ -44,22 +36,14 @@ class TherapySessionHandlers:
 
         id = data.get("id", "")
         name = data.get('name', "")
-        date_str = data.get('date', "")
         status = data.get('status', "")
         result = data.get('result', '')
-
-        date_obj = convert_to_date(date_str)
-        if not date_obj:
-            return ResponseHelper.error_response(
-                "Invalid date format. Use YYYY-MM-DD.",
-                status_code=400
-            )
 
         updated = self.__session_service.update_session(
             email=email,
             id=id,
             name=name,
-            date=date_obj,
+            date=datetime.now(),
             status=status,
             result=result,
         )

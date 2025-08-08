@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 class SessionValidator:
     REQUIRED_FIELDS_FOR_CREATION = {
         "name": "Session name is required",
-        "date": "Session date is required",
         "status": "Session status is required",
         "result": "Session result is required"
     }
@@ -12,7 +11,6 @@ class SessionValidator:
     REQUIRED_FIELDS_FOR_UPDATE = {
         "id": "Session id is required",
         "name": "Session name is required",
-        "date": "Session date is required",
         "status": "Session status is required",
         "result": "Session result is required",
     }

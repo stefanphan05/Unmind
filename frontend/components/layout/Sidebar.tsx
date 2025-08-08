@@ -108,7 +108,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     }
     const payload = {
       name: sessionData.name,
-      date: sessionData.date,
       status: sessionData.status,
       result: sessionData.result,
     };
@@ -131,7 +130,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     const payload = {
       id: sessionData.id,
       name: sessionData.name,
-      date: sessionData.date,
       status: sessionData.status,
       result: sessionData.result,
     };
@@ -216,10 +214,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                   </div>
 
                   <div className="flex gap-4 text-xs text-gray-500 justify-between">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{new Date(session.date).toLocaleDateString()}</span>
-                    </div>
+                    <div className="flex items-center gap-1">Oops</div>
 
                     <div className="flex items-center gap-1">
                       {getTypeIcon(session.result)}

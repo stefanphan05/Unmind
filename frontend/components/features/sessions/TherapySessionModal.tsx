@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { TherapySession } from "@/types/therapySession";
 
 import StatusSelector from "./components/StatusSelector";
-import SessionDatePicker from "./components/DatePicker";
 import ResultSelector from "./components/ResultSelector";
 import ModalHeader from "./components/ModalHeader";
 import ModalFooter from "./components/ModalFooter";
@@ -27,7 +26,6 @@ export default function TherapySessionModal({
   mode,
 }: TherapySessionModalProps) {
   const [name, setName] = useState("");
-  const [date, setDate] = useState("");
   const [status, setStatus] = useState<"upcoming" | "ongoing" | "completed">(
     "upcoming"
   );
@@ -43,13 +41,11 @@ export default function TherapySessionModal({
       if (mode === "edit" && session) {
         setId(session.id);
         setName(session.name);
-        setDate(session.date);
         setStatus(session.status);
         setResult(session.result);
       } else {
         setId(undefined);
         setName("");
-        setDate(new Date().toISOString().split("T")[0]);
         setStatus("upcoming");
         setResult("neutral");
       }
@@ -64,15 +60,14 @@ export default function TherapySessionModal({
     const sessionData: TherapySession = {
       ...(id ? { id } : {}),
       name,
-      date,
       status,
       result,
     };
 
     if (mode === "create") {
-      onCreate({ name, date, status, result });
+      onCreate({ name, status, result });
     } else {
-      onUpdate({ id, name, date, status, result });
+      onUpdate({ id, name, status, result });
     }
     onClose();
   };
@@ -103,8 +98,6 @@ export default function TherapySessionModal({
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter session name..."
           />
-
-          <SessionDatePicker value={date} onChange={setDate} />
 
           <StatusSelector value={status} onChange={setStatus} />
 
