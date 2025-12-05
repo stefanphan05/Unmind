@@ -1,8 +1,9 @@
 import datetime
 from typing import List, Optional
-from utils.find_session import find_session_by_id_for_user
-from utils.find_user import user_exists
-from models.therapy_session import TherapySession
+
+from backend.utils.find_session import find_session_by_id_for_user
+from backend.utils.find_user import user_exists
+from backend.models.therapy_session import TherapySession
 
 
 class TherapySessionService:

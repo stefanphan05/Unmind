@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, timezone
-from utils.find_user import user_exists
-from models import User, Message, TherapySession
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from backend.utils.find_user import user_exists
+from backend.models import User, Message, TherapySession
 
 # Types
 from sqlalchemy.orm import Session
-from typing import Tuple, Union
+from typing import Tuple
 
 
 class AuthService:

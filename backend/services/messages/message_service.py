@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta, timezone
 from typing import List
-from models.message import Message
+from datetime import datetime, timedelta, timezone
+
+from backend.models.message import Message
 
 
 class MessageService:

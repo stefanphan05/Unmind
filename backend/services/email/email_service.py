@@ -1,5 +1,5 @@
-from datetime import timedelta
 import random
+from datetime import timedelta
 from typing import Tuple
 from flask_mailman import EmailMessage
 import redis
