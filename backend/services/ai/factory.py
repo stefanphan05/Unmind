@@ -1,5 +1,7 @@
 import os
-from services.ai.providers import GeminiStrategy, OpenAIStrategy
+
+from services.ai.providers.gemini import GeminiStrategy
+from services.ai.providers.openai import OpenAIStrategy
 
 
 def llm_factory():

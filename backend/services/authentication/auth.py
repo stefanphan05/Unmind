@@ -2,7 +2,10 @@ from datetime import datetime, timedelta, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from utils.find_user import user_exists
-from models import User, Message, TherapySession
+
+from models.user import User
+from models.message import Message
+from models.therapy_session import TherapySession
 
 # Types
 from sqlalchemy.orm import Session

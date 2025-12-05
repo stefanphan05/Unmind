@@ -1,5 +1,6 @@
 from typing import Optional
-from models import User
+
+from models.user import User
 
 
 class UserService:
