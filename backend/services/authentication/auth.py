@@ -29,7 +29,9 @@ class AuthService:
                                and a message string.
         """
 
-        if self.user_exists(email):
+        user = user = self.__db.query(User).filter_by(email=email).first()
+
+        if user:
             return False, "Email already exists"
 
         try:
@@ -76,7 +78,7 @@ class AuthService:
         return user or raise an error
         """
 
-        user = self.user_exists(email)
+        user = user = self.__db.query(User).filter_by(email=email).first()
 
         if not user:
             return False, "Email doesn't exist"
