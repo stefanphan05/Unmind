@@ -1,4 +1,4 @@
-from . import VoiceStrategy
+from services.voice.voice_strategy import VoiceStrategy
 
 
 class SamanthaVoiceStrategy(VoiceStrategy):

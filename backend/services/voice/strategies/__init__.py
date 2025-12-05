@@ -1,1 +1,1 @@
-from ..voice_strategy import VoiceStrategy
+from services.voice.voice_strategy import VoiceStrategy

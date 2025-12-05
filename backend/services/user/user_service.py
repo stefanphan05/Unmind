@@ -1,5 +1,5 @@
 from typing import Optional
-from backend.models import User
+from models import User
 
 
 class UserService:

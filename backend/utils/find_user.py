@@ -1,6 +1,6 @@
 from typing import Union
 
-from backend.models.user import User
+from models.user import User
 
 
 def user_exists(email: str) -> Union[User, None]:

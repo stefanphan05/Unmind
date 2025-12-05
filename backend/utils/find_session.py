@@ -1,6 +1,6 @@
 from typing import Optional
 
-from backend.models.therapy_session import TherapySession
+from models.therapy_session import TherapySession
 
 
 def find_session_by_id_for_user(db_session, session_id: int, email: str) -> Optional[TherapySession]:

@@ -1,5 +1,5 @@
 from flask import current_app
-from .factory import llm_factory
+from services.ai.factory import llm_factory
 
 
 class AITherapistService:

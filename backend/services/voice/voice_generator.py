@@ -1,5 +1,5 @@
 import pyttsx3
-from backend.services.voice.voice_strategy import VoiceStrategy
+from services.voice.voice_strategy import VoiceStrategy
 
 
 class VoiceGenerator:
