@@ -29,6 +29,7 @@ export default function ChatRoute() {
   const [messageRefreshTrigger, setMessageRefreshTrigger] = useState(0);
   const [isAILoading, setIsAILoading] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isIntialLoading, setIsInitialLoading] = useState<boolean>(true);
 
   // ------------------ Auth Check ------------------
 
@@ -51,6 +52,7 @@ export default function ChatRoute() {
    */
   const fetchMessages = async (token: string) => {
     try {
+      setIsInitialLoading(true);
       const fetched = await getAllMessages(
         token,
         therapySessionId,
@@ -66,6 +68,8 @@ export default function ChatRoute() {
         statusCode: 400,
         message: "Failed to fetch messages",
       });
+    } finally {
+      setIsInitialLoading(false);
     }
   };
 
@@ -109,6 +113,7 @@ export default function ChatRoute() {
               isTherapistResponseLoading={isAILoading}
               onError={handleError}
               onRefresh={triggerChatMessageRefresh}
+              isInitialLoading={isIntialLoading}
               setIsTherapistResponseLoading={setIsAILoading}
             />
           </div>

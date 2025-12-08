@@ -1,14 +1,18 @@
-import Message from "@/types/message";
-import ChatMessage from "./ChatMessage";
-import PromptBox from "./PromptBox";
-import TypingIndicator from "./TypingIndicator";
 import { ApiError } from "next/dist/server/api-utils";
+
+import Message from "@/types/message";
+
+import TypingIndicator from "./TypingIndicator";
+import PromptBox from "./PromptBox";
+import ChatMessage from "./ChatMessage";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 interface ChatConversationPanelProps {
   messages: Message[];
   isTherapistResponseLoading: boolean;
   onError: (error: ApiError) => void;
   onRefresh: () => void;
+  isInitialLoading: boolean;
   setIsTherapistResponseLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -17,6 +21,7 @@ export default function ChatConversationPanel({
   isTherapistResponseLoading,
   onError,
   onRefresh,
+  isInitialLoading,
   setIsTherapistResponseLoading,
 }: ChatConversationPanelProps) {
   const isLatestMessage = (messageIndex: number): boolean => {
@@ -29,20 +34,28 @@ export default function ChatConversationPanel({
         {/* ------------------Chat Messages Display Area------------------ */}
         <div className="p-4 overflow-y-auto scroll-smooth">
           {/* ------------------Render all existing messages------------------ */}
-          {messages.length > 0 ? (
-            messages.map((message, index) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                isLatest={isLatestMessage(index)}
-              />
-            ))
+          {isInitialLoading ? (
+            <LoadingOverlay
+              isVisible={isInitialLoading}
+              message="Loading your conversation..."
+            />
           ) : (
-            <div className="text-gray-500 text-center py-10">
-              No messages yet. Start a conversation!
-            </div>
+            <>
+              {messages.length > 0 ? (
+                messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    isLatest={isLatestMessage(index)}
+                  />
+                ))
+              ) : (
+                <div className="text-gray-500 text-center py-10">
+                  No messages yet. Start a conversation!
+                </div>
+              )}
+            </>
           )}
-
           {/* ------------------AI response loading indicator------------------ */}
           {isTherapistResponseLoading && <TypingIndicator />}
         </div>

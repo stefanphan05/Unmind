@@ -8,7 +8,7 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
-  const isAssistant = message.role === "assistant";
+  // const isAssistant = message.role === "assistant";
 
   return (
     <div
@@ -23,11 +23,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
             : "text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl rounded-bl-md"
         }`}
       >
-        {isAssistant && isLatest ? (
+        {/* {isAssistant && isLatest ? (
           <Typewriter words={[message.content]} typeSpeed={25} />
         ) : (
           message.content
-        )}
+        )} */}
+
+        {message.content}
       </div>
     </div>
   );
