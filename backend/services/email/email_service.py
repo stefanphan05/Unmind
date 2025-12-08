@@ -1,8 +1,9 @@
 import random
-from datetime import timedelta
-from typing import Tuple
-from flask_mailman import EmailMessage
 import redis
+
+from typing import Tuple
+from datetime import timedelta
+from flask_mailman import EmailMessage
 
 
 class EmailService:

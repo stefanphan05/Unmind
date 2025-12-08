@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime, timedelta, timezone
 
-from models.message import Message
+from models import Message
 
 
 class MessageService:
