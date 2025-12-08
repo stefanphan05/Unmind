@@ -35,6 +35,16 @@ def create_app():
 
         # Services
         app.text_generator = TextGenerator()
+
+        # Make voice generator optional
+        try:
+            from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
+            from services.voice.voice_generator import VoiceGenerator
+            app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
+        except Exception as e:
+            print(f"Warning: Voice generator not available: {e}")
+            app.voice_generator = None
+
         app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
         app.ai_therapist = AITherapistService()
 
