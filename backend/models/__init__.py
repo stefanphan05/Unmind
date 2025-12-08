@@ -1,3 +1,3 @@
-from models.message import Message
-from models.therapy_session import TherapySession
-from models.user import User
+from .message import Message
+from .therapy_session import TherapySession
+from .user import User
