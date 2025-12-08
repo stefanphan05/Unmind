@@ -1,4 +1,4 @@
-from config import db
+from config.extensions import db
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey
 
