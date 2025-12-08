@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from utils.find_session import find_session_by_id_for_user
 from utils.find_user import user_exists
-from models.therapy_session import TherapySession
+
+from models import TherapySession
 
 
 class TherapySessionService:

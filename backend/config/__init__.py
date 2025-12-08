@@ -18,6 +18,7 @@ def create_app():
         # Importing
         from utils.token_utils import Token
         from redis import Redis
+
         from services.sessions.session_service import TherapySessionService
         from services.email.email_service import EmailService
         from services.messages.message_service import MessageService
