@@ -60,3 +60,23 @@ export const updateSession = async (
     return null;
   }
 };
+
+export const deleteSession = async (
+  token: string,
+  onError: (error: ApiError) => void,
+  id: string
+): Promise<{ message: string } | null> => {
+  try {
+    const data = await handleMutationRequest<{ message: string }>(
+      `${BASE_URL}/sessions`,
+      "Delete session",
+      { id },
+      "DELETE",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};

@@ -9,7 +9,7 @@ export default function SessionToolbar({ onAdd }: { onAdd: () => void }) {
         </h2>
         <button
           onClick={onAdd}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
         >
           <Plus className="w-5 h-5 text-gray-600" />
         </button>

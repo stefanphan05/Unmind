@@ -19,7 +19,8 @@ interface SidebarProps {
 export default function Sidebar({ isOpen }: SidebarProps) {
   useAuthRedirect();
   const { handleError } = useErrorHandler();
-  const { sessions, create, update } = useTherapySessions(handleError);
+
+  const { sessions, create, update, remove } = useTherapySessions(handleError);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<"edit" | "create">("create");
@@ -49,12 +50,17 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     setIsModalOpen(false);
   };
 
+  const handleDelete = async (id: string) => {
+    await remove(id);
+    setIsModalOpen(false);
+  };
+
   return (
     <>
       <div
         className={`
           bg-white border-r border-gray-200 flex flex-col h-screen 
-          transition-all duration-300 ease-in-out z-40  // <-- Added transition for smooth open/close
+          transition-all duration-300 ease-in-out z-40
           ${
             isOpen
               ? "w-80 translate-x-0"
@@ -75,6 +81,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         session={selectedSession}
         onCreate={handleCreate}
         onUpdate={handleUpdate}
+        onDelete={handleDelete}
         mode={mode}
       />
     </>

@@ -52,3 +52,18 @@ class TherapySessionHandlers:
             return ResponseHelper.error_response("Session not found", 404)
 
         return ResponseHelper.success_response(updated.to_dict(), 200)
+
+    def handle_delete_session(self, email: str, data: dict):
+        # Validate input
+        session_id = data.get("id")
+        if not session_id:
+            return ResponseHelper.validation_error("Session ID is required")
+
+        # Delete session
+        deleted = self.__session_service.delete_session(
+            email=email, id=session_id)
+
+        if not deleted:
+            return ResponseHelper.error_response("Session not found", 404)
+
+        return ResponseHelper.success_response({"message": "Session deleted successfully"}, 200)

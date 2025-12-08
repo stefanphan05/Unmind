@@ -52,3 +52,20 @@ class TherapySessionService:
 
         self.__db.commit()
         return session
+
+    def delete_session(self, email: str, id: str) -> bool:
+        # Check if user exists
+        user = user_exists(email)
+        if not user:
+            return False
+
+        # Find session belonging to this user
+        session = find_session_by_id_for_user(self.__db, id, email)
+        if not session:
+            return False
+
+        # Delete session
+        self.__db.delete(session)
+        self.__db.commit()
+
+        return True

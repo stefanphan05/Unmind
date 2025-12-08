@@ -26,3 +26,9 @@ def create_session(email):
 @token_required
 def update_session(email):
     return therapy_session_handlers.handle_update_session(email=email, data=request.json)
+
+
+@therapy_session_bp.route("/sessions", methods=["DELETE"])
+@token_required
+def delete_session(email):
+    return therapy_session_handlers.handle_delete_session(email=email, data=request.json)

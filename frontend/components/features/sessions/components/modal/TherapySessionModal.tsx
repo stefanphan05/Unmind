@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+
 import { TherapySession } from "@/types/therapySession";
+
 import InputField from "./fields/InputField";
 import StatusSelector from "./fields/StatusSelector";
 import ResultSelector from "./fields/ResultSelector";
@@ -13,6 +15,7 @@ interface Props {
   mode: "edit" | "create";
   onCreate: (payload: Omit<TherapySession, "id">) => Promise<void> | void;
   onUpdate: (payload: TherapySession) => Promise<void> | void;
+  onDelete: (id: string) => Promise<void> | void;
 }
 
 export default function TherapySessionModal({
@@ -22,6 +25,7 @@ export default function TherapySessionModal({
   mode,
   onCreate,
   onUpdate,
+  onDelete,
 }: Props) {
   const [id, setId] = useState<string | undefined>();
   const [name, setName] = useState("");
@@ -57,6 +61,16 @@ export default function TherapySessionModal({
     }
   };
 
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await onDelete(id);
+      onClose();
+    } catch {
+      console.log("Error deleting session");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -78,9 +92,12 @@ export default function TherapySessionModal({
             placeholder="Enter session name..."
           />
           <StatusSelector value={status} onChange={setStatus} />
-          <ResultSelector value={result} onChange={setResult} />
+
+          {mode !== "create" && (
+            <ResultSelector value={result} onChange={setResult} />
+          )}
         </div>
-        <ModalFooter mode={mode} onSave={handleSave} />
+        <ModalFooter mode={mode} onSave={handleSave} onDelete={handleDelete} />
       </div>
     </div>
   );

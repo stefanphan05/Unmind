@@ -4,6 +4,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { FaAngleDown } from "react-icons/fa6";
+
+import { BsLayoutSidebar } from "react-icons/bs";
+import { BsLayoutSidebarReverse } from "react-icons/bs";
+
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { CgProfile } from "react-icons/cg";
 import { LogOut } from "lucide-react";
@@ -66,9 +70,12 @@ export default function Header({
               onClickCapture={() => setIsSidebarOpen((prev) => !prev)}
             >
               {isSidebarOpen ? (
-                <GoSidebarExpand className="h-6 w-6" title="Close sidebar" />
+                <BsLayoutSidebar className="h-5 w-5" title="Close sidebar" />
               ) : (
-                <GoSidebarCollapse className="h-6 w-6" title="Open sidebar" />
+                <BsLayoutSidebarReverse
+                  className="h-5 w-5"
+                  title="Open sidebar"
+                />
               )}
             </button>
 
