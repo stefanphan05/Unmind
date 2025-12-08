@@ -71,7 +71,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         {isOpen && (
           <>
             <SessionToolbar onAdd={openCreateModal} />
-            <SessionList sessions={sessions} onSelect={openEditModal} />
+            <SessionList sessions={sessions} onMenuClick={openEditModal} />
           </>
         )}
       </div>

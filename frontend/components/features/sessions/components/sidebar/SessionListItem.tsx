@@ -1,11 +1,12 @@
 import { TherapySession } from "@/types/therapySession";
 import { User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
 import { BsDashCircle, BsThreeDots } from "react-icons/bs";
 
 interface SessionListItemProps {
   session: TherapySession;
-  onClick: () => void;
+  onMenuClick: () => void;
 }
 
 const statusClasses = {
@@ -30,19 +31,24 @@ const resultIcon = (r: TherapySession["result"]) => {
 
 export default function SessionListItem({
   session,
-  onClick,
+  onMenuClick,
 }: SessionListItemProps) {
+  const router = useRouter();
   const badge = statusClasses[session.status] ?? statusClasses.default;
+
+  const handleSessionClick = () => {
+    router.push(`/chat/${session.id}`);
+  };
   return (
     <div
-      onClick={onClick}
+      onClick={handleSessionClick}
       className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:shadow-sm hover:border-gray-300 transform"
     >
       <div className="flex items-start justify-between mb-2">
         <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
           {session.name}
         </h3>
-        <BsThreeDots />
+        <BsThreeDots onClick={onMenuClick} />
       </div>
       <div className="flex gap-4 text-xs text-gray-500 justify-between">
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge}`}>
