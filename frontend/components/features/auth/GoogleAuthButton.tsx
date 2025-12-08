@@ -3,21 +3,25 @@ import { signInWithGoogle } from "@/lib/api/auth";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { useState } from "react";
 
 interface GoogleAuthButtonProps {
   label: string;
   isLoading?: boolean;
   disabled?: boolean;
+  onNavigating?: (navigating: boolean) => void;
 }
 
 export default function GoogleAuthButton({
   label,
   isLoading = false,
   disabled = false,
+  onNavigating,
 }: GoogleAuthButtonProps) {
   const router = useRouter();
   const { signIn } = useAuth();
   const { handleError } = useErrorHandler();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const googleSignin = useGoogleLogin({
     onSuccess: async (credentialResponse: any) => {
@@ -34,8 +38,22 @@ export default function GoogleAuthButton({
         }
 
         const appToken = await signInWithGoogle(googleToken, handleError);
-        if (appToken) signIn(appToken, true);
-        router.push("/chat/1");
+
+        if (appToken) {
+          signIn(appToken, true);
+
+          // Notify parent component if callback provided
+          if (onNavigating) {
+            onNavigating(true);
+          }
+
+          // Small delay for smooth visual feedback
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          router.push("/chat/1");
+        } else {
+          setIsProcessing(false);
+        }
       } catch (error) {
         handleError({
           name: "Google Signup",

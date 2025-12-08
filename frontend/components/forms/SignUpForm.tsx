@@ -4,25 +4,32 @@ import React, { useState } from "react";
 
 import { SignUpPayload, signUpUser } from "@/lib/api/auth";
 
+import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
 import { useSuccessHandler } from "@/lib/hooks/useSuccessHandler";
 
 import { getMissingFields } from "@/lib/utils/getMissingAuthFields";
 
 import { AuthFormLayout } from "./AuthFormLayout";
+
 import AuthDivider from "../features/auth/AuthDivider";
 import AuthInput from "../features/auth/AuthInput";
 import GoogleAuthButton from "../features/auth/GoogleAuthButton";
 import PasswordInputWithToggle from "../features/auth/PasswordInputWithToggle";
 import SubmitButton from "../features/auth/SubmitButton";
+
 import InputWithLabel from "../ui/InputWithLabel";
+import LoadingOverlay from "../ui/LoadingOverlay";
 
 export function SignUpForm() {
+  const router = useRouter();
+
   // ------------------ States ------------------
   const [email, setEmail] = useState<string>("");
   const [username, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
 
   // ------------------ Handlers ------------------
   const { showSuccess, openSuccessModal, closeSuccessModal } =
@@ -63,15 +70,29 @@ export function SignUpForm() {
     // Start loading
     setIsLoading(true);
 
-    // Get the result from signUpUser
-    const result = await signUpUser(payload, handleError);
+    try {
+      // Get the result from signUpUser
+      const result = await signUpUser(payload, handleError);
 
-    // Stop loading
-    setIsLoading(false);
+      // Only show success modal if signup was actually successful
+      if (result) {
+        // Show navigating state for smooth transition
+        setIsNavigating(true);
 
-    // Only show success modal if signup was actually successful
-    if (result) {
-      openSuccessModal();
+        // Small delay for smooth visual feedback
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Reset navigating state after modal opens
+        setIsNavigating(false);
+
+        openSuccessModal();
+      }
+    } catch (error) {
+      console.log("Sign up error", error);
+    } finally {
+      if (!isNavigating) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -127,7 +148,11 @@ export function SignUpForm() {
       <AuthDivider />
 
       {/* -----------------Google Login Button----------------- */}
-      <GoogleAuthButton label="Sign up with Google" isLoading={isLoading} />
+      <GoogleAuthButton
+        label="Sign up with Google"
+        isLoading={isLoading}
+        onNavigating={setIsNavigating}
+      />
 
       {/* -----------------Create Account Link----------------- */}
       <p className="text-center text-sm">
@@ -139,6 +164,11 @@ export function SignUpForm() {
           Sign in
         </Link>
       </p>
+
+      <LoadingOverlay
+        isVisible={isNavigating}
+        message="Redirecting to your chat..."
+      />
     </AuthFormLayout>
   );
 }

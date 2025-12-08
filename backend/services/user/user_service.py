@@ -7,6 +7,12 @@ class UserService:
     def __init__(self, db_session):
         self.__db = db_session
 
+    def user_exists(self, email: str) -> bool:
+        if self.__db.query(User).filter_by(email=email).first():
+            return True
+
+        return False
+
     def get_username_by_email(self, email: str) -> Optional[str]:
         user = self.__db.query(User).filter_by(email=email).first()
         if user:

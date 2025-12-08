@@ -1,5 +1,7 @@
 from services.authentication.google_auth_service import GoogleAuthService
 from controllers.auth.auth_validators import AuthValidator
+
+from utils.find_user import user_exists
 from utils.response_helpers import ResponseHelper
 
 
@@ -60,7 +62,7 @@ class AuthHandlers:
         name = user_info.get("name")
 
         # Register user if not exists
-        if not self.__auth_service.user_exists(email):
+        if not user_exists(email):
             self.__auth_service.register_user(email, name, "")
 
         # Generate app token
