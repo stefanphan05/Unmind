@@ -45,7 +45,6 @@ def create_app():
             print(f"Warning: Voice generator not available: {e}")
             app.voice_generator = None
 
-        app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
         app.ai_therapist = AITherapistService()
 
         app.auth_service = AuthService(db.session)
