@@ -1,20 +1,10 @@
-from utils.token_utils import Token
-from services.sessions.session_service import TherapySessionService
-from services.email.email_service import EmailService
-from services.messages.message_service import MessageService
-from services.user.user_service import UserService
-from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
-from services.voice.voice_generator import VoiceGenerator
-from services.ai.therapist import AITherapistService
-from services.text.text_generator import TextGenerator
-from services.authentication.auth import AuthService
-from redis import Redis
-from .settings import Config
-from .extensions import db, cors, mail
-from flask import Flask
-
 import sys
 import os
+
+from flask import Flask
+from .settings import Config
+from .extensions import db, cors, mail
+
 
 # Ensure the backend directory is in the path
 backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,6 +23,19 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+
+        # Importing
+        from utils.token_utils import Token
+        from redis import Redis
+        from services.sessions.session_service import TherapySessionService
+        from services.email.email_service import EmailService
+        from services.messages.message_service import MessageService
+        from services.user.user_service import UserService
+        from services.voice.strategies.samantha_voice import SamanthaVoiceStrategy
+        from services.voice.voice_generator import VoiceGenerator
+        from services.ai.therapist import AITherapistService
+        from services.text.text_generator import TextGenerator
+        from services.authentication.auth import AuthService
 
         # External dependencies
         redis_client = Redis(host="localhost", port=6379,
