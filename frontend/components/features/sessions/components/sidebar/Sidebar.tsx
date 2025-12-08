@@ -51,9 +51,23 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
   return (
     <>
-      <div className="bg-white border-r border-gray-200 flex flex-col h-screen w-80">
-        <SessionToolbar onAdd={openCreateModal} />
-        <SessionList sessions={sessions} onSelect={openEditModal} />
+      <div
+        className={`
+          bg-white border-r border-gray-200 flex flex-col h-screen 
+          transition-all duration-300 ease-in-out z-40  // <-- Added transition for smooth open/close
+          ${
+            isOpen
+              ? "w-80 translate-x-0"
+              : "w-0 -translate-x-full overflow-hidden"
+          }
+        `}
+      >
+        {isOpen && (
+          <>
+            <SessionToolbar onAdd={openCreateModal} />
+            <SessionList sessions={sessions} onSelect={openEditModal} />
+          </>
+        )}
       </div>
       <TherapySessionModal
         isOpen={isModalOpen}
