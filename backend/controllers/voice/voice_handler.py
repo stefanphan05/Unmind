@@ -52,7 +52,7 @@ class VoiceHandler:
         """
         Get the currently active voice.
         """
-        current_voice_id = self.voice_generator._VoiceGenerator__voice_strategy.voice_id
+        current_voice_id = self.voice_generator.get_voice_id()
 
         # Find the voice name by ID
         current_voice_name = None

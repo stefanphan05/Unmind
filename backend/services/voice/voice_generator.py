@@ -30,6 +30,9 @@ class VoiceGenerator:
     def set_voice_id(self, voice_id: str):
         self.__voice_id = voice_id
 
+    def get_voice_id(self):
+        return self.__voice_id
+
     def generate_audio(self, text: str) -> bytes:
         """
         Convert text → ElevenLabs voice → return audio bytes.
