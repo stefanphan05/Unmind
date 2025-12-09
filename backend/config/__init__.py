@@ -28,6 +28,7 @@ def create_app():
         from services.ai.therapist import AITherapistService
         from services.text.text_generator import TextGenerator
         from services.authentication.auth import AuthService
+        from services.voice.strategies.elevenlabs_voice import ElevenLabsVoiceStrategy
 
         # External dependencies
         redis_client = Redis(host="localhost", port=6379,
@@ -36,7 +37,10 @@ def create_app():
         # Services
         app.text_generator = TextGenerator()
 
-        app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
+        # app.voice_generator = VoiceGenerator(SamanthaVoiceStrategy())
+
+        app.voice_generator = VoiceGenerator(
+            ElevenLabsVoiceStrategy(voice_id="bIHbv24MWmeRgasZH58o"))
 
         # # Make voice generator optional
         # try:

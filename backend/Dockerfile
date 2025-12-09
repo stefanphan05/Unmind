@@ -30,4 +30,4 @@ EXPOSE 8000
 
 # Use gunicorn to serve Flask app
 # Increased timeout for TTS processing
-CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --worker-class sync
+CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120 --worker-class sync

@@ -1,4 +1,5 @@
 from flask import jsonify
+import base64
 from utils.response_helpers import ResponseHelper
 from controllers.messages.message_validators import MessageValidator
 
@@ -45,10 +46,23 @@ class MessageHandlers:
             therapy_session_id=therapy_session_id
         )
 
-        # Convert response to voice
-        self.__voice_generator.speak_default(message.content)
+        # # Convert response to voice
+        # self.__voice_generator.speak_default(message.content)
+        # Generate audio bytes
+        audio_bytes = self.__voice_generator.generate_audio(message.content)
 
-        return ResponseHelper.success_response({"question": user_input, "answer": message.to_dict()})
+        response_data = {
+            "question": user_input,
+            "answer": message.to_dict()
+        }
+
+        # Add audio if generated successfully
+        if audio_bytes:
+            # Encode audio bytes to base64 for JSON transmission
+            audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            response_data["audio"] = audio_base64
+
+        return ResponseHelper.success_response(response_data)
 
     def handle_get_all_messages(self, email: str, therapy_session_id: int):
         messages = self.__message_service.get_all_messages(

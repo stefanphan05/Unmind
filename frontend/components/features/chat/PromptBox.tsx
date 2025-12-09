@@ -8,6 +8,7 @@ import { saveUserInput } from "@/lib/api/chat";
 import { BiSolidSend } from "react-icons/bi";
 import { useParams } from "next/navigation";
 import MessageInput from "@/components/ui/MessageInput";
+import { useAudioPlayer } from "@/lib/hooks/useAudioPlayer";
 
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
@@ -25,6 +26,7 @@ export default function PromptBox({
   const params = useParams();
 
   const therapySessionId = Number(params?.therapySessionId);
+  const { playBase64Audio, isPlaying } = useAudioPlayer();
 
   // Handle form submission and prevent reload
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +64,15 @@ export default function PromptBox({
     onRefresh();
 
     if (currentTextMessage) {
-      await getAIAnswer(currentTextMessage, therapySessionId, onError, token);
+      const response = await getAIAnswer(
+        currentTextMessage,
+        therapySessionId,
+        onError,
+        token
+      );
+      if (response?.audio) {
+        playBase64Audio(response.audio);
+      }
       setIsAILoading(false);
     }
     onRefresh();
