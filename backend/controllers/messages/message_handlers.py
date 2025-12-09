@@ -53,14 +53,14 @@ class MessageHandlers:
             "answer": message.to_dict()
         }
 
-        # # Generate audio bytes
-        # audio_bytes = self.__voice_generator.generate_audio(message.content)
+        # Generate audio bytes
+        audio_bytes = self.__voice_generator.generate_audio(message.content)
 
-        # # Add audio if generated successfully
-        # if audio_bytes:
-        #     # Encode audio bytes to base64 for JSON transmission
-        #     audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
-        #     response_data["audio"] = audio_base64
+        # Add audio if generated successfully
+        if audio_bytes:
+            # Encode audio bytes to base64 for JSON transmission
+            audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+            response_data["audio"] = audio_base64
 
         return ResponseHelper.success_response(response_data)
 
