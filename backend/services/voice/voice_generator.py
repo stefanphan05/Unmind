@@ -17,56 +17,31 @@
 #         self.__voice_strategy = voice_strategy
 #         self.__voice_strategy.set_voice(self.__engine)
 
-import simpleaudio as sa
-import io
-from pydub import AudioSegment
-from services.voice.voice_strategy import VoiceStrategy
+import os
+from elevenlabs import ElevenLabs
 
 
 class VoiceGenerator:
-    def __init__(self, voice_strategy: VoiceStrategy):
-        self.__voice_strategy = voice_strategy
+    def __init__(self, model="eleven_turbo_v2"):
+        self.__voice_id = "ROMJ9yK1NAMuu1ggrjDW"
+        self.__model = model
+        self.__client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
-    def set_strategy(self, voice_strategy: VoiceStrategy):
-        self.__voice_strategy = voice_strategy
+    def set_voice_id(self, voice_id: str):
+        self.__voice_id = voice_id
 
     def generate_audio(self, text: str) -> bytes:
         """
         Convert text → ElevenLabs voice → return audio bytes.
         """
         try:
-            audio_bytes = self.__voice_strategy.generate_audio(text)
-            return audio_bytes
+            audio_stream = self.__client.text_to_speech.convert(
+                voice_id=self.__voice_id,
+                model_id=self.__model,
+                text=text,
+                output_format="mp3_44100_128",
+            )
+            return b"".join(audio_stream)
         except Exception as e:
             print(f"Error generating audio: {e}")
             return None
-
-    # def speak_default(self, text: str):
-    #     """
-    #     Convert text → ElevenLabs voice → play immediately.
-    #     """
-    #     try:
-    #         # 1. Generate audio bytes from ElevenLabs
-    #         audio_bytes = self.__voice_strategy.generate_audio(text)
-
-    #         # 2. Use pydub to properly parse the audio format
-    #         audio = AudioSegment.from_file(
-    #             io.BytesIO(audio_bytes), format="mp3")
-
-    #         # 3. Convert to raw audio data with known parameters
-    #         raw_data = audio.raw_data
-    #         sample_rate = audio.frame_rate
-    #         num_channels = audio.channels
-    #         bytes_per_sample = audio.sample_width
-
-    #         # 4. Play with correct parameters
-    #         play_obj = sa.play_buffer(
-    #             raw_data,
-    #             num_channels,
-    #             bytes_per_sample,
-    #             sample_rate
-    #         )
-    #         play_obj.wait_done()
-
-    #     except Exception as e:
-    #         print(f"Error playing audio: {e}")

@@ -22,4 +22,3 @@ flask-mailman==1.1.1
 redis==6.2.0
 gunicorn==23.0.0
 elevenlabs==2.26.0
-simpleaudio==1.0.4
