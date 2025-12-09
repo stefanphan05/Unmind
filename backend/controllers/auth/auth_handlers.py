@@ -76,7 +76,7 @@ class AuthHandlers:
         if not success:
             return ResponseHelper.validation_error(error)
 
-        if not self.__auth_service.user_exists(email):
+        if not user_exists(email):
             return ResponseHelper.not_found_error("User with this email does not exist")
 
         self.__email_service.send_password_reset_code(email)
