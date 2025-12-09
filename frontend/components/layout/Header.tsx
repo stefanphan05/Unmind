@@ -24,14 +24,14 @@ interface HeaderProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   onError: (error: ApiError) => void;
-  onRefresh: () => void;
+  onClearMessages: () => void;
 }
 
 export default function Header({
   isSidebarOpen,
   setIsSidebarOpen,
   onError,
-  onRefresh,
+  onClearMessages,
 }: HeaderProps) {
   const router = useRouter();
   const { isAuthenticated, user, signOut } = useAuth();
@@ -75,7 +75,7 @@ export default function Header({
     }
 
     setChatMenuOpen(false);
-    onRefresh();
+    onClearMessages();
   };
 
   const handleVoiceSwitch = async (voiceName: string) => {

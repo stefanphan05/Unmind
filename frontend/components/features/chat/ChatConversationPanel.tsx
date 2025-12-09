@@ -11,7 +11,7 @@ interface ChatConversationPanelProps {
   messages: Message[];
   isTherapistResponseLoading: boolean;
   onError: (error: ApiError) => void;
-  onRefresh: () => void;
+  onNewMessage: (message: Message) => void;
   isInitialLoading: boolean;
   setIsTherapistResponseLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -20,7 +20,7 @@ export default function ChatConversationPanel({
   messages,
   isTherapistResponseLoading,
   onError,
-  onRefresh,
+  onNewMessage,
   isInitialLoading,
   setIsTherapistResponseLoading,
 }: ChatConversationPanelProps) {
@@ -64,7 +64,7 @@ export default function ChatConversationPanel({
       {/* ------------------Message Input Interface------------------ */}
       <PromptBox
         onError={onError}
-        onRefresh={onRefresh}
+        onNewMessage={onNewMessage}
         setIsAILoading={setIsTherapistResponseLoading}
       />
     </div>

@@ -10,15 +10,17 @@ import { useParams } from "next/navigation";
 import MessageInput from "@/components/ui/MessageInput";
 import { useAudioPlayer } from "@/lib/hooks/useAudioPlayer";
 
+import Message from "@/types/message";
+
 interface PromptBoxProps {
   onError: (error: ApiError) => void;
-  onRefresh: () => void;
+  onNewMessage: (message: Message) => void;
   setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function PromptBox({
   onError,
-  onRefresh,
+  onNewMessage,
   setIsAILoading,
 }: PromptBoxProps) {
   const [message, setMessage] = useState<string>("");
@@ -61,7 +63,13 @@ export default function PromptBox({
     }
 
     await saveUserInput(token, therapySessionId, onError, currentTextMessage);
-    onRefresh();
+    const userMessage: Message = {
+      id: Date.now(),
+      content: currentTextMessage,
+      role: "user",
+    };
+
+    onNewMessage(userMessage);
 
     if (currentTextMessage) {
       const response = await getAIAnswer(
@@ -74,8 +82,15 @@ export default function PromptBox({
         playBase64Audio(response.audio);
       }
       setIsAILoading(false);
+
+      const aiMessage: Message = {
+        id: Date.now(),
+        content: response?.answer.content,
+        role: "assistant",
+      };
+
+      onNewMessage(aiMessage);
     }
-    onRefresh();
   };
 
   return (

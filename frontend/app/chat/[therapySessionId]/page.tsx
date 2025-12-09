@@ -26,16 +26,13 @@ export default function ChatRoute() {
 
   // ------------------ States ------------------
   const [messages, setMessages] = useState<Message[]>([]);
-  const [messageRefreshTrigger, setMessageRefreshTrigger] = useState(0);
   const [isAILoading, setIsAILoading] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isIntialLoading, setIsInitialLoading] = useState<boolean>(true);
 
   // ------------------ Auth Check ------------------
 
-  /**
-   * Handle user authentication check and inital message loading
-   */
+  // Fetch once on mount
   useEffect(() => {
     const token = getStoredToken();
 
@@ -44,40 +41,32 @@ export default function ChatRoute() {
       return;
     }
 
-    fetchMessages(token);
-  }, [messageRefreshTrigger]);
+    const fetchMessages = async () => {
+      try {
+        setIsInitialLoading(true);
+        const fetched = await getAllMessages(
+          token,
+          therapySessionId,
+          handleError
+        );
 
-  /**
-   * Fetches all chat messages from the server using the provided token
-   */
-  const fetchMessages = async (token: string) => {
-    try {
-      setIsInitialLoading(true);
-      const fetched = await getAllMessages(
-        token,
-        therapySessionId,
-        handleError
-      );
-
-      if (fetched) {
-        setMessages(fetched);
+        if (fetched) {
+          setMessages(fetched);
+        }
+      } finally {
+        setIsInitialLoading(false);
       }
-    } catch (error) {
-      handleError({
-        name: "Failed to fetch messages",
-        statusCode: 400,
-        message: "Failed to fetch messages",
-      });
-    } finally {
-      setIsInitialLoading(false);
-    }
+    };
+
+    fetchMessages();
+  }, [therapySessionId]);
+
+  const handleNewMessage = (message: Message) => {
+    setMessages((prev) => [...prev, message]);
   };
 
-  /**
-   * Triggers a refresh of chat messages from the server after sending new messages
-   */
-  const triggerChatMessageRefresh = (): void => {
-    setMessageRefreshTrigger((prev) => prev + 1);
+  const handleClearMessages = () => {
+    setMessages([]);
   };
 
   return (
@@ -92,7 +81,7 @@ export default function ChatRoute() {
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           onError={handleError}
-          onRefresh={triggerChatMessageRefresh}
+          onClearMessages={handleClearMessages}
         />
 
         {/* -----------Main Chat Content Area----------- */}
@@ -102,7 +91,7 @@ export default function ChatRoute() {
             <RecordingView
               onError={handleError}
               setIsAILoading={setIsAILoading}
-              onRefresh={triggerChatMessageRefresh}
+              onNewMessage={handleNewMessage}
             />
           </div>
 
@@ -112,7 +101,7 @@ export default function ChatRoute() {
               messages={messages}
               isTherapistResponseLoading={isAILoading}
               onError={handleError}
-              onRefresh={triggerChatMessageRefresh}
+              onNewMessage={handleNewMessage}
               isInitialLoading={isIntialLoading}
               setIsTherapistResponseLoading={setIsAILoading}
             />

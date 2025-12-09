@@ -12,6 +12,8 @@ import { RxCross2 } from "react-icons/rx";
 import { useParams } from "next/navigation";
 import { useAudioPlayer } from "@/lib/hooks/useAudioPlayer";
 
+import Message from "@/types/message";
+
 declare global {
   interface Window {
     webkitSpeechRecognition: any;
@@ -21,13 +23,13 @@ declare global {
 interface RecordingViewProps {
   onError: (error: ApiError) => void;
   setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
-  onRefresh: () => void;
+  onNewMessage: (message: Message) => void;
 }
 
 export default function RecordingView({
   onError,
   setIsAILoading,
-  onRefresh,
+  onNewMessage,
 }: RecordingViewProps) {
   // State variables to manage recording status, completion, and transcript
   const [isRecording, setIsRecording] = useState(false);
@@ -133,7 +135,14 @@ export default function RecordingView({
           onError,
           currentTranscript
         );
-        onRefresh();
+
+        const userMessage: Message = {
+          id: Date.now(),
+          content: currentTranscript,
+          role: "user",
+        };
+
+        onNewMessage(userMessage);
 
         const response = await getAIAnswer(
           currentTranscript,
@@ -147,8 +156,15 @@ export default function RecordingView({
         }
 
         setIsAILoading(false);
+
+        const aiMessage: Message = {
+          id: Date.now(),
+          content: response?.answer.content,
+          role: "assistant",
+        };
+
+        onNewMessage(aiMessage);
       }
-      onRefresh();
     }
   };
 
