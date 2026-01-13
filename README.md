@@ -43,4 +43,5 @@ Unmind is built on a modern, robust architecture for performance and scalability
 | **API Framework** | Flask                  | Lightweight and flexible REST API service layer.                  |
 | **Core AI**       | Google Gemini & OpenAI | Provides the core intelligence, empathy, and conversational flow. |
 | **Database ORM**  | SQLAlchemy             | Manages database interactions for users, sessions, and messages.  |
+| **Voice I/O**     | ElevenLabs             | Ensures ultra-realistic text-to-speech technology.                |
 | **Security**      | `werkzeug.security`    | Handles secure password hashing and verification.                 |
