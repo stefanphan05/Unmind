@@ -16,12 +16,14 @@ interface PromptBoxProps {
   onError: (error: ApiError) => void;
   onNewMessage: (message: Message) => void;
   setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedTone: string;
 }
 
 export default function PromptBox({
   onError,
   onNewMessage,
   setIsAILoading,
+  selectedTone,
 }: PromptBoxProps) {
   const [message, setMessage] = useState<string>("");
 
@@ -76,7 +78,8 @@ export default function PromptBox({
         currentTextMessage,
         therapySessionId,
         onError,
-        token
+        token,
+        selectedTone
       );
       if (response?.audio) {
         playBase64Audio(response.audio);

@@ -32,11 +32,13 @@ class MessageHandlers:
             return ResponseHelper.validation_error(error)
 
         user_input = data.get("content")
+        tone = data.get("tone")
 
         # Get AI Response
         ai_answer = self.__ai_therapist.send_message(
             email=email,
-            user_input=user_input
+            user_input=user_input,
+            tone=tone
         )
 
         message = self.__message_service.save_message(

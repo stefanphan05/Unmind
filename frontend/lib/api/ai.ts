@@ -15,13 +15,14 @@ export const getAIAnswer = async (
   content: string,
   therapySessionId: number,
   onError: (error: ApiError) => void,
-  token: string
+  token: string,
+  tone: string = "compassionate"
 ): Promise<AIAnswerResponse | null> => {
   try {
     const res = await handleMutationRequest<AIAnswerResponse>(
       `${BASE_URL}/sessions/${therapySessionId}/messages/ai`,
       "get AI answer",
-      { content },
+      { content, tone },
       "POST",
       token
     );

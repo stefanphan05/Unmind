@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-
 import { ApiError } from "next/dist/server/api-utils";
-
 import { getAIAnswer } from "@/lib/api/ai";
 import { saveUserInput } from "@/lib/api/chat";
-
 import { FaMicrophone, FaPause, FaStop } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 import { useParams } from "next/navigation";
 import { useAudioPlayer } from "@/lib/hooks/useAudioPlayer";
-
 import Message from "@/types/message";
 
 declare global {
@@ -24,56 +20,115 @@ interface RecordingViewProps {
   onError: (error: ApiError) => void;
   setIsAILoading: React.Dispatch<React.SetStateAction<boolean>>;
   onNewMessage: (message: Message) => void;
+  selectedTone: string;
 }
 
 export default function RecordingView({
   onError,
   setIsAILoading,
   onNewMessage,
+  selectedTone,
 }: RecordingViewProps) {
-  // State variables to manage recording status, completion, and transcript
   const [isRecording, setIsRecording] = useState(false);
   const [isShowingTranscript, setIsShowingTranscript] = useState(false);
   const [recordingComplete, setRecordingComplete] = useState(false);
   const [transcript, setTranscript] = useState("");
 
-  const params = useParams();
+  // Track the starting index for transcript
+  const transcriptStartIndexRef = useRef(0);
 
+  const params = useParams();
   const therapySessionId = Number(params?.therapySessionId);
   const { playBase64Audio, isPlaying } = useAudioPlayer();
 
   const [error, setError] = useState<ApiError | null>(null);
   const transcriptContainerRef = useRef<HTMLDivElement | null>(null);
-
-  // Reference to store the SpeechRecognition instance
   const recognitionRef = useRef<any>(null);
 
-  // Function to start recording
+  // Function to start recording with improved configuration
   const startRecording = () => {
     setIsRecording(true);
     setIsShowingTranscript(true);
+    transcriptStartIndexRef.current = 0;
 
-    // Create a new SpeechRecognition instance and configure it
     recognitionRef.current = new window.webkitSpeechRecognition();
     recognitionRef.current.continuous = true;
     recognitionRef.current.interimResults = true;
 
-    // Event handler for speech recognition results
-    recognitionRef.current.onresult = (event: any) => {
-      let fullTranscript = "";
+    recognitionRef.current.lang = "en-US";
 
-      for (let i = 0; i < event.results.length; i++) {
-        fullTranscript += event.results[i][0].transcript;
+    recognitionRef.current.maxAlternatives = 1;
+
+    // IMPROVED: Better result handling - only capture new speech after clear
+    recognitionRef.current.onresult = (event: any) => {
+      let newTranscript = "";
+
+      // Only process results from the starting index onwards
+      for (
+        let i = transcriptStartIndexRef.current;
+        i < event.results.length;
+        i++
+      ) {
+        newTranscript += event.results[i][0].transcript;
       }
 
-      setTranscript(fullTranscript.trim());
+      setTranscript(newTranscript.trim());
     };
 
-    // Start the speech recognition
-    recognitionRef.current.start();
+    // IMPROVED: Error handling
+    recognitionRef.current.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+
+      if (event.error === "no-speech") {
+        // Don't stop, just continue listening
+        return;
+      }
+
+      if (
+        event.error === "not-allowed" ||
+        event.error === "service-not-allowed"
+      ) {
+        onError({
+          name: "Permission Error",
+          statusCode: 403,
+          message:
+            "Microphone access denied. Please enable microphone permissions.",
+        });
+        setIsRecording(false);
+        setIsShowingTranscript(false);
+      } else if (event.error === "network") {
+        onError({
+          name: "Network Error",
+          statusCode: 500,
+          message: "Network error occurred. Please check your connection.",
+        });
+      }
+    };
+
+    // IMPROVED: Handle recognition end and auto-restart
+    recognitionRef.current.onend = () => {
+      // Auto-restart if still recording (handles browser auto-stop)
+      if (isRecording) {
+        try {
+          recognitionRef.current.start();
+        } catch (e) {
+          console.error("Failed to restart recognition:", e);
+        }
+      }
+    };
+
+    try {
+      recognitionRef.current.start();
+    } catch (e) {
+      console.error("Failed to start recognition:", e);
+      onError({
+        name: "Error",
+        statusCode: 500,
+        message: "Failed to start speech recognition. Please try again.",
+      });
+    }
   };
 
-  // Scroll to the bottom of the transcript container when the transcript changes
   useEffect(() => {
     if (transcriptContainerRef.current) {
       transcriptContainerRef.current.scrollTop =
@@ -81,22 +136,18 @@ export default function RecordingView({
     }
   }, [transcript]);
 
-  // Cleanup effect when the component unmounts
   useEffect(() => {
     return () => {
-      // Stop the speech recognition if it's active
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
     };
   }, []);
 
-  // Function to stop recording
   const stopRecording = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (recognitionRef.current) {
-      // Stop the speech recognition and mark recording as complete
       recognitionRef.current.stop();
 
       if (!transcript.trim()) {
@@ -105,6 +156,8 @@ export default function RecordingView({
           statusCode: 400,
           message: "Please talk something",
         });
+        setIsRecording(false);
+        setIsShowingTranscript(false);
         return;
       }
 
@@ -112,6 +165,8 @@ export default function RecordingView({
       setTranscript("");
       setIsShowingTranscript(false);
       setRecordingComplete(false);
+      setIsRecording(false);
+      transcriptStartIndexRef.current = 0;
 
       const token =
         localStorage.getItem("authToken") ||
@@ -148,7 +203,8 @@ export default function RecordingView({
           currentTranscript,
           therapySessionId,
           onError,
-          token
+          token,
+          selectedTone
         );
 
         if (response?.audio) {
@@ -176,42 +232,30 @@ export default function RecordingView({
     setTranscript("");
     setIsShowingTranscript(false);
     setRecordingComplete(false);
+    transcriptStartIndexRef.current = 0;
   };
 
+  // IMPROVED: Clear transcript without stopping recognition
   const clearTranscript = () => {
-    // Stop the current recognition
-    recognitionRef.current.stop();
+    if (!recognitionRef.current) return;
 
-    // Clear the transcript
+    // Clear the displayed transcript
     setTranscript("");
 
-    // Restart recognition after a brief delay to avoid conflicts
+    // IMPORTANT: Update the starting index to ignore previous results
+    // This ensures only new speech is captured
+    recognitionRef.current.abort(); // Abort current recognition
+
+    // Restart with fresh state
     setTimeout(() => {
       if (isRecording) {
-        recognitionRef.current = new window.webkitSpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.interimResults = true;
-
-        // Event handler for speech recognition results
-        recognitionRef.current.onresult = (event: any) => {
-          let fullTranscript = "";
-
-          for (let i = 0; i < event.results.length; i++) {
-            fullTranscript += event.results[i][0].transcript;
-          }
-
-          setTranscript(fullTranscript.trim());
-        };
-
-        // Restart the speech recognition
-        recognitionRef.current.start();
+        transcriptStartIndexRef.current = 0;
+        startRecording();
       }
     }, 100);
   };
 
-  // Toggle recording state and manage recording actions
   const handleToggleRecording = (e: React.FormEvent) => {
-    setIsRecording(!isRecording);
     if (!isRecording) {
       startRecording();
     } else {
@@ -234,11 +278,9 @@ export default function RecordingView({
         </div>
       )}
 
-      {/* Buttons */}
       <div className="flex items-center justify-center">
         {isRecording ? (
           <div className="flex flex-row justify-center items-center">
-            {/* Clear transcript button */}
             <button
               onClick={clearTranscript}
               className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
@@ -247,7 +289,6 @@ export default function RecordingView({
               <RxCross2 className="text-gray-600 w-6 h-6" />
             </button>
 
-            {/* Button for stopping recording */}
             <button
               onClick={handleToggleRecording}
               className="flex items-center justify-center bg-red-400 hover:bg-red-500 ring-4 ring-red-300 animate-expand rounded-full w-40 h-40 focus:outline-none cursor-pointer ml-10 mr-10"
@@ -255,7 +296,6 @@ export default function RecordingView({
               <FaPause className="text-white w-24 h-24" />
             </button>
 
-            {/* Cancel recording button */}
             <button
               onClick={cancelRecording}
               className="flex items-center justify-center bg-red-100 hover:bg-red-200 border-2 border-red-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
@@ -265,7 +305,6 @@ export default function RecordingView({
             </button>
           </div>
         ) : (
-          // Button for starting recording
           <button
             onClick={handleToggleRecording}
             className="flex items-center justify-center bg-blue-400 hover:bg-blue-500 rounded-full w-40 h-40 focus:outline-none cursor-pointer"

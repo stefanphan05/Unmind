@@ -14,6 +14,7 @@ interface ChatConversationPanelProps {
   onNewMessage: (message: Message) => void;
   isInitialLoading: boolean;
   setIsTherapistResponseLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedTone: string;
 }
 
 export default function ChatConversationPanel({
@@ -23,6 +24,7 @@ export default function ChatConversationPanel({
   onNewMessage,
   isInitialLoading,
   setIsTherapistResponseLoading,
+  selectedTone,
 }: ChatConversationPanelProps) {
   const isLatestMessage = (messageIndex: number): boolean => {
     return messageIndex === messages.length - 1;
@@ -66,6 +68,7 @@ export default function ChatConversationPanel({
         onError={onError}
         onNewMessage={onNewMessage}
         setIsAILoading={setIsTherapistResponseLoading}
+        selectedTone={selectedTone}
       />
     </div>
   );

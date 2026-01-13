@@ -58,8 +58,7 @@ class GeminiStrategy(LLMStrategy):
                 contents=[content]
             )
 
-            cleaned_response = re.sub(
-                r'\*\*(.*?)\*\*', r'\1', response.text.strip())
+            cleaned_response = response.text.replace("*", "").strip()
             return cleaned_response
 
         except Exception as e:

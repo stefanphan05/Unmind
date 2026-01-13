@@ -25,6 +25,7 @@ interface HeaderProps {
   setIsSidebarOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   onError: (error: ApiError) => void;
   onClearMessages: () => void;
+  onToneChange: (tone: string) => void;
 }
 
 export default function Header({
@@ -32,6 +33,7 @@ export default function Header({
   setIsSidebarOpen,
   onError,
   onClearMessages,
+  onToneChange,
 }: HeaderProps) {
   const router = useRouter();
   const { isAuthenticated, user, signOut } = useAuth();
@@ -46,6 +48,17 @@ export default function Header({
   const [currentVoice, setCurrentVoice] = useState<string>("rachel");
   const [availableVoices, setAvailableVoices] = useState<string[]>([]);
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
+
+  const [toneMenuOpen, setToneMenuOpen] = useState(false);
+  const [currentTone, setCurrentTone] = useState<string>("compassionate");
+
+  const availableTones = [
+    "fun",
+    "angry",
+    "boring",
+    "aggressive",
+    "compassionate",
+  ];
 
   // Fetch current voice on component mount
   useEffect(() => {
@@ -103,6 +116,12 @@ export default function Header({
     return voice.charAt(0).toUpperCase() + voice.slice(1);
   };
 
+  const handleToneSelect = (tone: string) => {
+    setCurrentTone(tone);
+    setToneMenuOpen(false);
+    onToneChange(tone);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div className="max-w-full p-3">
@@ -154,6 +173,44 @@ export default function Header({
                           {capitalizeVoice(voice)}
                         </span>
                         {currentVoice === voice && (
+                          <FaCheck className="w-4 h-4 text-blue-600" />
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Tone selection button */}
+            <button
+              className="ml-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl border border-gray-200"
+              onClick={() => setToneMenuOpen((prev) => !prev)}
+            >
+              <div className="flex justify-center items-center gap-1">
+                <span className="text-sm font-medium text-gray-600">
+                  Tone: {capitalizeVoice(currentTone)}
+                </span>
+                <FaAngleDown className="h-4 w-4 text-gray-400" />
+              </div>
+            </button>
+
+            {/* Tone selection dropdown */}
+            {toneMenuOpen && (
+              <div className="absolute left-32 top-12 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-300 z-50">
+                <div className="p-2">
+                  <p className="px-3 py-2 text-xs text-gray-500 font-semibold uppercase">
+                    Set AI Mood
+                  </p>
+                  <ul className="space-y-1">
+                    {availableTones.map((tone) => (
+                      <li
+                        key={tone}
+                        onClick={() => handleToneSelect(tone)}
+                        className="px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center justify-between"
+                      >
+                        <span className="text-sm">{capitalizeVoice(tone)}</span>
+                        {currentTone === tone && (
                           <FaCheck className="w-4 h-4 text-blue-600" />
                         )}
                       </li>

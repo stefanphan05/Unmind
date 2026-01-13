@@ -30,6 +30,8 @@ export default function ChatRoute() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isIntialLoading, setIsInitialLoading] = useState<boolean>(true);
 
+  const [selectedTone, setSelectedTone] = useState("compassionate");
+
   // ------------------ Auth Check ------------------
 
   // Fetch once on mount
@@ -82,6 +84,7 @@ export default function ChatRoute() {
           setIsSidebarOpen={setIsSidebarOpen}
           onError={handleError}
           onClearMessages={handleClearMessages}
+          onToneChange={(tone) => setSelectedTone(tone)}
         />
 
         {/* -----------Main Chat Content Area----------- */}
@@ -92,6 +95,7 @@ export default function ChatRoute() {
               onError={handleError}
               setIsAILoading={setIsAILoading}
               onNewMessage={handleNewMessage}
+              selectedTone={selectedTone}
             />
           </div>
 
@@ -104,6 +108,7 @@ export default function ChatRoute() {
               onNewMessage={handleNewMessage}
               isInitialLoading={isIntialLoading}
               setIsTherapistResponseLoading={setIsAILoading}
+              selectedTone={selectedTone}
             />
           </div>
         </div>
