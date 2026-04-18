@@ -13,6 +13,9 @@ def create_app():
     mail.init_app(app)
 
     with app.app_context():
+        from models.user import User
+        from models.therapy_session import TherapySession
+        from models.message import Message
         db.create_all()
 
         # Importing
