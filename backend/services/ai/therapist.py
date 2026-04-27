@@ -33,7 +33,7 @@ class AITherapistService:
             - Reference what the user has shared earlier (e.g., emotions, events, struggles)
             - Maintain continuity in the conversation and avoid repeating advice
             - Deepen the conversation based on previously shared thoughts
-            - Recognize patterns or changes in emotinoal tone
+            - Recognize patterns or changes in emotional tone
             - Help the user reflect on their progress
 
             Guidelines:
