@@ -50,12 +50,21 @@ export default function PromptBox({
 
     setMessage("");
 
+    const userMessage: Message = {
+      id: Date.now(),
+      content: currentTextMessage,
+      role: "user",
+    };
+
+    // Show the user's message instantly while backend requests run.
+    onNewMessage(userMessage);
     setIsAILoading(true);
 
     const token =
       localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
     if (!token) {
+      setIsAILoading(false);
       onError({
         name: "Auth Error",
         statusCode: 401,
@@ -64,35 +73,36 @@ export default function PromptBox({
       return;
     }
 
-    await saveUserInput(token, therapySessionId, onError, currentTextMessage);
-    const userMessage: Message = {
-      id: Date.now(),
-      content: currentTextMessage,
-      role: "user",
-    };
+    try {
+      await saveUserInput(token, therapySessionId, onError, currentTextMessage);
 
-    onNewMessage(userMessage);
+      if (currentTextMessage) {
+        const response = await getAIAnswer(
+          currentTextMessage,
+          therapySessionId,
+          onError,
+          token,
+          selectedTone
+        );
+        if (!response?.answer) {
+          return;
+        }
 
-    if (currentTextMessage) {
-      const response = await getAIAnswer(
-        currentTextMessage,
-        therapySessionId,
-        onError,
-        token,
-        selectedTone
-      );
-      if (response?.audio) {
-        playBase64Audio(response.audio);
+        if (response?.audio) {
+          playBase64Audio(response.audio);
+        }
+
+        const aiMessage: Message = {
+          id: Date.now(),
+          content: response.answer.content,
+          role: "assistant",
+          shouldAnimate: true,
+        };
+
+        onNewMessage(aiMessage);
       }
+    } finally {
       setIsAILoading(false);
-
-      const aiMessage: Message = {
-        id: Date.now(),
-        content: response?.answer.content,
-        role: "assistant",
-      };
-
-      onNewMessage(aiMessage);
     }
   };
 
@@ -100,13 +110,13 @@ export default function PromptBox({
     <div className="bg-gray-100 rounded-4xl text-[#5e5e5e] px-4 py-1 border border-gray-300 sticky bottom-0 w-full">
       <form
         className="flex flex-row gap-4 items-center"
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={handleSubmit}
       >
         <MessageInput textMessage={message} setTextMessage={setMessage} />
         <div className="flex gap-2 items-center">
           <button
+            type="submit"
             className="flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-gray-300 hover:text-black bg-gray-200 rounded-2xl transition"
-            onClick={handleSubmit}
           >
             <BiSolidSend className="h-5" />
           </button>

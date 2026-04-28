@@ -1,6 +1,7 @@
 import { ApiError } from "next/dist/server/api-utils";
 
 import Message from "@/types/message";
+import { useChatAutoScroll } from "@/lib/hooks/useChatAutoScroll";
 
 import TypingIndicator from "./TypingIndicator";
 import PromptBox from "./PromptBox";
@@ -26,6 +27,19 @@ export default function ChatConversationPanel({
   setIsTherapistResponseLoading,
   selectedTone,
 }: ChatConversationPanelProps) {
+  const latestMessageRole = messages.at(-1)?.role;
+  const {
+    scrollContainerRef,
+    bottomAnchorRef,
+    handleScroll,
+    handleLatestAssistantRender,
+  } = useChatAutoScroll({
+    messageCount: messages.length,
+    latestMessageRole,
+    isInitialLoading,
+    isTherapistResponseLoading,
+  });
+
   const isLatestMessage = (messageIndex: number): boolean => {
     return messageIndex === messages.length - 1;
   };
@@ -34,7 +48,11 @@ export default function ChatConversationPanel({
       {/* ------------------Scrollable message history container------------------ */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* ------------------Chat Messages Display Area------------------ */}
-        <div className="p-4 overflow-y-auto scroll-smooth">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 p-4 overflow-y-auto scroll-smooth"
+          onScroll={handleScroll}
+        >
           {/* ------------------Render all existing messages------------------ */}
           {isInitialLoading ? (
             <LoadingOverlay
@@ -49,6 +67,9 @@ export default function ChatConversationPanel({
                     key={message.id}
                     message={message}
                     isLatest={isLatestMessage(index)}
+                    onContentRender={
+                      isLatestMessage(index) ? handleLatestAssistantRender : undefined
+                    }
                   />
                 ))
               ) : (
@@ -60,6 +81,7 @@ export default function ChatConversationPanel({
           )}
           {/* ------------------AI response loading indicator------------------ */}
           {isTherapistResponseLoading && <TypingIndicator />}
+          <div ref={bottomAnchorRef} />
         </div>
       </div>
 

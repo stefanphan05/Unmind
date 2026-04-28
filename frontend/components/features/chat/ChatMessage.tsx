@@ -1,14 +1,57 @@
 import Message from "@/types/message";
-import React from "react";
-import { Typewriter } from "react-simple-typewriter";
+import React, { useEffect, useState } from "react";
 
 interface ChatMessageProps {
   message: Message;
   isLatest?: boolean;
+  onContentRender?: () => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
-  // const isAssistant = message.role === "assistant";
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  isLatest,
+  onContentRender,
+}) => {
+  const isAssistant = message.role === "assistant";
+  const fullContent = message.content ?? "";
+  const shouldAnimate = isAssistant && message.shouldAnimate && isLatest;
+  const [displayedContent, setDisplayedContent] = useState(
+    shouldAnimate ? "" : fullContent
+  );
+
+  useEffect(() => {
+    if (!shouldAnimate) {
+      setDisplayedContent(fullContent);
+      return;
+    }
+
+    if (!fullContent.length) {
+      setDisplayedContent("");
+      return;
+    }
+
+    let currentIndex = 0;
+    const typingInterval = window.setInterval(() => {
+      currentIndex += 1;
+      setDisplayedContent(fullContent.slice(0, currentIndex));
+
+      if (currentIndex >= fullContent.length) {
+        window.clearInterval(typingInterval);
+      }
+    }, 18);
+
+    return () => {
+      window.clearInterval(typingInterval);
+    };
+  }, [fullContent, shouldAnimate]);
+
+  useEffect(() => {
+    if (!onContentRender) {
+      return;
+    }
+
+    onContentRender();
+  }, [displayedContent, onContentRender]);
 
   return (
     <div
@@ -23,13 +66,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isLatest }) => {
             : "text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl rounded-bl-md"
         }`}
       >
-        {/* {isAssistant && isLatest ? (
-          <Typewriter words={[message.content]} typeSpeed={25} />
-        ) : (
-          message.content
-        )} */}
-
-        {message.content}
+        {displayedContent}
       </div>
     </div>
   );

@@ -207,6 +207,11 @@ export default function RecordingView({
           selectedTone
         );
 
+        if (!response?.answer) {
+          setIsAILoading(false);
+          return;
+        }
+
         if (response?.audio) {
           playBase64Audio(response.audio);
         }
@@ -215,8 +220,9 @@ export default function RecordingView({
 
         const aiMessage: Message = {
           id: Date.now(),
-          content: response?.answer.content,
+          content: response.answer.content,
           role: "assistant",
+          shouldAnimate: true,
         };
 
         onNewMessage(aiMessage);
