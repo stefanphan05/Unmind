@@ -167,7 +167,7 @@ export function SignUpForm() {
 
       <LoadingOverlay
         isVisible={isNavigating}
-        message="Redirecting to your chat..."
+        message=""
       />
     </AuthFormLayout>
   );

@@ -1,8 +1,6 @@
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
-import { signInWithGoogle } from "@/lib/api/auth";
-import { useGoogleLogin } from "@react-oauth/google";
+import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/providers/auth-provider";
 import { useState } from "react";
 
 interface GoogleAuthButtonProps {
@@ -19,68 +17,63 @@ export default function GoogleAuthButton({
   onNavigating,
 }: GoogleAuthButtonProps) {
   const router = useRouter();
-  const { signIn } = useAuth();
   const { handleError } = useErrorHandler();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const googleSignin = useGoogleLogin({
-    onSuccess: async (credentialResponse: any) => {
-      try {
-        const googleToken = credentialResponse?.access_token;
+  const handleGoogleSignIn = async () => {
+    const isActionBlocked = isLoading || disabled || isProcessing;
+    if (isActionBlocked) {
+      return;
+    }
 
-        if (!googleToken) {
-          handleError({
-            name: "Google Login",
-            statusCode: 400,
-            message: `No Google token received`,
-          });
-          return;
-        }
+    // Supabase sends the user to Google, then redirects back to this route.
+    const redirectTo = `${window.location.origin}/auth/callback`;
 
-        const appToken = await signInWithGoogle(googleToken, handleError);
+    try {
+      setIsProcessing(true);
+      onNavigating?.(true);
 
-        if (appToken) {
-          signIn(appToken, true);
-
-          // Notify parent component if callback provided
-          if (onNavigating) {
-            onNavigating(true);
-          }
-
-          // Small delay for smooth visual feedback
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          router.push("/chat/1");
-        } else {
-          setIsProcessing(false);
-        }
-      } catch (error) {
-        handleError({
-          name: "Google Signup",
-          statusCode: 400,
-          message:
-            error instanceof Error
-              ? `Google login failed: ${error.message}`
-              : `Google login failed: ${JSON.stringify(error)}`,
-        });
-      }
-    },
-    onError: () => {
-      handleError({
-        name: "Google SignUp",
-        statusCode: 400,
-        message: "Google signup failed",
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+          // Request consent explicitly to reliably receive a provider token.
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+          scopes: "email profile",
+        },
       });
-    },
-    scope: "profile email",
-  });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      // OAuth popup/redirect setup failed before leaving the current page.
+      onNavigating?.(false);
+      setIsProcessing(false);
+
+      const errorMessage =
+        error instanceof Error
+          ? `Google sign in failed: ${error.message}`
+          : "Google sign in failed";
+
+      handleError({
+        name: "Google Sign In",
+        statusCode: 400,
+        message: errorMessage,
+      });
+      router.replace("/signin");
+    }
+  };
 
   return (
     <button
       type="button"
-      onClick={() => googleSignin()}
+      onClick={handleGoogleSignIn}
       className={`w-full flex items-center justify-center py-5 px-4 text-sm rounded-2xl border border-gray-300 text-gray-700 bg-white  transition${
-        isLoading || disabled
+        isLoading || disabled || isProcessing
           ? "bg-gray-400 cursor-not-allowed "
           : " focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 hover:bg-gray-50 cursor-pointer"
       }`}

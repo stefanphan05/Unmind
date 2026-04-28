@@ -25,7 +25,9 @@ export default function LoadingOverlay({
         <div
           className={`${sizeClasses[spinnerSize]} border-gray-200 border-t-gray-800 rounded-full animate-spin`}
         />
-        <p className="text-gray-700 font-medium">{message}</p>
+        {message.trim() ? (
+          <p className="text-gray-700 font-medium">{message}</p>
+        ) : null}
       </div>
     </div>
   );

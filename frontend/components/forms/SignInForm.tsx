@@ -7,6 +7,7 @@ import { SignInPayload, signInUser } from "@/lib/api/auth";
 
 import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
+import { getPostLoginRedirectPath } from "@/lib/utils/getPostLoginRedirectPath";
 
 import { getMissingFields } from "@/lib/utils/getMissingAuthFields";
 
@@ -82,8 +83,8 @@ export function SignInForm() {
         // Small delay for smooth visual feedback
         await new Promise((resolve) => setTimeout(resolve, 300));
 
-        // Go to chat page
-        router.push("/chat/1");
+        const redirectPath = await getPostLoginRedirectPath(token, handleError);
+        router.push(redirectPath);
       }
     } catch (error) {
       console.log("Sign in error", error);
@@ -96,10 +97,7 @@ export function SignInForm() {
 
   return (
     <>
-      <LoadingOverlay
-        isVisible={isNavigating}
-        message="Redirecting to your chat..."
-      />
+      <LoadingOverlay isVisible={isNavigating} message="" />
 
       <AuthFormLayout
         title="Sign in"
