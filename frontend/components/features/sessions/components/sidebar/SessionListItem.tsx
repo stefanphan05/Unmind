@@ -1,64 +1,90 @@
 import { TherapySession } from "@/types/therapySession";
-import { User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
 import { BsDashCircle, BsThreeDots } from "react-icons/bs";
 
 interface SessionListItemProps {
   session: TherapySession;
   onMenuClick: () => void;
+  onNavigate?: () => void;
 }
 
-const statusClasses = {
-  completed: "text-green-600 bg-green-50",
-  upcoming: "text-blue-600 bg-blue-50",
-  ongoing: "text-yellow-600 bg-yellow-50",
-  default: "text-gray-600 bg-gray-50",
+const statusLabels: Record<string, string> = {
+  completed: "Completed",
+  upcoming: "Upcoming",
+  ongoing: "In progress",
 };
 
 const resultIcon = (r: TherapySession["result"]) => {
   switch (r) {
     case "positive":
-      return <AiOutlineLike className="w-4 h-4" />;
+      return <AiOutlineLike className="session-card__result-icon" />;
     case "neutral":
-      return <BsDashCircle className="w-4 h-4" />;
+      return <BsDashCircle className="session-card__result-icon" />;
     case "negative":
-      return <AiOutlineDislike className="w-4 h-4" />;
+      return <AiOutlineDislike className="session-card__result-icon" />;
     default:
-      return <User className="w-4 h-4" />;
+      return null;
   }
 };
 
 export default function SessionListItem({
   session,
   onMenuClick,
+  onNavigate,
 }: SessionListItemProps) {
   const router = useRouter();
-  const badge = statusClasses[session.status] ?? statusClasses.default;
+  const params = useParams();
+  const activeId = Number(params?.therapySessionId);
+  const isActive = activeId === Number(session.id);
 
   const handleSessionClick = () => {
     router.push(`/chat/${session.id}`);
+    onNavigate?.();
   };
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMenuClick();
+  };
+
   return (
-    <div
+    <article
+      role="button"
+      tabIndex={0}
       onClick={handleSessionClick}
-      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200 hover:shadow-sm hover:border-gray-300 transform"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSessionClick();
+        }
+      }}
+      className={`session-card ${isActive ? "session-card--active" : ""}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
-          {session.name}
-        </h3>
-        <BsThreeDots onClick={onMenuClick} />
+      <div className="session-card__top">
+        <h3 className="session-card__name">{session.name}</h3>
+        <button
+          type="button"
+          className="session-card__menu-btn"
+          onClick={handleMenuClick}
+          aria-label="Session options"
+        >
+          <BsThreeDots />
+        </button>
       </div>
-      <div className="flex gap-4 text-xs text-gray-500 justify-between">
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge}`}>
-          {session.status}
+      <div className="session-card__meta">
+        <span
+          className={`session-card__status session-card__status--${session.status}`}
+        >
+          {statusLabels[session.status] ?? session.status}
         </span>
-        <div className="flex items-center gap-1">
-          {resultIcon(session.result)}
-          <span className="capitalize">{session.result}</span>
-        </div>
+        {session.result && (
+          <span className="session-card__result">
+            {resultIcon(session.result)}
+            <span className="capitalize">{session.result}</span>
+          </span>
+        )}
       </div>
-    </div>
+    </article>
   );
 }

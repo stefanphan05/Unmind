@@ -1,18 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { FaAngleDown, FaCheck } from "react-icons/fa6";
-
-import { BsLayoutSidebar } from "react-icons/bs";
-import { BsLayoutSidebarReverse } from "react-icons/bs";
-
-import { CgProfile } from "react-icons/cg";
-import { LogOut } from "lucide-react";
-import { MdOutlineEmail } from "react-icons/md";
-import { BsThreeDots } from "react-icons/bs";
 import { FiTrash2 } from "react-icons/fi";
+import { LogOut, Menu, Sparkles, Volume2 } from "lucide-react";
 import { getStoredToken } from "@/lib/utils/authToken";
 import { ApiError } from "next/dist/server/api-utils";
 
@@ -41,15 +34,16 @@ export default function Header({
   const params = useParams();
   const therapySessionId = Number(params?.therapySessionId);
 
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [chatMenuOpen, setChatMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [voiceMenuOpen, setVoiceMenuOpen] = useState(false);
 
   const [currentVoice, setCurrentVoice] = useState<string>("rachel");
   const [availableVoices, setAvailableVoices] = useState<string[]>([]);
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
 
-  const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [currentTone, setCurrentTone] = useState<string>("compassionate");
 
   const availableTones = [
@@ -60,7 +54,18 @@ export default function Header({
     "compassionate",
   ];
 
-  // Fetch current voice on component mount
+  const userInitial = (
+    user?.username?.[0] ??
+    user?.email?.[0] ??
+    "U"
+  ).toUpperCase();
+
+  const closeAllMenus = () => {
+    setMenuOpen(false);
+    setToneMenuOpen(false);
+    setVoiceMenuOpen(false);
+  };
+
   useEffect(() => {
     const fetchCurrentVoice = async () => {
       const token = getStoredToken();
@@ -76,7 +81,19 @@ export default function Header({
     fetchCurrentVoice();
   }, []);
 
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) {
+        closeAllMenus();
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
   const handleSignOut = () => {
+    closeAllMenus();
     router.push("/signin");
     signOut();
   };
@@ -87,7 +104,7 @@ export default function Header({
       await removeAllMessages(token, therapySessionId, onError);
     }
 
-    setChatMenuOpen(false);
+    closeAllMenus();
     onClearMessages();
   };
 
@@ -111,7 +128,6 @@ export default function Header({
     setVoiceMenuOpen(false);
   };
 
-  // Capitalize first letter for display
   const capitalizeVoice = (voice: string) => {
     return voice.charAt(0).toUpperCase() + voice.slice(1);
   };
@@ -123,169 +139,170 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
-      <div className="max-w-full p-3">
-        <div className="flex items-center justify-between">
-          {/* ---------- LEFT SECTION: Logo & Sidebar ---------- */}
-          <div className="flex justify-center items-center">
-            {/* Sidebar toggle button */}
-            <button
-              className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
-              onClickCapture={() => setIsSidebarOpen((prev) => !prev)}
-            >
-              {isSidebarOpen ? (
-                <BsLayoutSidebar className="h-5 w-5" title="Close sidebar" />
-              ) : (
-                <BsLayoutSidebarReverse
-                  className="h-5 w-5"
-                  title="Open sidebar"
-                />
-              )}
-            </button>
+    <header className="chat-top-bar" ref={headerRef}>
+      <div className="chat-top-bar__inner">
+        <div className="chat-top-bar__start">
+          <button
+            type="button"
+            className={`chat-sessions-btn ${
+              isSidebarOpen ? "chat-sessions-btn--active" : ""
+            }`}
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            aria-label={isSidebarOpen ? "Close sessions" : "Open sessions"}
+            aria-expanded={isSidebarOpen}
+          >
+            <Menu className="chat-sessions-btn__icon" strokeWidth={1.75} />
+            <span className="chat-sessions-btn__label">Sessions</span>
+          </button>
 
-            {/* App name with dropdown icon to change voices */}
-            <button
-              className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
-              onClick={() => setVoiceMenuOpen((prev) => !prev)}
-            >
-              <div className="flex justify-center items-center gap-1">
-                <p className="text-lg">Unmind</p>
-                <FaAngleDown className="h-4 w-4 text-gray-400" />
-              </div>
-            </button>
-            {/* Voice selection dropdown */}
-            {voiceMenuOpen && (
-              <div className="absolute left-0 top-12 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-300 z-50">
-                <div className="p-2">
-                  <p className="px-3 py-2 text-xs text-gray-500 font-semibold uppercase">
-                    Select Voice
-                  </p>
-                  <ul className="space-y-1">
-                    {availableVoices.map((voice) => (
-                      <li
-                        key={voice}
-                        onClick={() => handleVoiceSwitch(voice)}
-                        className={`px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center justify-between ${
-                          isLoadingVoice ? "opacity-50 pointer-events-none" : ""
-                        }`}
-                      >
-                        <span className="text-sm">
-                          {capitalizeVoice(voice)}
-                        </span>
-                        {currentVoice === voice && (
-                          <FaCheck className="w-4 h-4 text-blue-600" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {/* Tone selection button */}
-            <button
-              className="ml-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl border border-gray-200"
-              onClick={() => setToneMenuOpen((prev) => !prev)}
-            >
-              <div className="flex justify-center items-center gap-1">
-                <span className="text-sm font-medium text-gray-600">
-                  Tone: {capitalizeVoice(currentTone)}
-                </span>
-                <FaAngleDown className="h-4 w-4 text-gray-400" />
-              </div>
-            </button>
-
-            {/* Tone selection dropdown */}
-            {toneMenuOpen && (
-              <div className="absolute left-32 top-12 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-300 z-50">
-                <div className="p-2">
-                  <p className="px-3 py-2 text-xs text-gray-500 font-semibold uppercase">
-                    Set AI Mood
-                  </p>
-                  <ul className="space-y-1">
-                    {availableTones.map((tone) => (
-                      <li
-                        key={tone}
-                        onClick={() => handleToneSelect(tone)}
-                        className="px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center justify-between"
-                      >
-                        <span className="text-sm">{capitalizeVoice(tone)}</span>
-                        {currentTone === tone && (
-                          <FaCheck className="w-4 h-4 text-blue-600" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ---------- RIGHT SECTION: User Profile Dropdown ---------- */}
-          <div>
-            {isAuthenticated && (
-              <button
-                className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
-                onClick={() => setChatMenuOpen((prev) => !prev)}
-              >
-                <BsThreeDots className="w-6 h-6" />
-              </button>
-            )}
-
-            {chatMenuOpen && (
-              <div className="absolute right-13 top-12 mt-2 w-max min-w-[12rem] bg-white rounded-xl shadow-lg border border-gray-300 z-50">
-                <ul className="p-1">
-                  {/* Sign out button */}
-                  <li
-                    onClick={handleDeleteMessages}
-                    className="px-4 py-1 hover:bg-red-50 rounded-xl text-red-600 cursor-pointer flex items-center gap-2"
-                  >
-                    <FiTrash2 className="w-5 h-5" />
-                    <span>Delete</span>
-                  </li>
-                </ul>
-              </div>
-            )}
-
-            {/* Profile icon button to toggle menu */}
-            {isAuthenticated && (
-              <button
-                className="cursor-pointer hover:bg-gray-100 p-2 rounded-xl"
-                onClick={() => setUserMenuOpen((prev) => !prev)}
-              >
-                <CgProfile className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Profile dropdown menu */}
-            {userMenuOpen && (
-              <div className="absolute right-4 top-12 mt-2 w-max min-w-[12rem] bg-white rounded-xl shadow-lg border border-gray-300 z-50">
-                <ul className="p-1">
-                  {/* Show user email if available */}
-                  <li className="px-4 py-1 hover:bg-gray-100 rounded-xl cursor-pointer flex items-center gap-2 text-gray-500">
-                    <MdOutlineEmail className="w-5 h-5" />
-                    <span className="break-all">{user?.email}</span>
-                  </li>
-
-                  {/* Show username if available */}
-                  <li className="px-4 py-1 hover:bg-gray-100 rounded-xl cursor-pointer flex items-center gap-2 text-gray-500">
-                    <CgProfile className="w-5 h-5" />
-                    <span>{user?.username}</span>
-                  </li>
-
-                  {/* Sign out button */}
-                  <li
-                    onClick={handleSignOut}
-                    className="px-4 py-1 hover:bg-red-50 rounded-xl text-red-600 cursor-pointer flex items-center gap-2"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span>Sign out</span>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+          <span className="chat-top-bar__wordmark font-display">Unmind</span>
         </div>
+
+        {isAuthenticated && (
+          <div className="chat-top-bar__end">
+            <div className="chat-top-bar__tone-wrap">
+              <button
+                type="button"
+                className={`chat-header__tone-pill ${
+                  toneMenuOpen ? "chat-header__tone-pill--open" : ""
+                }`}
+                onClick={() => {
+                  setToneMenuOpen((prev) => !prev);
+                  setMenuOpen(false);
+                  setVoiceMenuOpen(false);
+                }}
+                aria-expanded={toneMenuOpen}
+                aria-haspopup="listbox"
+              >
+                <Sparkles
+                  className="chat-header__tone-icon"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                <span>{capitalizeVoice(currentTone)}</span>
+                <FaAngleDown className="chat-header__chevron" />
+              </button>
+              {toneMenuOpen && (
+                <div className="chat-header__dropdown chat-header__dropdown--tone">
+                  <p className="chat-header__dropdown-heading">Mood</p>
+                  <ul>
+                    {availableTones.map((tone) => (
+                      <li key={tone}>
+                        <button
+                          type="button"
+                          className={`chat-header__dropdown-option ${
+                            currentTone === tone
+                              ? "chat-header__dropdown-option--selected"
+                              : ""
+                          }`}
+                          onClick={() => handleToneSelect(tone)}
+                        >
+                          <span>{capitalizeVoice(tone)}</span>
+                          {currentTone === tone && (
+                            <FaCheck className="chat-header__check" />
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="chat-top-bar__menu-wrap">
+              <button
+                type="button"
+                className="chat-header__avatar-btn"
+                onClick={() => {
+                  setMenuOpen((prev) => !prev);
+                  setToneMenuOpen(false);
+                }}
+                aria-label="Account and settings"
+                aria-expanded={menuOpen}
+              >
+                <span className="chat-header__avatar font-display">
+                  {userInitial}
+                </span>
+              </button>
+
+              {menuOpen && (
+                <div className="chat-header__dropdown chat-header__dropdown--account">
+                  <div className="chat-header__account-card">
+                    <span className="chat-header__account-name font-display">
+                      {user?.username || "Guest"}
+                    </span>
+                    {user?.email && (
+                      <span className="chat-header__account-email">
+                        {user.email}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="chat-header__dropdown-section">
+                    <button
+                      type="button"
+                      className="chat-header__dropdown-row"
+                      onClick={() => {
+                        setVoiceMenuOpen((prev) => !prev);
+                      }}
+                    >
+                      <Volume2
+                        className="chat-header__row-icon"
+                        strokeWidth={1.75}
+                      />
+                      <span>Voice · {capitalizeVoice(currentVoice)}</span>
+                      <FaAngleDown className="chat-header__chevron chat-header__chevron--sm" />
+                    </button>
+                    {voiceMenuOpen && (
+                      <ul className="chat-header__sublist">
+                        {availableVoices.map((voice) => (
+                          <li key={voice}>
+                            <button
+                              type="button"
+                              className={`chat-header__dropdown-option ${
+                                currentVoice === voice
+                                  ? "chat-header__dropdown-option--selected"
+                                  : ""
+                              } ${isLoadingVoice ? "opacity-50 pointer-events-none" : ""}`}
+                              onClick={() => handleVoiceSwitch(voice)}
+                            >
+                              <span>{capitalizeVoice(voice)}</span>
+                              {currentVoice === voice && (
+                                <FaCheck className="chat-header__check" />
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="chat-header__dropdown-divider" />
+
+                  <button
+                    type="button"
+                    className="chat-header__dropdown-row chat-header__dropdown-row--danger"
+                    onClick={handleDeleteMessages}
+                  >
+                    <FiTrash2 className="chat-header__row-icon" />
+                    <span>Clear this conversation</span>
+                  </button>
+
+                  <div className="chat-header__dropdown-divider" />
+
+                  <button
+                    type="button"
+                    className="chat-header__dropdown-row chat-header__dropdown-row--danger"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="chat-header__row-icon" strokeWidth={1.75} />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

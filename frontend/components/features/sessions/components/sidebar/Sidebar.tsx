@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
 
 import { TherapySession } from "@/types/therapySession";
@@ -14,9 +15,10 @@ import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect";
 
 interface SidebarProps {
   isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function Sidebar({ isOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   useAuthRedirect();
   const { handleError } = useErrorHandler();
 
@@ -58,23 +60,40 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   return (
     <>
       <div
-        className={`
-          bg-white border-r border-gray-200 flex flex-col h-screen 
-          transition-all duration-300 ease-in-out z-40
-          ${
-            isOpen
-              ? "w-80 translate-x-0"
-              : "w-0 -translate-x-full overflow-hidden"
-          }
-        `}
+        className={`session-drawer-backdrop ${
+          isOpen ? "session-drawer-backdrop--visible" : ""
+        }`}
+        onClick={onClose}
+        aria-hidden={!isOpen}
+      />
+
+      <aside
+        className={`session-drawer ${isOpen ? "session-drawer--open" : ""}`}
+        aria-hidden={!isOpen}
       >
-        {isOpen && (
-          <>
-            <SessionToolbar onAdd={openCreateModal} />
-            <SessionList sessions={sessions} onMenuClick={openEditModal} />
-          </>
-        )}
-      </div>
+        <div className="session-drawer__header">
+          <div>
+            <p className="session-drawer__eyebrow">Journal</p>
+            <h2 className="session-drawer__title font-display">Your sessions</h2>
+          </div>
+          <button
+            type="button"
+            className="session-drawer__close"
+            onClick={onClose}
+            aria-label="Close sessions"
+          >
+            <X strokeWidth={1.75} className="h-5 w-5" />
+          </button>
+        </div>
+
+        <SessionToolbar onAdd={openCreateModal} />
+        <SessionList
+          sessions={sessions}
+          onMenuClick={openEditModal}
+          onNavigate={onClose}
+        />
+      </aside>
+
       <TherapySessionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
