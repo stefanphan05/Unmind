@@ -4,14 +4,26 @@ import { useState, useRef, useCallback } from "react";
 export const useAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
+  const releaseAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onplay = null;
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setIsPlaying(false);
+  }, []);
 
   const playBase64Audio = useCallback((base64Audio: string) => {
     try {
-      // Stop current audio if playing
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      releaseAudio();
 
       // Convert base64 to blob
       const byteCharacters = atob(base64Audio);
@@ -24,22 +36,14 @@ export const useAudioPlayer = () => {
       const byteArray = new Uint8Array(byteNumbers);
       const audioBlob = new Blob([byteArray], { type: "audio/wav" });
       const audioUrl = URL.createObjectURL(audioBlob);
+      audioUrlRef.current = audioUrl;
 
-      // Create and play audio
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
       audio.onplay = () => setIsPlaying(true);
-      audio.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
-      audio.onerror = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
+      audio.onended = () => releaseAudio();
+      audio.onerror = () => releaseAudio();
 
       audio.play().catch((err) => {
         console.error("Error playing audio:", err);
@@ -49,15 +53,11 @@ export const useAudioPlayer = () => {
       console.error("Error processing audio:", error);
       setIsPlaying(false);
     }
-  }, []);
+  }, [releaseAudio]);
 
   const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      setIsPlaying(false);
-    }
-  }, []);
+    releaseAudio();
+  }, [releaseAudio]);
 
   return { playBase64Audio, stopAudio, isPlaying };
 };

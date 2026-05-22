@@ -34,6 +34,15 @@ import Message from "@/types/message";
 
 // API imports
 import { getAllMessages } from "@/lib/api/chat";
+import { getSession, updateSessionTone } from "@/lib/api/session";
+import type { SessionTone } from "@/types/therapySession";
+import {
+  CACHE_KEYS,
+  STALE_MS,
+  getCacheEntry,
+  isCacheFresh,
+  setCacheEntry,
+} from "@/lib/cache/apiCache";
 import { getStoredToken } from "@/lib/utils/authToken";
 import Sidebar from "@/components/features/sessions/components/sidebar/Sidebar";
 import Header from "@/components/layout/Header";
@@ -49,12 +58,31 @@ export default function ChatRoute() {
   const therapySessionId = Number(params?.therapySessionId);
 
   // ------------------ States ------------------
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const cached = getCacheEntry<Message[]>(
+      CACHE_KEYS.messages(Number(params?.therapySessionId))
+    );
+    return cached?.data ?? [];
+  });
   const [isAILoading, setIsAILoading] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isIntialLoading, setIsInitialLoading] = useState<boolean>(true);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(() => {
+    const cached = getCacheEntry<Message[]>(
+      CACHE_KEYS.messages(Number(params?.therapySessionId))
+    );
+    return !cached;
+  });
 
-  const [selectedTone, setSelectedTone] = useState("compassionate");
+  const [selectedTone, setSelectedTone] = useState<SessionTone>("compassionate");
+
+  const handleToneChange = async (tone: SessionTone) => {
+    setSelectedTone(tone);
+
+    const token = getStoredToken();
+    if (!token) return;
+
+    await updateSessionTone(token, therapySessionId, tone, handleError);
+  };
 
   // ------------------ Auth Check ------------------
 
@@ -67,9 +95,31 @@ export default function ChatRoute() {
       return;
     }
 
+    const loadSessionTone = async () => {
+      const session = await getSession(token, therapySessionId, handleError);
+      if (session?.tone) {
+        setSelectedTone(session.tone);
+      }
+    };
+
+    void loadSessionTone();
+
+    const cacheKey = CACHE_KEYS.messages(therapySessionId);
+    const cached = getCacheEntry<Message[]>(cacheKey);
+
+    if (cached) {
+      setMessages(cached.data);
+      setIsInitialLoading(false);
+    }
+
     const fetchMessages = async () => {
+      const fresh = isCacheFresh(cacheKey, STALE_MS.messages);
+      if (fresh) return;
+
       try {
-        setIsInitialLoading(true);
+        if (!cached) {
+          setIsInitialLoading(true);
+        }
         const fetched = await getAllMessages(
           token,
           therapySessionId,
@@ -77,6 +127,7 @@ export default function ChatRoute() {
         );
 
         if (fetched) {
+          setCacheEntry(cacheKey, fetched);
           setMessages(fetched);
         }
       } finally {
@@ -85,14 +136,19 @@ export default function ChatRoute() {
     };
 
     fetchMessages();
-  }, [therapySessionId]);
+  }, [therapySessionId, handleError, router]);
 
   const handleNewMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) => {
+      const next = [...prev, message];
+      setCacheEntry(CACHE_KEYS.messages(therapySessionId), next);
+      return next;
+    });
   };
 
   const handleClearMessages = () => {
     setMessages([]);
+    setCacheEntry(CACHE_KEYS.messages(therapySessionId), []);
   };
 
   return (
@@ -101,7 +157,6 @@ export default function ChatRoute() {
     >
       <AmbientBlobs />
 
-      {/* -----------Therapy Sessions Sidebar - including previous sessions----------- */}
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -115,7 +170,8 @@ export default function ChatRoute() {
           setIsSidebarOpen={setIsSidebarOpen}
           onError={handleError}
           onClearMessages={handleClearMessages}
-          onToneChange={(tone) => setSelectedTone(tone)}
+          selectedTone={selectedTone}
+          onToneChange={(tone) => void handleToneChange(tone as SessionTone)}
         />
 
         {/* -----------Message area + input zone----------- */}
@@ -124,7 +180,7 @@ export default function ChatRoute() {
           isTherapistResponseLoading={isAILoading}
           onError={handleError}
           onNewMessage={handleNewMessage}
-          isInitialLoading={isIntialLoading}
+          isInitialLoading={isInitialLoading}
           setIsTherapistResponseLoading={setIsAILoading}
           selectedTone={selectedTone}
         />

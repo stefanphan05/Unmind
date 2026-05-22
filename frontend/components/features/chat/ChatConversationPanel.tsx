@@ -145,6 +145,8 @@ export default function ChatConversationPanel({
           </div>
           <div className="chat-input-mode__panel chat-input-mode__panel--voice">
             <RecordingView
+              isActive={inputMode === "voice"}
+              isTherapistResponseLoading={isTherapistResponseLoading}
               onError={onError}
               setIsAILoading={setIsTherapistResponseLoading}
               onNewMessage={onNewMessage}
