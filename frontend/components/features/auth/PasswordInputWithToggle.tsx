@@ -6,18 +6,20 @@ interface PasswordInputWithToggleProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
 export default function PasswordInputWithToggle({
   value,
   onChange,
   disabled,
+  hasError,
 }: PasswordInputWithToggleProps) {
   const [isShowingPassword, setIsShowingPassword] = useState(false);
 
   return (
     <div>
-      <label htmlFor="password" className="block text-sm text-gray-700 mb-2">
+      <label htmlFor="password" className="auth-label">
         Password
       </label>
       <div className="relative">
@@ -28,18 +30,20 @@ export default function PasswordInputWithToggle({
           placeholder="••••••• ••••• ••••••••• •••••••"
           value={value}
           onChange={onChange}
-          className="w-full px-3 py-4 input-field placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-2xl pr-10"
+          className={`auth-input pr-11 ${hasError ? "auth-input--error" : ""}`}
           disabled={disabled}
         />
         <button
           type="button"
           onClick={() => setIsShowingPassword(!isShowingPassword)}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+          className="auth-toggle-btn"
+          disabled={disabled}
+          aria-label={isShowingPassword ? "Hide password" : "Show password"}
         >
           {isShowingPassword ? (
-            <EyeOffIcon className="h-5 w-5 text-gray-400" />
+            <EyeOffIcon className="h-5 w-5" strokeWidth={1.75} />
           ) : (
-            <EyeIcon className="h-5 w-5 text-gray-400" />
+            <EyeIcon className="h-5 w-5" strokeWidth={1.75} />
           )}
         </button>
       </div>

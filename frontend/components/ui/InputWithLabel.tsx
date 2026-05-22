@@ -8,6 +8,7 @@ interface InputWithLabelProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
 export default function InputWithLabel({
@@ -18,10 +19,11 @@ export default function InputWithLabel({
   onChange,
   placeholder,
   disabled,
+  hasError,
 }: InputWithLabelProps) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm text-gray-700 mb-2">
+      <label htmlFor={id} className="auth-label">
         {label}
       </label>
       <Input
@@ -31,6 +33,7 @@ export default function InputWithLabel({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
+        hasError={hasError}
       />
     </div>
   );

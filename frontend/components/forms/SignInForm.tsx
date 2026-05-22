@@ -15,7 +15,6 @@ import { AuthFormLayout } from "./AuthFormLayout";
 import { useAuth } from "@/providers/auth-provider";
 
 import AuthDivider from "../features/auth/AuthDivider";
-import AuthInput from "../features/auth/AuthInput";
 import GoogleAuthButton from "../features/auth/GoogleAuthButton";
 import PasswordInputWithToggle from "../features/auth/PasswordInputWithToggle";
 import SubmitButton from "../features/auth/SubmitButton";
@@ -124,7 +123,7 @@ export function SignInForm() {
         />
 
         {/* --------------Remember Me and Forgot Password------------- */}
-        <div className="flex items-center justify-between">
+        <div className="auth-remember-row">
           <div className="flex items-center">
             <input
               id="remember-me"
@@ -132,30 +131,26 @@ export function SignInForm() {
               type="checkbox"
               checked={isRememberMe}
               onChange={(e) => setIsRememberMe(e.target.checked)}
-              className="h-4 w-4 accent-gray-700 border-gray-300"
+              className="auth-checkbox"
               disabled={isLoading}
             />
             <label
               htmlFor="remember-me"
-              className={`ml-4 block text-sm ${
-                isLoading ? "text-gray-400" : "text-gray-700"
+              className={`auth-checkbox-label ${
+                isLoading ? "auth-checkbox-label--disabled" : ""
               }`}
             >
               Remember Me
             </label>
           </div>
-          <div className="text-sm">
-            <a
-              href="/forgot-password"
-              className={`${
-                isLoading
-                  ? "text-gray-400 pointer-events-none"
-                  : "text-gray-700 hover:text-gray-900"
-              }`}
-            >
-              Forgot password?
-            </a>
-          </div>
+          <a
+            href="/forgot-password"
+            className={`auth-aux-link ${
+              isLoading ? "auth-aux-link--disabled" : ""
+            }`}
+          >
+            Forgot password?
+          </a>
         </div>
 
         {/* -----------------Submit Button----------------- */}
@@ -175,14 +170,12 @@ export function SignInForm() {
         />
 
         {/* -----------------Create Account Link----------------- */}
-        <p className="text-center text-sm">
+        <p className="auth-footer-text">
           Not using Unmind yet?{" "}
           <Link
             href="signup"
-            className={`font-semibold transition ${
-              isLoading
-                ? "text-gray-400 pointer-events-none"
-                : "text-black hover:text-gray-700"
+            className={`auth-switch-link ${
+              isLoading ? "auth-switch-link--disabled" : ""
             }`}
           >
             Create an account now

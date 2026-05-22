@@ -6,6 +6,7 @@ interface AuthInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
 export default function ({
@@ -16,10 +17,11 @@ export default function ({
   onChange,
   placeholder,
   disabled,
+  hasError,
 }: AuthInputProps) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm text-gray-700 mb-2">
+      <label htmlFor={id} className="auth-label">
         {label}
       </label>
       <input
@@ -29,7 +31,7 @@ export default function ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full px-3 py-4 input-field placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-2xl"
+        className={`auth-input ${hasError ? "auth-input--error" : ""}`}
         disabled={disabled}
       />
     </div>

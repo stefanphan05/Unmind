@@ -20,20 +20,19 @@ export function AuthFormLayout({
   successModal?: SuccessModalProps;
 }) {
   return (
-    <div className="w-full max-w-sm sm:max-w-sm md:max-w-md lg:max-w-lg space-y-8">
-      <AuthFormTitle title={title} />
-      <form onSubmit={onSubmit} className="space-y-6">
-        {children}
+    <div className="auth-card auth-stagger auth-stagger--card">
+      <div className="auth-stagger auth-stagger--1">
+        <AuthFormTitle title={title} />
+      </div>
+      <form onSubmit={onSubmit} className="auth-form mt-8">
+        <div className="auth-form__fields space-y-6">{children}</div>
       </form>
 
-      {/* Modals */}
       <div className="h-0">
-        {/* Error Modal */}
         {error && onCloseError && (
           <ErrorModal error={error} onClose={onCloseError} />
         )}
 
-        {/* Success Modal */}
         {successModal && (
           <SuccessModal
             isOpen={successModal.isOpen}

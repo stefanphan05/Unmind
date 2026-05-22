@@ -13,7 +13,6 @@ import { getMissingFields } from "@/lib/utils/getMissingAuthFields";
 import { AuthFormLayout } from "./AuthFormLayout";
 
 import AuthDivider from "../features/auth/AuthDivider";
-import AuthInput from "../features/auth/AuthInput";
 import GoogleAuthButton from "../features/auth/GoogleAuthButton";
 import PasswordInputWithToggle from "../features/auth/PasswordInputWithToggle";
 import SubmitButton from "../features/auth/SubmitButton";
@@ -155,11 +154,13 @@ export function SignUpForm() {
       />
 
       {/* -----------------Create Account Link----------------- */}
-      <p className="text-center text-sm">
+      <p className="auth-footer-text">
         Already have an account?{" "}
         <Link
           href="signin"
-          className="text-black hover:text-gray-700 font-semibold transition"
+          className={`auth-switch-link ${
+            isLoading ? "auth-switch-link--disabled" : ""
+          }`}
         >
           Sign in
         </Link>

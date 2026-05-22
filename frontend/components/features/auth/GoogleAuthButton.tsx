@@ -26,7 +26,6 @@ export default function GoogleAuthButton({
       return;
     }
 
-    // Supabase sends the user to Google, then redirects back to this route.
     const redirectTo = `${window.location.origin}/auth/callback`;
 
     try {
@@ -37,7 +36,6 @@ export default function GoogleAuthButton({
         provider: "google",
         options: {
           redirectTo,
-          // Request consent explicitly to reliably receive a provider token.
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -50,7 +48,6 @@ export default function GoogleAuthButton({
         throw error;
       }
     } catch (error) {
-      // OAuth popup/redirect setup failed before leaving the current page.
       onNavigating?.(false);
       setIsProcessing(false);
 
@@ -72,13 +69,10 @@ export default function GoogleAuthButton({
     <button
       type="button"
       onClick={handleGoogleSignIn}
-      className={`w-full flex items-center justify-center py-5 px-4 text-sm rounded-2xl border border-gray-300 text-gray-700 bg-white  transition${
-        isLoading || disabled || isProcessing
-          ? "bg-gray-400 cursor-not-allowed "
-          : " focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 hover:bg-gray-50 cursor-pointer"
-      }`}
+      className="btn-auth-ghost"
+      disabled={isLoading || disabled || isProcessing}
     >
-      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+      <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
         <path
           fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

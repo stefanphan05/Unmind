@@ -5,6 +5,7 @@ interface InputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
 export default function Input({
@@ -14,6 +15,7 @@ export default function Input({
   onChange,
   placeholder,
   disabled,
+  hasError,
 }: InputProps) {
   return (
     <input
@@ -23,7 +25,7 @@ export default function Input({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full px-3 py-4 input-field placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-2xl"
+      className={`auth-input ${hasError ? "auth-input--error" : ""}`}
       disabled={disabled}
     />
   );
