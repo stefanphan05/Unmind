@@ -17,11 +17,22 @@ export const sendRequest = async <T>({
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: method !== "GET" ? JSON.stringify(payload) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method,
+      headers,
+      body: method !== "GET" ? JSON.stringify(payload) : undefined,
+    });
+  } catch {
+    const apiError: ApiError = {
+      name: "Error",
+      statusCode: 503,
+      message:
+        "Cannot reach the API server. Start the backend with `python3 main.py` in the backend folder (port 5001).",
+    };
+    throw apiError;
+  }
 
   const data = await response.json();
 

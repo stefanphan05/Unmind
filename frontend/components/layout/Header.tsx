@@ -40,7 +40,7 @@ export default function Header({
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [voiceMenuOpen, setVoiceMenuOpen] = useState(false);
 
-  const [currentVoice, setCurrentVoice] = useState<string>("rachel");
+  const [currentVoice, setCurrentVoice] = useState<string>("sarah");
   const [availableVoices, setAvailableVoices] = useState<string[]>([]);
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
 

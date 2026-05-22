@@ -22,7 +22,7 @@ export const useAudioPlayer = () => {
       }
 
       const byteArray = new Uint8Array(byteNumbers);
-      const audioBlob = new Blob([byteArray], { type: "audio/mpeg" });
+      const audioBlob = new Blob([byteArray], { type: "audio/wav" });
       const audioUrl = URL.createObjectURL(audioBlob);
 
       // Create and play audio

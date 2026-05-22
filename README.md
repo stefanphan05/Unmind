@@ -43,5 +43,15 @@ Unmind is built on a modern, robust architecture for performance and scalability
 | **API Framework** | Flask                  | Lightweight and flexible REST API service layer.                  |
 | **Core AI**       | Google Gemini & OpenAI | Provides the core intelligence, empathy, and conversational flow. |
 | **Database ORM**  | SQLAlchemy             | Manages database interactions for users, sessions, and messages.  |
-| **Voice I/O**     | ElevenLabs             | Ensures ultra-realistic text-to-speech technology.                |
+| **Voice I/O**     | Kokoro ONNX (local)    | Local text-to-speech via `kokoro-onnx` and ONNX Runtime.        |
 | **Security**      | `werkzeug.security`    | Handles secure password hashing and verification.                 |
+
+### Kokoro voice models (backend)
+
+Local TTS needs two files in `backend/` (not committed — they exceed GitHub’s file size limit):
+
+```bash
+cd backend
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+```

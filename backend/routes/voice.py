@@ -24,3 +24,13 @@ def get_current_voice(email):
     """
     voice_controller = VoiceHandler(current_app.voice_generator)
     return voice_controller.handle_get_current_voice()
+
+
+@voice_bp.route('/voice/synthesize', methods=["POST"])
+@token_required
+def synthesize_voice(email):
+    """
+    Convert text to speech and return a WAV audio file.
+    """
+    voice_handler = VoiceHandler(current_app.voice_generator)
+    return voice_handler.handle_synthesize(request.json)

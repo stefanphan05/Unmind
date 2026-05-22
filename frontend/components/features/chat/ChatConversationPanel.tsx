@@ -62,7 +62,7 @@ export default function ChatConversationPanel({
           </div>
         ) : (
           <>
-            {messages.length > 0 ? (
+            {messages.length > 0 || isTherapistResponseLoading ? (
               <div className="chat-messages-list">
                 {messages.map((message, index) => (
                   <ChatMessage
@@ -76,6 +76,7 @@ export default function ChatConversationPanel({
                     }
                   />
                 ))}
+                {isTherapistResponseLoading && <TypingIndicator />}
               </div>
             ) : (
               <div className="chat-empty">
@@ -91,7 +92,6 @@ export default function ChatConversationPanel({
             )}
           </>
         )}
-        {isTherapistResponseLoading && <TypingIndicator />}
         <div ref={bottomAnchorRef} />
       </div>
 

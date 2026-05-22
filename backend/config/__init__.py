@@ -26,7 +26,7 @@ def create_app():
         from services.email.email_service import EmailService
         from services.messages.message_service import MessageService
         from services.user.user_service import UserService
-        from services.voice.voice_generator import VoiceGenerator
+        from services.voice.voice_generator import VoiceGenerator, create_kokoro
         from services.ai.therapist import AITherapistService
         from services.text.text_generator import TextGenerator
         from services.authentication.auth import AuthService
@@ -37,7 +37,8 @@ def create_app():
 
         # Services
         app.text_generator = TextGenerator()
-        app.voice_generator = VoiceGenerator()
+        app.kokoro = create_kokoro()
+        app.voice_generator = VoiceGenerator(app.kokoro)
         app.ai_therapist = AITherapistService()
         app.auth_service = AuthService(db.session)
         app.user_service = UserService(db.session)

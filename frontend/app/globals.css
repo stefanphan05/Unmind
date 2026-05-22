@@ -1266,6 +1266,10 @@ body {
   animation-delay: 0.08s;
 }
 
+.chat-message--typing {
+  animation: none;
+}
+
 .chat-message--user {
   justify-content: flex-end;
 }
@@ -1292,18 +1296,25 @@ body {
 }
 
 .chat-typing {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 12px 18px !important;
-  min-width: 3.5rem;
+  justify-content: center;
+  gap: 5px;
+  width: fit-content;
+  padding: 12px 16px;
+  min-width: 3.25rem;
+  background: var(--color-bubble-ai);
+  border-left: 3px solid var(--color-sage-chat);
+  border-radius: 20px 20px 20px 6px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
 }
 
 .chat-typing__dot {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--color-sage-chat);
+  opacity: 0.45;
   animation: typing-dots-chat 1.1s ease-in-out infinite;
 }
 

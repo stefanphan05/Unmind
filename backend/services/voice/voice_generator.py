@@ -1,50 +1,58 @@
-# import pyttsx3
-# from services.voice.voice_strategy import VoiceStrategy
+import io
+from pathlib import Path
+
+import soundfile as sf
+from flask import send_file
+from kokoro_onnx import Kokoro
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+KOKORO_MODEL_PATH = BACKEND_DIR / "kokoro-v1.0.onnx"
+KOKORO_VOICES_PATH = BACKEND_DIR / "voices-v1.0.bin"
+
+DEFAULT_VOICE = "af_sarah"
 
 
-# class VoiceGenerator:
-#     def __init__(self, voice_strategy: VoiceStrategy):
-#         self.__engine = pyttsx3.init()
-#         self.__engine.setProperty('volume', 0.9)
-#         self.__voice_strategy = voice_strategy
-#         self.__voice_strategy.set_voice(self.__engine)
-
-#     def speak_default(self, text):
-#         self.__engine.say(text)
-#         self.__engine.runAndWait()
-
-#     def set_strategy(self, voice_strategy: VoiceStrategy):
-#         self.__voice_strategy = voice_strategy
-#         self.__voice_strategy.set_voice(self.__engine)
-
-import os
-from elevenlabs import ElevenLabs
+def create_kokoro() -> Kokoro:
+    return Kokoro(str(KOKORO_MODEL_PATH), str(KOKORO_VOICES_PATH))
 
 
 class VoiceGenerator:
-    def __init__(self, model="eleven_turbo_v2"):
-        self.__voice_id = "ROMJ9yK1NAMuu1ggrjDW"
-        self.__model = model
-        self.__client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+    def __init__(self, kokoro: Kokoro, voice: str = DEFAULT_VOICE):
+        self._kokoro = kokoro
+        self._voice = voice
 
-    def set_voice_id(self, voice_id: str):
-        self.__voice_id = voice_id
+    def set_voice(self, voice: str):
+        self._voice = voice
 
-    def get_voice_id(self):
-        return self.__voice_id
+    def get_voice(self) -> str:
+        return self._voice
 
-    def generate_audio(self, text: str) -> bytes:
-        """
-        Convert text → ElevenLabs voice → return audio bytes.
-        """
+    def set_voice_id(self, voice: str):
+        self.set_voice(voice)
+
+    def get_voice_id(self) -> str:
+        return self.get_voice()
+
+    def _synthesize_to_buffer(self, text: str) -> io.BytesIO:
+        samples, sample_rate = self._kokoro.create(
+            text,
+            voice=self._voice,
+            speed=1.0,
+            lang="en-us",
+        )
+        buffer = io.BytesIO()
+        sf.write(buffer, samples, sample_rate, format="WAV")
+        buffer.seek(0)
+        return buffer
+
+    def synthesize_wav_response(self, text: str):
+        buffer = self._synthesize_to_buffer(text)
+        return send_file(buffer, mimetype="audio/wav")
+
+    def generate_audio(self, text: str) -> bytes | None:
         try:
-            audio_stream = self.__client.text_to_speech.convert(
-                voice_id=self.__voice_id,
-                model_id=self.__model,
-                text=text,
-                output_format="mp3_44100_128",
-            )
-            return b"".join(audio_stream)
+            buffer = self._synthesize_to_buffer(text)
+            return buffer.getvalue()
         except Exception as e:
             print(f"Error generating audio: {e}")
             return None
