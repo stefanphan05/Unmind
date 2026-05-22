@@ -16,7 +16,14 @@ def create_app():
         from models.user import User
         from models.therapy_session import TherapySession
         from models.message import Message
+        from utils.db_migrations import (
+            ensure_therapy_session_summary_column,
+            ensure_therapy_session_tone_column,
+        )
+
         db.create_all()
+        ensure_therapy_session_summary_column()
+        ensure_therapy_session_tone_column()
 
         # Importing
         from utils.token_utils import Token

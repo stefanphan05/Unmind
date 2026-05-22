@@ -10,6 +10,8 @@ class TherapySession(db.Model):
     name = db.Column(db.String(100), nullable=False, default="")
     status = db.Column(db.String(20), nullable=False, default="ongoing")
     result = db.Column(db.String(20), nullable=False, default="pending")
+    summary = db.Column(db.Text, nullable=False, default="")
+    tone = db.Column(db.String(32), nullable=False, default="compassionate")
     date = db.Column(db.DateTime, nullable=False,
                      default=datetime.now(timezone.utc))
 
@@ -21,6 +23,8 @@ class TherapySession(db.Model):
             "name": self.name,
             "status": self.status,
             "result": self.result,
-            "date": self.date,
+            "summary": self.summary,
+            "tone": self.tone,
+            "date": self.date.isoformat() if self.date else None,
             "email": self.email
         }
