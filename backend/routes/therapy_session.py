@@ -10,6 +10,15 @@ therapy_session_handlers = TherapySessionHandlers(
 )
 
 
+@therapy_session_bp.route('/sessions/draft', methods=["GET"])
+@token_required
+def get_draft_session(email):
+    force_new = request.args.get("force_new", "false").lower() == "true"
+    return therapy_session_handlers.handle_get_or_create_draft(
+        email, force_new=force_new
+    )
+
+
 @therapy_session_bp.route('/sessions', methods=["GET"])
 @token_required
 def get_all_sessions(email):
@@ -32,3 +41,19 @@ def update_session(email):
 @token_required
 def delete_session(email):
     return therapy_session_handlers.handle_delete_session(email=email, data=request.json)
+
+
+@therapy_session_bp.route("/sessions/<int:therapy_session_id>", methods=["GET"])
+@token_required
+def get_session(email, therapy_session_id):
+    return therapy_session_handlers.handle_get_session(email, therapy_session_id)
+
+
+@therapy_session_bp.route("/sessions/<int:therapy_session_id>/tone", methods=["PATCH"])
+@token_required
+def update_session_tone(email, therapy_session_id):
+    return therapy_session_handlers.handle_update_tone(
+        email=email,
+        session_id=therapy_session_id,
+        data=request.json,
+    )
