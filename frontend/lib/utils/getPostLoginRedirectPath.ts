@@ -1,20 +1,18 @@
 import { ApiError } from "next/dist/server/api-utils";
 
-import { createSession } from "@/lib/api/session";
+import { getOrCreateDraftSession } from "@/lib/api/session";
 
 export const getPostLoginRedirectPath = async (
   token: string,
   onError: (error: ApiError) => void
 ): Promise<string> => {
-  const createdSession = await createSession(token, onError, {
-    name: "New session",
-    status: "upcoming",
-    result: "neutral",
+  const draft = await getOrCreateDraftSession(token, onError, {
+    forceNew: false,
   });
 
-  if (!createdSession?.id) {
-    throw new Error("Unable to create a new therapy session.");
+  if (!draft?.id) {
+    throw new Error("Unable to open a new conversation.");
   }
 
-  return `/chat/${createdSession.id}`;
+  return `/chat/${draft.id}`;
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { clearApiCache } from "@/lib/cache/apiCache";
 import {
   clearStoredToken,
   DecodedToken,
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Sign out by clearing token and resetting state
   const signOut = () => {
     clearStoredToken();
+    clearApiCache();
     setIsAuthenticated(false);
     setUser(null);
   };
