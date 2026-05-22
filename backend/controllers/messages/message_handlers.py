@@ -1,14 +1,16 @@
-from flask import jsonify
+from flask import current_app, jsonify
 import base64
+from services.ai.therapist import VALID_TONES
 from utils.response_helpers import ResponseHelper
 from controllers.messages.message_validators import MessageValidator
 
 
 class MessageHandlers:
-    def __init__(self, message_service, ai_therapist, voice_generator):
+    def __init__(self, message_service, ai_therapist, voice_generator, session_summary_service=None):
         self.__message_service = message_service
         self.__ai_therapist = ai_therapist
         self.__voice_generator = voice_generator
+        self.__session_summary_service = session_summary_service
 
     def handle_save_user_input(self, data: dict, email: str, therapy_session_id: int):
         valid, error = MessageValidator.validate_user_input(data)
@@ -33,12 +35,18 @@ class MessageHandlers:
 
         user_input = data.get("content")
         tone = data.get("tone")
+        if not tone or tone not in VALID_TONES:
+            session = current_app.session_service.get_session(
+                email, therapy_session_id
+            )
+            tone = session.tone if session and session.tone in VALID_TONES else "compassionate"
 
         # Get AI Response
         ai_answer = self.__ai_therapist.send_message(
             email=email,
             user_input=user_input,
-            tone=tone
+            tone=tone,
+            therapy_session_id=therapy_session_id,
         )
 
         message = self.__message_service.save_message(
@@ -47,6 +55,14 @@ class MessageHandlers:
             email=email,
             therapy_session_id=therapy_session_id
         )
+
+        if self.__session_summary_service:
+            self.__session_summary_service.on_exchange_complete(
+                current_app._get_current_object(),
+                email,
+                therapy_session_id,
+                user_input,
+            )
 
         # # Convert response to voice
         # self.__voice_generator.speak_default(message.content)

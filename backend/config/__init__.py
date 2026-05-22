@@ -30,6 +30,7 @@ def create_app():
         from redis import Redis
 
         from services.sessions.session_service import TherapySessionService
+        from services.sessions.session_summary_service import SessionSummaryService
         from services.email.email_service import EmailService
         from services.messages.message_service import MessageService
         from services.user.user_service import UserService
@@ -51,6 +52,7 @@ def create_app():
         app.user_service = UserService(db.session)
         app.message_service = MessageService(db.session)
         app.session_service = TherapySessionService(db.session)
+        app.session_summary_service = SessionSummaryService(db.session)
         app.email_service = EmailService(redis_client)
         app.token_handler = Token(app.config["SECRET_KEY"])
 
