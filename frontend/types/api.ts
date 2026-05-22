@@ -6,4 +6,5 @@ export interface RequestOptions {
   payload?: any;
   token?: string;
   errorName: string;
+  signal?: AbortSignal;
 }

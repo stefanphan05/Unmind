@@ -16,7 +16,8 @@ export const getAIAnswer = async (
   therapySessionId: number,
   onError: (error: ApiError) => void,
   token: string,
-  tone: string = "compassionate"
+  tone: string = "compassionate",
+  signal?: AbortSignal
 ): Promise<AIAnswerResponse | null> => {
   try {
     const res = await handleMutationRequest<AIAnswerResponse>(
@@ -24,11 +25,15 @@ export const getAIAnswer = async (
       "get AI answer",
       { content, tone },
       "POST",
-      token
+      token,
+      signal
     );
 
     return res;
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return null;
+    }
     onError(error as ApiError);
     return null;
   }

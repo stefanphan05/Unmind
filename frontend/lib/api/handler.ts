@@ -6,9 +6,10 @@ export const handleMutationRequest = async <T>(
   errorName: string,
   payload: any,
   method: RequestMethod,
-  token?: string
+  token?: string,
+  signal?: AbortSignal
 ): Promise<T> => {
-  return sendRequest<T>({ method, url, payload, token, errorName });
+  return sendRequest<T>({ method, url, payload, token, errorName, signal });
 };
 
 export const handleGetRequest = async <T>(

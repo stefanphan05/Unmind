@@ -7,6 +7,7 @@ export const sendRequest = async <T>({
   payload,
   token,
   errorName,
+  signal,
 }: RequestOptions): Promise<T> => {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -23,8 +24,12 @@ export const sendRequest = async <T>({
       method,
       headers,
       body: method !== "GET" ? JSON.stringify(payload) : undefined,
+      signal,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
     const apiError: ApiError = {
       name: "Error",
       statusCode: 503,

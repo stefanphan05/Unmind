@@ -4,6 +4,25 @@ import { TherapySession } from "@/types/therapySession";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
+export const getOrCreateDraftSession = async (
+  token: string,
+  onError: (error: ApiError) => void,
+  options: { forceNew?: boolean } = {}
+): Promise<TherapySession | null> => {
+  try {
+    const query = options.forceNew ? "?force_new=true" : "";
+    const data = await handleGetRequest<TherapySession>(
+      `${BASE_URL}/sessions/draft${query}`,
+      "Open conversation",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};
+
 export const getAllSessions = async (
   token: string,
   onError: (error: ApiError) => void
@@ -51,6 +70,45 @@ export const updateSession = async (
       `${BASE_URL}/sessions`,
       "Update session",
       payload,
+      "PATCH",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};
+
+export const getSession = async (
+  token: string,
+  sessionId: number,
+  onError: (error: ApiError) => void
+): Promise<TherapySession | null> => {
+  try {
+    const data = await handleGetRequest<TherapySession>(
+      `${BASE_URL}/sessions/${sessionId}`,
+      "Fetch session",
+      token
+    );
+    return data;
+  } catch (error) {
+    onError(error as ApiError);
+    return null;
+  }
+};
+
+export const updateSessionTone = async (
+  token: string,
+  sessionId: number,
+  tone: string,
+  onError: (error: ApiError) => void
+): Promise<TherapySession | null> => {
+  try {
+    const data = await handleMutationRequest<TherapySession>(
+      `${BASE_URL}/sessions/${sessionId}/tone`,
+      "Update mood",
+      { tone },
       "PATCH",
       token
     );
