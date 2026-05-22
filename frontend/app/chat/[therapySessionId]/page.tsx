@@ -2,7 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+function AmbientBlobs() {
+  return (
+    <div className="ambient-blobs" aria-hidden="true">
+      <div className="ambient-blob ambient-blob--1" />
+      <div className="ambient-blob ambient-blob--2" />
+      <div className="ambient-blob ambient-blob--3" />
+    </div>
+  );
+}
 
 // Type imports
 import Message from "@/types/message";
@@ -12,7 +37,6 @@ import { getAllMessages } from "@/lib/api/chat";
 import { getStoredToken } from "@/lib/utils/authToken";
 import Sidebar from "@/components/features/sessions/components/sidebar/Sidebar";
 import Header from "@/components/layout/Header";
-import RecordingView from "@/components/features/chat/RecordingView";
 import ChatConversationPanel from "@/components/features/chat/ChatConversationPanel";
 import ErrorModal from "@/components/features/modals/ErrorModal";
 
@@ -72,13 +96,20 @@ export default function ChatRoute() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div
+      className={`chat-page ${fraunces.variable} ${sourceSans.variable} flex h-screen`}
+    >
+      <AmbientBlobs />
+
       {/* -----------Therapy Sessions Sidebar - including previous sessions----------- */}
-      <Sidebar isOpen={isSidebarOpen} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
 
       {/* -----------Main Chat Interface Container----------- */}
-      <div className="flex flex-1 flex-col">
-        {/* -----------Application Header with navigation and controls----------- */}
+      <div className="chat-page__main flex flex-1 flex-col min-w-0 min-h-0">
+        {/* -----------Top bar----------- */}
         <Header
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -87,31 +118,16 @@ export default function ChatRoute() {
           onToneChange={(tone) => setSelectedTone(tone)}
         />
 
-        {/* -----------Main Chat Content Area----------- */}
-        <div className="p-6 h-[calc(100vh-72px)] flex flex-col lg:flex-row gap-6 ">
-          {/* -----------Left Panel: Voice Recording Interface----------- */}
-          <div className="lg:w-3/5 flex items-center justify-center">
-            <RecordingView
-              onError={handleError}
-              setIsAILoading={setIsAILoading}
-              onNewMessage={handleNewMessage}
-              selectedTone={selectedTone}
-            />
-          </div>
-
-          {/* -----------Right Panel: Chat Conversation Display and Input----------- */}
-          <div className="lg:w-2/5">
-            <ChatConversationPanel
-              messages={messages}
-              isTherapistResponseLoading={isAILoading}
-              onError={handleError}
-              onNewMessage={handleNewMessage}
-              isInitialLoading={isIntialLoading}
-              setIsTherapistResponseLoading={setIsAILoading}
-              selectedTone={selectedTone}
-            />
-          </div>
-        </div>
+        {/* -----------Message area + input zone----------- */}
+        <ChatConversationPanel
+          messages={messages}
+          isTherapistResponseLoading={isAILoading}
+          onError={handleError}
+          onNewMessage={handleNewMessage}
+          isInitialLoading={isIntialLoading}
+          setIsTherapistResponseLoading={setIsAILoading}
+          selectedTone={selectedTone}
+        />
       </div>
 
       {/* -----------Error Modal - Displays error messages to user----------- */}

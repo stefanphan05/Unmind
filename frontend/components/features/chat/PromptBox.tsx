@@ -106,21 +106,23 @@ export default function PromptBox({
     }
   };
 
+  const canSend = message.trim().length > 0;
+
   return (
-    <div className="bg-gray-100 rounded-4xl text-[#5e5e5e] px-4 py-1 border border-gray-300 sticky bottom-0 w-full">
+    <div className="chat-input-tray">
       <form
-        className="flex flex-row gap-4 items-center"
+        className="chat-input-tray__form"
         onSubmit={handleSubmit}
       >
         <MessageInput textMessage={message} setTextMessage={setMessage} />
-        <div className="flex gap-2 items-center">
-          <button
-            type="submit"
-            className="flex items-center gap-2 text-sx px-2 py-2 cursor-pointer hover:bg-gray-300 hover:text-black bg-gray-200 rounded-2xl transition"
-          >
-            <BiSolidSend className="h-5" />
-          </button>
-        </div>
+        <button
+          type="submit"
+          className={`chat-send-btn ${canSend ? "" : "chat-send-btn--disabled"}`}
+          disabled={!canSend}
+          aria-label="Send message"
+        >
+          <BiSolidSend />
+        </button>
       </form>
     </div>
   );

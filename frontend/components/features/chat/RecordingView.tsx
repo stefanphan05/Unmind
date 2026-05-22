@@ -270,55 +270,69 @@ export default function RecordingView({
   };
 
   return (
-    <div className="relative h-[calc(100vh-64px)] flex items-center justify-center ">
-      {isShowingTranscript && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 mb-10">
-          <div
-            ref={transcriptContainerRef}
-            className="w-96 p-3 bg-black/5 rounded-2xl max-h-40 overflow-y-auto scrollbar-hide"
-          >
-            <p className="mb-0 text-sm leading-relaxed">
-              {transcript || "Listening..."}
-            </p>
-          </div>
+    <div className="chat-voice-panel">
+      {isShowingTranscript && transcript && (
+        <div
+          ref={transcriptContainerRef}
+          className="chat-transcript scrollbar-hide"
+        >
+          <p>{transcript}</p>
         </div>
       )}
 
-      <div className="flex items-center justify-center">
+      <div className="chat-voice-panel__controls">
         {isRecording ? (
-          <div className="flex flex-row justify-center items-center">
+          <>
             <button
               onClick={clearTranscript}
-              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
+              className="chat-mic-secondary"
               title="Clear transcript"
+              type="button"
             >
-              <RxCross2 className="text-gray-600 w-6 h-6" />
+              <RxCross2 className="h-5 w-5" />
             </button>
 
             <button
               onClick={handleToggleRecording}
-              className="flex items-center justify-center bg-red-400 hover:bg-red-500 ring-4 ring-red-300 animate-expand rounded-full w-40 h-40 focus:outline-none cursor-pointer ml-10 mr-10"
+              className="chat-mic-btn chat-mic-btn--recording"
+              type="button"
             >
-              <FaPause className="text-white w-24 h-24" />
+              <FaPause className="chat-mic-btn__icon" />
             </button>
 
             <button
               onClick={cancelRecording}
-              className="flex items-center justify-center bg-red-100 hover:bg-red-200 border-2 border-red-300 rounded-full w-16 h-16 focus:outline-none cursor-pointer transition-colors"
+              className="chat-mic-secondary chat-mic-secondary--cancel"
               title="Cancel recording"
+              type="button"
             >
-              <FaStop className="text-red-600 w-6 h-6" />
+              <FaStop className="h-4 w-4" />
             </button>
-          </div>
+          </>
         ) : (
           <button
             onClick={handleToggleRecording}
-            className="flex items-center justify-center bg-blue-400 hover:bg-blue-500 rounded-full w-40 h-40 focus:outline-none cursor-pointer"
+            className="chat-mic-btn"
+            type="button"
           >
-            <FaMicrophone className="text-white w-24 h-24" />
+            <FaMicrophone className="chat-mic-btn__icon" />
           </button>
         )}
       </div>
+
+      {isRecording && (
+        <div className="chat-voice-waveform" aria-hidden="true">
+          <span className="chat-voice-waveform__bar" />
+          <span className="chat-voice-waveform__bar" />
+          <span className="chat-voice-waveform__bar" />
+          <span className="chat-voice-waveform__bar" />
+          <span className="chat-voice-waveform__bar" />
+        </div>
+      )}
+
+      <p className="chat-voice-panel__label">
+        {isRecording ? "Listening..." : "Tap to speak"}
+      </p>
     </div>
   );
 }

@@ -55,18 +55,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div
-      className={`flex ${
-        message.role === "user" ? "justify-end" : "justify-start"
-      } items-center gap-3 mb-3`}
+      className={`chat-message ${
+        message.role === "user"
+          ? "chat-message--user"
+          : "chat-message--assistant"
+      }`}
     >
       <div
-        className={`text-[14px] ${
+        className={`chat-message__bubble ${
           message.role === "user"
-            ? "p-3 max-w-sm input-field text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-bl-2xl rounded-br-md"
-            : "text-gray-700 rounded-tr-2xl rounded-tl-2xl rounded-br-2xl rounded-bl-md"
+            ? "chat-message__bubble--user"
+            : "chat-message__bubble--assistant"
         }`}
       >
-        {displayedContent}
+        <span className="chat-message__text">{displayedContent}</span>
       </div>
     </div>
   );
