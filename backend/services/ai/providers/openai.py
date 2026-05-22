@@ -18,22 +18,28 @@ class OpenAIStrategy(LLMStrategy):
         self.__client = openai.OpenAI()
         self.__model = "gpt-3.5-turbo"
 
-    def format_messages(self, user_input: str, load_history: bool, system_prompt: str, email: str):
+    def format_messages(
+        self,
+        user_input: str,
+        load_history: bool,
+        system_prompt: str,
+        email: str,
+        therapy_session_id: int | None = None,
+    ):
         messages = [
             {"role": "system", "content": system_prompt}
         ]
 
         if load_history:
-            # Only load the last 5 turns
-            history = db.session.query(Message).filter_by(
-                email=email
-            ).order_by(Message.timestamp).all()
+            query = db.session.query(Message).filter_by(email=email)
+            if therapy_session_id is not None:
+                query = query.filter_by(therapy_session_id=therapy_session_id)
+            history = query.order_by(Message.timestamp).all()
 
-            messages = []
             for msg in history:
                 messages.append({"role": msg.role, "content": msg.content})
 
-            messages.append({"role": "user", "content": user_input})
+        messages.append({"role": "user", "content": user_input})
 
         return messages
 

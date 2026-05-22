@@ -21,16 +21,24 @@ class GeminiStrategy(LLMStrategy):
             api_key=api_key
         )
 
-    def format_messages(self, user_input: str, load_history: bool, system_prompt: str, email: str) -> any:
+    def format_messages(
+        self,
+        user_input: str,
+        load_history: bool,
+        system_prompt: str,
+        email: str,
+        therapy_session_id: int | None = None,
+    ) -> any:
         """
         Convert OpenAI-style messages into a single prompt string
         """
         messages = [system_prompt]
 
         if load_history:
-            history = db.session.query(Message).filter_by(
-                email=email
-            ).order_by(Message.timestamp).all()
+            query = db.session.query(Message).filter_by(email=email)
+            if therapy_session_id is not None:
+                query = query.filter_by(therapy_session_id=therapy_session_id)
+            history = query.order_by(Message.timestamp).all()
 
             for msg in history:
                 if msg.role == "user":

@@ -1,6 +1,15 @@
 from flask import current_app
 from services.ai.factory import llm_factory
 
+VALID_TONES = frozenset({
+    "fun",
+    "angry",
+    "about_to_cry",
+    "boring",
+    "aggressive",
+    "compassionate",
+})
+
 
 class AITherapistService:
     def __init__(self) -> None:
@@ -37,7 +46,7 @@ class AITherapistService:
             - Help the user reflect on their progress
 
             Guidelines:
-            1. Always response with empathy and understanding
+            1. Stay in the chosen tone for the entire response; do not slip back into a generic warm therapist voice unless the tone is compassionate
             2. Ask open-ended questions to encourage sharing
             3. Validate the user's feelings and experiences
             4. Offer practical coping strategies when appropriate
@@ -57,7 +66,13 @@ class AITherapistService:
 
         return prompt
 
-    def send_message(self, email: str, user_input: str, tone: str = "compassionate") -> str:
+    def send_message(
+        self,
+        email: str,
+        user_input: str,
+        tone: str = "compassionate",
+        therapy_session_id: int | None = None,
+    ) -> str:
         if not self.__is_valid_message_input(
             email=email,
             user_input=user_input
@@ -73,9 +88,8 @@ class AITherapistService:
             user_input=user_input,
             system_prompt=system_prompt,
             email=email,
-
-            # Load message history to make the ai smarter
-            load_history=True
+            load_history=True,
+            therapy_session_id=therapy_session_id,
         )
 
         try:
