@@ -1,36 +1,14 @@
 import { TherapySession } from "@/types/therapySession";
+import { formatSessionDate } from "@/lib/utils/formatSessionDate";
 import { useParams, useRouter } from "next/navigation";
-import { AiOutlineDislike, AiOutlineLike } from "react-icons/ai";
-import { BsDashCircle, BsThreeDots } from "react-icons/bs";
 
 interface SessionListItemProps {
   session: TherapySession;
-  onMenuClick: () => void;
   onNavigate?: () => void;
 }
 
-const statusLabels: Record<string, string> = {
-  completed: "Completed",
-  upcoming: "Upcoming",
-  ongoing: "In progress",
-};
-
-const resultIcon = (r: TherapySession["result"]) => {
-  switch (r) {
-    case "positive":
-      return <AiOutlineLike className="session-card__result-icon" />;
-    case "neutral":
-      return <BsDashCircle className="session-card__result-icon" />;
-    case "negative":
-      return <AiOutlineDislike className="session-card__result-icon" />;
-    default:
-      return null;
-  }
-};
-
 export default function SessionListItem({
   session,
-  onMenuClick,
   onNavigate,
 }: SessionListItemProps) {
   const router = useRouter();
@@ -38,53 +16,29 @@ export default function SessionListItem({
   const activeId = Number(params?.therapySessionId);
   const isActive = activeId === Number(session.id);
 
+  const title = session.name?.trim() || "New conversation";
+  const preview =
+    session.summary?.trim() ||
+    "Start chatting and a short summary will appear here.";
+
   const handleSessionClick = () => {
     router.push(`/chat/${session.id}`);
     onNavigate?.();
   };
 
-  const handleMenuClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMenuClick();
-  };
-
   return (
-    <article
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={handleSessionClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleSessionClick();
-        }
-      }}
-      className={`session-card ${isActive ? "session-card--active" : ""}`}
+      className={`history-item ${isActive ? "history-item--active" : ""}`}
     >
-      <div className="session-card__top">
-        <h3 className="session-card__name">{session.name}</h3>
-        <button
-          type="button"
-          className="session-card__menu-btn"
-          onClick={handleMenuClick}
-          aria-label="Session options"
-        >
-          <BsThreeDots />
-        </button>
+      <div className="history-item__row">
+        <span className="history-item__title">{title}</span>
+        <time className="history-item__date" dateTime={session.date}>
+          {formatSessionDate(session.date)}
+        </time>
       </div>
-      <div className="session-card__meta">
-        <span
-          className={`session-card__status session-card__status--${session.status}`}
-        >
-          {statusLabels[session.status] ?? session.status}
-        </span>
-        {session.result && (
-          <span className="session-card__result">
-            {resultIcon(session.result)}
-            <span className="capitalize">{session.result}</span>
-          </span>
-        )}
-      </div>
-    </article>
+      <p className="history-item__summary">{preview}</p>
+    </button>
   );
 }

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useErrorHandler } from "@/lib/hooks/useErrorHandler";
 
-import { TherapySession } from "@/types/therapySession";
-
-import TherapySessionModal from "../modal/TherapySessionModal";
 import SessionList from "./SessionList";
 import SessionToolbar from "./SessionToolbar";
 
@@ -20,41 +19,42 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   useAuthRedirect();
+  const router = useRouter();
   const { handleError } = useErrorHandler();
 
-  const { sessions, create, update, remove } = useTherapySessions(handleError);
+  const { sessions, isLoading, startNewConversation, fetchSessions } =
+    useTherapySessions(handleError, { fetchOnMount: false });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState<"edit" | "create">("create");
-  const [selectedSession, setSelectedSession] = useState<TherapySession | null>(
-    null
-  );
+  useEffect(() => {
+    if (isOpen) fetchSessions();
+  }, [isOpen, fetchSessions]);
 
-  const openCreateModal = () => {
-    setMode("create");
-    setSelectedSession(null);
-    setIsModalOpen(true);
-  };
+  const filteredSessions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return sessions;
 
-  const openEditModal = (session: TherapySession) => {
-    setMode("edit");
-    setSelectedSession(session);
-    setIsModalOpen(true);
-  };
+    return sessions.filter((session) => {
+      const title = (session.name ?? "").toLowerCase();
+      const summary = (session.summary ?? "").toLowerCase();
+      return title.includes(q) || summary.includes(q);
+    });
+  }, [sessions, searchQuery]);
 
-  const handleCreate = async (payload: TherapySession) => {
-    await create(payload);
-    setIsModalOpen(false);
-  };
+  const handleNewConversation = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const draft = await startNewConversation(true);
 
-  const handleUpdate = async (payload: TherapySession) => {
-    await update(payload);
-    setIsModalOpen(false);
-  };
-
-  const handleDelete = async (id: string) => {
-    await remove(id);
-    setIsModalOpen(false);
+      if (draft?.id) {
+        router.push(`/chat/${draft.id}`);
+        onClose();
+      }
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -73,36 +73,44 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="session-drawer__header">
           <div>
-            <p className="session-drawer__eyebrow">Journal</p>
-            <h2 className="session-drawer__title font-display">Your sessions</h2>
+            <p className="session-drawer__eyebrow">Unmind</p>
+            <h2 className="session-drawer__title font-display">History</h2>
           </div>
           <button
             type="button"
             className="session-drawer__close"
             onClick={onClose}
-            aria-label="Close sessions"
+            aria-label="Close history"
           >
             <X strokeWidth={1.75} className="h-5 w-5" />
           </button>
         </div>
 
-        <SessionToolbar onAdd={openCreateModal} />
+        <SessionToolbar
+          onAdd={handleNewConversation}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
         <SessionList
-          sessions={sessions}
-          onMenuClick={openEditModal}
+          sessions={filteredSessions}
+          isLoading={isLoading}
           onNavigate={onClose}
         />
-      </aside>
 
-      <TherapySessionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        session={selectedSession}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-        mode={mode}
-      />
+        <div className="session-drawer__footer">
+          <Link
+            href="/history"
+            className="session-drawer__full-history"
+            onClick={onClose}
+          >
+            View full history
+            <ArrowUpRight
+              className="session-drawer__full-history-icon"
+              strokeWidth={1.75}
+            />
+          </Link>
+        </div>
+      </aside>
     </>
   );
 }
