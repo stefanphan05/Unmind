@@ -11,13 +11,25 @@ import { ApiError } from "next/dist/server/api-utils";
 
 import { removeAllMessages } from "@/lib/api/chat";
 import { useAuth } from "@/providers/auth-provider";
-import { getCurrentVoice, switchVoice } from "@/lib/api/voice";
+import {
+  CACHE_KEYS,
+  STALE_MS,
+  getCacheEntry,
+  isCacheFresh,
+  setCacheEntry,
+} from "@/lib/cache/apiCache";
+import {
+  CurrentVoiceResponse,
+  getCurrentVoice,
+  switchVoice,
+} from "@/lib/api/voice";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   onError: (error: ApiError) => void;
   onClearMessages: () => void;
+  selectedTone: string;
   onToneChange: (tone: string) => void;
 }
 
@@ -26,6 +38,7 @@ export default function Header({
   setIsSidebarOpen,
   onError,
   onClearMessages,
+  selectedTone,
   onToneChange,
 }: HeaderProps) {
   const router = useRouter();
@@ -40,11 +53,15 @@ export default function Header({
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [voiceMenuOpen, setVoiceMenuOpen] = useState(false);
 
-  const [currentVoice, setCurrentVoice] = useState<string>("sarah");
-  const [availableVoices, setAvailableVoices] = useState<string[]>([]);
+  const [currentVoice, setCurrentVoice] = useState<string>(() => {
+    const cached = getCacheEntry<CurrentVoiceResponse>(CACHE_KEYS.voice);
+    return cached?.data.current_voice ?? "sarah";
+  });
+  const [availableVoices, setAvailableVoices] = useState<string[]>(() => {
+    const cached = getCacheEntry<CurrentVoiceResponse>(CACHE_KEYS.voice);
+    return cached?.data.available_voices ?? [];
+  });
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
-
-  const [currentTone, setCurrentTone] = useState<string>("compassionate");
 
   const availableTones = [
     "fun",
@@ -68,18 +85,21 @@ export default function Header({
 
   useEffect(() => {
     const fetchCurrentVoice = async () => {
+      if (isCacheFresh(CACHE_KEYS.voice, STALE_MS.voice)) return;
+
       const token = getStoredToken();
-      if (token) {
-        const voiceData = await getCurrentVoice(token, onError);
-        if (voiceData) {
-          setCurrentVoice(voiceData.current_voice);
-          setAvailableVoices(voiceData.available_voices);
-        }
+      if (!token) return;
+
+      const voiceData = await getCurrentVoice(token, onError);
+      if (voiceData) {
+        setCacheEntry(CACHE_KEYS.voice, voiceData);
+        setCurrentVoice(voiceData.current_voice);
+        setAvailableVoices(voiceData.available_voices);
       }
     };
 
     fetchCurrentVoice();
-  }, []);
+  }, [onError]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -121,6 +141,13 @@ export default function Header({
 
       if (response && response.status === "success") {
         setCurrentVoice(response.current_voice);
+        const cached = getCacheEntry<CurrentVoiceResponse>(CACHE_KEYS.voice);
+        setCacheEntry(CACHE_KEYS.voice, {
+          status: response.status,
+          current_voice: response.current_voice,
+          voice_id: response.voice_id,
+          available_voices: cached?.data.available_voices ?? availableVoices,
+        });
       }
       setIsLoadingVoice(false);
     }
@@ -133,7 +160,6 @@ export default function Header({
   };
 
   const handleToneSelect = (tone: string) => {
-    setCurrentTone(tone);
     setToneMenuOpen(false);
     onToneChange(tone);
   };
@@ -148,11 +174,11 @@ export default function Header({
               isSidebarOpen ? "chat-sessions-btn--active" : ""
             }`}
             onClick={() => setIsSidebarOpen((prev) => !prev)}
-            aria-label={isSidebarOpen ? "Close sessions" : "Open sessions"}
+            aria-label={isSidebarOpen ? "Close history" : "Open history"}
             aria-expanded={isSidebarOpen}
           >
             <Menu className="chat-sessions-btn__icon" strokeWidth={1.75} />
-            <span className="chat-sessions-btn__label">Sessions</span>
+            <span className="chat-sessions-btn__label">History</span>
           </button>
 
           <span className="chat-top-bar__wordmark font-display">Unmind</span>
@@ -179,7 +205,7 @@ export default function Header({
                   strokeWidth={1.75}
                   aria-hidden
                 />
-                <span>{capitalizeVoice(currentTone)}</span>
+                <span>{capitalizeVoice(selectedTone)}</span>
                 <FaAngleDown className="chat-header__chevron" />
               </button>
               {toneMenuOpen && (
@@ -191,14 +217,14 @@ export default function Header({
                         <button
                           type="button"
                           className={`chat-header__dropdown-option ${
-                            currentTone === tone
+                            selectedTone === tone
                               ? "chat-header__dropdown-option--selected"
                               : ""
                           }`}
                           onClick={() => handleToneSelect(tone)}
                         >
                           <span>{capitalizeVoice(tone)}</span>
-                          {currentTone === tone && (
+                          {selectedTone === tone && (
                             <FaCheck className="chat-header__check" />
                           )}
                         </button>
